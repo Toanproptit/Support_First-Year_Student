@@ -1,0 +1,231 @@
+.cas-layout {
+    display: flex;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+}
+
+/* --- CỘT TRÁI (Bảng Đăng Nhập) --- */
+.cas-sidebar {
+    width: 380px;
+    background-color: #f8fafc;
+    /* Đổi thành màu trắng/xám cực nhạt cho hiện đại */
+    border-right: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+    padding: 40px 30px;
+}
+
+.cas-logo-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.cas-logo-img {
+    width: 90px;
+    /* Chỉnh to logo lên một chút cho rõ */
+    margin-bottom: 10px;
+}
+
+.cas-logo-header h2 {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    margin: 0;
+}
+
+/* Form */
+.cas-form .form-group {
+    margin-bottom: 15px;
+}
+
+.cas-form label {
+    display: block;
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.cas-form input[type="text"],
+.cas-form input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    /* Bo góc mượt hơn */
+    box-sizing: border-box;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.cas-form input[type="text"]:focus,
+.cas-form input[type="password"]:focus {
+    outline: none;
+    border-color: #c8102e;
+    /* Focus viền đỏ PTIT */
+}
+
+/* reCAPTCHA Fake */
+.cas-recaptcha {
+    background: #f9f9f9;
+    border: 1px solid #d3d3d3;
+    border-radius: 4px;
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.checkbox-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+}
+
+.checkbox-wrap input {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+}
+
+.recaptcha-logo {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.recaptcha-logo span {
+    font-size: 10px;
+    font-weight: bold;
+    color: #555;
+}
+
+.recaptcha-logo small {
+    font-size: 8px;
+    color: #999;
+}
+
+/* Nút Submit - ĐỔI SANG MÀU ĐỎ PTIT */
+.cas-submit-btn {
+    width: 100%;
+    background-color: #c8102e;
+    /* Đỏ PTIT */
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+}
+
+.cas-submit-btn:hover {
+    background-color: #a00a24;
+    /* Đỏ sậm hơn khi hover */
+}
+
+.cas-submit-btn:active {
+    transform: scale(0.98);
+}
+
+/* Footer Form */
+.cas-footer {
+    margin-top: 20px;
+    border-top: 1px solid #ddd;
+    padding-top: 15px;
+    font-size: 13px;
+}
+
+.forgot-pw {
+    color: #c8102e;
+    /* Đổi link Quên Mật Khẩu sang màu Đỏ */
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    transition: color 0.2s;
+}
+
+.forgot-pw:hover {
+    color: #a00a24;
+    text-decoration: underline;
+}
+
+.note {
+    color: #666;
+    line-height: 1.5;
+}
+
+/* --- CỘT PHẢI (Background) --- */
+.cas-main-bg {
+    flex: 1;
+    /* CHUYỂN MÀU NỀN TRẮNG/ĐỎ NHẠT */
+    background: linear-gradient(135deg, #ffffff 0%, #fdf2f2 100%);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Thẻ thông tin nhỏ góc trên phải */
+.top-right-card {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(200, 16, 46, 0.08);
+    /* Đổ bóng hơi ửng đỏ */
+    border: 1px solid rgba(200, 16, 46, 0.1);
+    /* Viền mờ màu đỏ */
+}
+
+.top-right-card strong {
+    color: #c8102e;
+    /* Chữ đậm màu đỏ */
+    font-size: 14px;
+}
+
+.top-right-card p {
+    margin: 5px 0 0;
+    font-size: 12px;
+    color: #444;
+}
+
+/* Logo PTIT to ở giữa */
+.big-circle-img {
+    width: 350px;
+    /* Cho to lên một chút cho hoành tráng */
+    border-radius: 50%;
+    border: 12px solid white;
+    box-shadow: 0 10px 30px rgba(200, 16, 46, 0.15);
+    /* Bóng đổ ửng đỏ */
+    background-color: white;
+    /* Đảm bảo nền trong logo luôn trắng */
+}
+
+/* Responsive cơ bản */
+@media (max-width: 768px) {
+    .cas-layout {
+        flex-direction: column;
+    }
+
+    .cas-sidebar {
+        width: 100%;
+        min-height: 100vh;
+    }
+
+    .cas-main-bg {
+        display: none;
+    }
+}

@@ -1,57 +1,27 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import React from "react";
+import { Routes, Route } from "react-router-dom";
+import Header from "./components/Header";
+import LoginSelection from "./components/LoginSelection";
+import StudentLogin from "./components/StudentLogin"; // Gọi file mới tạo vào đây
+import ForgotPassword from "./components/ForgotPassword";
+import AdminLogin from "./components/AdminLogin";
+import StudentHandbook from "./components/StudentHandbook";
+import StudentDashboard from "./components/StudentDashboard";
 
-// auth + pages
-import Login from "./pages/auth/Login";
-import Home from "./pages/student/Home";
-
-// feature-based
-import QnA from "./features/qna/QnA";
-import FAQ from "./features/faq/FAQ";
-import Schedule from "./features/schedule/Schedule";
-
-// admin
-import AdminDashboard from "./pages/admin/Dashboard";
-import ManageUsers from "./pages/admin/ManageUsers";
-
-// layout + protected
-import ProtectedRoute from "./components/ui/ProtectedRoute";
-import MainLayout from "./components/layout/MainLayout";
-
-function App() {
+export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-
-        <Route path="/login" element={<Login />} />
-
-        <Route path="/" element={<MainLayout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/qna" element={<QnA />} />
-          <Route path="/faq" element={<FAQ />} />
-          <Route path="/schedule" element={<Schedule />} />
-
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute role="admin">
-                <AdminDashboard />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/admin/users"
-            element={
-              <ProtectedRoute role="admin">
-                <ManageUsers />
-              </ProtectedRoute>
-            }
-          />
-        </Route>
-
-      </Routes>
-    </BrowserRouter>
+    <div className="app-root">
+      <Header />
+      <main className="container full-center">
+        <Routes>
+          <Route path="/" element={<LoginSelection />} />
+          <Route path="/login/student" element={<StudentLogin />} />
+          <Route path="/login/admin" element={<AdminLogin />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/cam-nang" element={<StudentHandbook />} />
+          <Route path="/student-dashboard" element={<StudentDashboard />} />
+        </Routes>
+      </main>
+    </div>
   );
 }
-
-export default App;

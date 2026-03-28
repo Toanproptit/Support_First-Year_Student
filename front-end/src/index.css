@@ -5,19 +5,12 @@
 /* Theme variables (primary = red) */
 :root {
   --ptit-primary: #ef4444;
-  /* red-500 */
   --ptit-primary-600: #dc2626;
-  /* red-600 */
   --ptit-primary-700: #b91c1c;
-  /* red-700 */
-  --ptit-sidebar: #b91c1c;
-  /* darker sidebar */
-  --ptit-on-primary: #ffffff;
   --ptit-bg: #f8f5f5;
-  --ptit-muted: #6b7280;
+  --ptit-on-primary: #ffffff;
 }
 
-/* Global base styles */
 html,
 body,
 #root {
@@ -26,56 +19,20 @@ body,
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
   background-color: var(--ptit-bg);
   color: #111827;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Utility helper: use CSS variables in custom classes */
-.btn-primary {
+.btn-ptit {
   background-color: var(--ptit-primary);
   color: var(--ptit-on-primary);
 }
 
-.btn-primary:hover {
+.btn-ptit:hover {
   background-color: var(--ptit-primary-600);
 }
 
-/* Sidebar specific fallback if not using Tailwind color classes */
-.sidebar {
-  background-color: var(--ptit-sidebar);
-  color: white;
-}
-
-/* Small accessible helper for visually-hidden text */
-.sr-only {
-  position: absolute !important;
-  width: 1px !important;
-  height: 1px !important;
-  padding: 0 !important;
-  margin: -1px !important;
-  overflow: hidden !important;
-  clip: rect(0, 0, 0, 0) !important;
-  white-space: nowrap !important;
-  border: 0 !important;
-}
-
-/* Component layer: optional small card style */
-@layer components {
-  .card {
-    @apply bg-white rounded-lg shadow p-4;
-  }
-
-  .card-title {
-    @apply text-lg font-semibold text-ptit;
-  }
-}
-
-/* Optional: custom color alias for Tailwind JIT if you want to use 'text-ptit' */
 .text-ptit {
   color: var(--ptit-primary);
 }
@@ -85,5 +42,5 @@ body {
 }
 
 .bg-ptit-dark {
-  background-color: var(--ptit-sidebar);
+  background-color: var(--ptit-primary-700);
 }
