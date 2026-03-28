@@ -12,7 +12,7 @@ export default function App() {
   return (
     <div className="app-root">
       <Header />
-      <main className="container full-center">
+      <main>
         <Routes>
           <Route path="/" element={<LoginSelection />} />
           <Route path="/login/student" element={<StudentLogin />} />

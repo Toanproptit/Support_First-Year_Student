@@ -32,10 +32,8 @@ body {
 }
 
 /* Layout */
-.app-root .container {
-    max-width: var(--max-w);
-    margin: 20px auto;
-    padding: 0 18px
+main {
+    width: 100%;
 }
 
 .site-header {

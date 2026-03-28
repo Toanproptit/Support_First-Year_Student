@@ -15,7 +15,7 @@ export default function StudentHandbook() {
 
     return (
         <div className="handbook-page">
-            <main className="container handbook-container">
+            <main className="handbook-container">
                 <div className="handbook-header-title">
                     <h2>Nội Dung Chính</h2>
                     <p>
