@@ -230,3 +230,694 @@
 .info-card strong {
     color: #111;
 }
+
+/* ================================================= */
+/* CSS CHO KHU VỰC DIỄN ĐÀN HỎI ĐÁP */
+/* ================================================= */
+
+.forum-container {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 25px 30px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+    border: 1px solid #f0f0f0;
+    margin-top: 10px;
+}
+
+.forum-title {
+    margin: 0 0 20px;
+    font-size: 18px;
+    color: #111;
+}
+
+/* Avatar nhỏ dùng chung */
+.avatar-small {
+    width: 36px;
+    height: 36px;
+    background-color: #111;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.avatar-small.alt {
+    background-color: #c8102e;
+}
+
+/* Đỏ PTIT cho người khác */
+
+.avatar-micro {
+    width: 28px;
+    height: 28px;
+    background-color: #111;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 10px;
+    flex-shrink: 0;
+}
+
+/* Form tạo bài viết */
+.forum-create-post {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.forum-create-post input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    /* Bo tròn mượt mà */
+    outline: none;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+.forum-create-post input:focus {
+    border-color: #c8102e;
+}
+
+.post-btn {
+    background-color: #c8102e;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 0 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.post-btn:hover {
+    background-color: #a00d25;
+}
+
+/* Danh sách bài viết */
+.forum-post-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.forum-post {
+    border: 1px solid #eee;
+    border-radius: 10px;
+    padding: 20px;
+    background-color: #fafbfc;
+}
+
+.post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.post-author-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.post-author-info strong {
+    color: #333;
+    font-size: 15px;
+}
+
+.post-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.action-btn.edit {
+    color: #3b82f6;
+}
+
+.action-btn.delete {
+    color: #ef4444;
+}
+
+.action-btn:hover {
+    text-decoration: underline;
+}
+
+.post-content {
+    color: #222;
+    font-size: 15px;
+    line-height: 1.5;
+    margin-bottom: 15px;
+}
+
+/* Chế độ sửa bài viết */
+.post-edit-box {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.post-edit-box input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    outline: none;
+}
+
+.save-btn {
+    background-color: #10b981;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0 15px;
+    cursor: pointer;
+}
+
+.cancel-btn {
+    background-color: #6b7280;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0 15px;
+    cursor: pointer;
+}
+
+/* Khu vực Bình luận */
+.post-comments-wrapper {
+    border-top: 1px dashed #ddd;
+    padding-top: 15px;
+}
+
+.comments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.comment-item {
+    background-color: #f1f3f5;
+    padding: 10px 15px;
+    border-radius: 12px;
+    font-size: 13.5px;
+    color: #444;
+    display: inline-block;
+    align-self: flex-start;
+}
+
+.comment-item strong {
+    color: #111;
+    margin-right: 5px;
+}
+
+.comment-input-area {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.comment-input-area input {
+    flex: 1;
+    padding: 8px 15px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    outline: none;
+    font-size: 13px;
+}
+
+.comment-input-area input:focus {
+    border-color: #999;
+}
+
+.send-comment-btn {
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.send-comment-btn:hover {
+    background-color: #2563eb;
+}
+
+/* --- CSS Cho Cảm xúc & Phản hồi phân cấp --- */
+.comment-thread {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 5px;
+}
+
+.comment-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+}
+
+.comment-actions {
+    display: flex;
+    gap: 12px;
+    margin-left: 10px;
+    margin-bottom: 6px;
+}
+
+.reaction-btn,
+.reply-btn {
+    background: none;
+    border: none;
+    font-size: 12px;
+    color: #65676b;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.reaction-btn:hover,
+.reply-btn:hover {
+    text-decoration: underline;
+    color: #111;
+}
+
+/* Giao diện Phản hồi con (Thụt lề) */
+.replies-list {
+    margin-left: 35px;
+    border-left: 2px solid #e4e6eb;
+    padding-left: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 5px;
+}
+
+.reply-item {
+    background-color: #f0f2f5;
+    font-size: 13px;
+}
+
+.reply-input-area {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-left: 35px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+.reply-input-area input {
+    flex: 1;
+    padding: 6px 12px;
+    border: 1px solid #ddd;
+    border-radius: 15px;
+    outline: none;
+    font-size: 12.5px;
+}
+
+.send-reply-btn {
+    background-color: #e4e6eb;
+    color: #050505;
+    border: none;
+    border-radius: 15px;
+    padding: 5px 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.send-reply-btn:hover {
+    background-color: #d8dadf;
+}
+
+/* ================================================= */
+/* CSS DIỄN ĐÀN STYLE FACEBOOK */
+/* ================================================= */
+.fb-forum-container {
+    max-width: 680px;
+    /* Giới hạn chiều rộng giống FB */
+    margin: 0 auto;
+}
+
+/* KHU VỰC TẠO BÀI VIẾT */
+.fb-create-post-card {
+    background: white;
+    border-radius: 8px;
+    padding: 12px 16px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.fb-create-input-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.fb-create-input-row input {
+    flex: 1;
+    padding: 10px 15px;
+    border-radius: 20px;
+    border: none;
+    background-color: #f0f2f5;
+    font-size: 15px;
+    outline: none;
+}
+
+.fb-create-input-row input:hover {
+    background-color: #e4e6eb;
+}
+
+.fb-post-btn {
+    background: #c8102e;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* BÀI VIẾT (POST) */
+.fb-post-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.fb-post-card {
+    background: white;
+    border-radius: 8px;
+    padding: 12px 16px 0;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.fb-post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.fb-post-author-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.fb-post-author-info strong {
+    color: #050505;
+    font-size: 15px;
+}
+
+.fb-post-time {
+    display: block;
+    font-size: 13px;
+    color: #65676b;
+    font-weight: normal;
+    margin-top: 2px;
+}
+
+.fb-post-actions-menu button {
+    background: none;
+    border: none;
+    color: #65676b;
+    cursor: pointer;
+    font-size: 13px;
+    margin-left: 10px;
+    font-weight: 600;
+}
+
+.fb-post-actions-menu button:hover {
+    text-decoration: underline;
+}
+
+.fb-post-content {
+    font-size: 15px;
+    color: #050505;
+    margin-bottom: 12px;
+    line-height: 1.4;
+}
+
+/* THỐNG KÊ (Stats) */
+.fb-post-stats {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #ced0d4;
+    padding-bottom: 10px;
+    font-size: 15px;
+    color: #65676b;
+}
+
+/* THANH ACTION BAR (Thích / Bình luận) */
+.fb-post-action-bar {
+    display: flex;
+    border-bottom: 1px solid #ced0d4;
+    padding: 4px 0;
+}
+
+.fb-action-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 6px 0;
+    font-size: 15px;
+    color: #65676b;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.fb-action-btn:hover {
+    background-color: #f0f2f5;
+}
+
+.fb-action-btn.liked {
+    color: #1877f2;
+}
+
+/* Xanh biển FB */
+
+/* KHU VỰC BÌNH LUẬN */
+.fb-post-comments {
+    padding: 12px 0;
+}
+
+.fb-comment-thread {
+    margin-bottom: 10px;
+}
+
+.fb-comment-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    margin-bottom: 5px;
+}
+
+.fb-comment-body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    position: relative;
+}
+
+.fb-comment-bubble {
+    background-color: #f0f2f5;
+    border-radius: 18px;
+    padding: 8px 12px;
+    display: inline-flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.fb-comment-bubble strong {
+    font-size: 13px;
+    color: #050505;
+    margin-bottom: 2px;
+}
+
+.fb-comment-bubble span {
+    font-size: 15px;
+    color: #050505;
+}
+
+/* Hiển thị số Like nổi trên góc bình luận */
+.fb-comment-like-count {
+    position: absolute;
+    bottom: -10px;
+    right: -15px;
+    background: white;
+    padding: 2px 4px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    color: #65676b;
+}
+
+.fb-comment-actions {
+    display: flex;
+    gap: 12px;
+    margin-left: 12px;
+    margin-top: 2px;
+}
+
+.fb-comment-actions button,
+.fb-comment-actions span {
+    background: none;
+    border: none;
+    font-size: 12px;
+    font-weight: bold;
+    color: #65676b;
+    cursor: pointer;
+    padding: 0;
+}
+
+.fb-comment-actions button:hover {
+    text-decoration: underline;
+}
+
+.fb-comment-actions button.liked {
+    color: #1877f2;
+}
+
+.fb-comment-actions span {
+    font-weight: normal;
+    cursor: default;
+}
+
+/* PHẢN HỒI (REPLIES) */
+.fb-replies-list {
+    margin-left: 45px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 5px;
+}
+
+.reply-bubble {
+    border-radius: 18px;
+    padding: 6px 10px;
+}
+
+.fb-reply-input-row {
+    display: flex;
+    gap: 8px;
+    margin-left: 45px;
+    margin-top: 5px;
+}
+
+.fb-reply-input-row input {
+    flex: 1;
+    border-radius: 20px;
+    border: 1px solid #ccd0d5;
+    padding: 6px 12px;
+    background: #f0f2f5;
+    outline: none;
+}
+
+/* NÚT XEM THÊM */
+.fb-see-more-btn {
+    background: none;
+    border: none;
+    color: #65676b;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    margin-top: 5px;
+    padding: 0;
+    text-align: left;
+}
+
+.fb-see-more-btn:hover {
+    text-decoration: underline;
+}
+
+/* Ô NHẬP BÌNH LUẬN GỐC (DƯỚI CÙNG) */
+.fb-comment-input-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 15px;
+}
+
+.fb-comment-input-row input {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: 20px;
+    border: none;
+    background: #f0f2f5;
+    font-size: 15px;
+    outline: none;
+}
+
+.send-icon-btn {
+    background: none;
+    border: none;
+    color: #1877f2;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0 5px;
+}
+
+/* AVATAR DÙNG CHUNG */
+.avatar-small {
+    width: 36px;
+    height: 36px;
+    background: #111;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.avatar-small.alt {
+    background: #c8102e;
+}
+
+.avatar-small.alt2 {
+    background: #10b981;
+}
+
+.avatar-micro {
+    width: 24px;
+    height: 24px;
+    background: #111;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 10px;
+    flex-shrink: 0;
+}
+
+.avatar-micro.alt3 {
+    background: #f59e0b;
+}

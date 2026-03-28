@@ -8,7 +8,7 @@ export default function Header() {
                 <img src={logo} alt="PTIT logo" className="logo" />
                 <div className="header-text">
                     <h1>Hệ thống Hỗ trợ Sinh viên</h1>
-                    <p className="sub">Khoa Công nghệ Thông tin - Học viện Công nghệ Bưu chính Viễn thông (PTIT)</p>
+                    <p className="sub">Học viện Công nghệ Bưu chính Viễn thông (PTIT)</p>
                 </div>
                 <a className="guide-btn" href="#" aria-label="Tài liệu hướng dẫn">Tài liệu hướng dẫn</a>
             </div>

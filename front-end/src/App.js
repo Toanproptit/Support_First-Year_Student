@@ -7,7 +7,7 @@ import ForgotPassword from "./components/ForgotPassword";
 import AdminLogin from "./components/AdminLogin";
 import StudentHandbook from "./components/StudentHandbook";
 import StudentDashboard from "./components/StudentDashboard";
-
+import TrainingPrograms from "./components/TrainingPrograms";
 export default function App() {
   return (
     <div className="app-root">
@@ -20,6 +20,7 @@ export default function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/cam-nang" element={<StudentHandbook />} />
           <Route path="/student-dashboard" element={<StudentDashboard />} />
+          <Route path="/cam-nang/1" element={<TrainingPrograms />} />
         </Routes>
       </main>
     </div>

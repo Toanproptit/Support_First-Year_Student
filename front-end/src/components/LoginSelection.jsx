@@ -14,7 +14,7 @@ export default function LoginSelection() {
             <header className="welcome-block">
                 <h2 className="welcome-line1">Chào mừng đến với</h2>
                 <h3 className="welcome-line2">
-                    Hệ thống Hỗ trợ Sinh viên Khoa Công nghệ Thông tin
+                    Hệ thống Hỗ trợ Sinh viên
                 </h3>
                 <p className="lead">
                     Vui lòng chọn phương thức đăng nhập phù hợp với vai trò của bạn trong

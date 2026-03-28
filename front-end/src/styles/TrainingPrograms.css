@@ -1,0 +1,228 @@
+/* TrainingPrograms.css */
+
+.programs-page {
+    background-color: #f9f9f9;
+    min-height: 100vh;
+    padding: 40px 20px;
+}
+
+.programs-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* HEADER ROW: Chứa breadcrumb và thanh tìm kiếm */
+.programs-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    gap: 20px;
+}
+
+.breadcrumb {
+    font-size: 14px;
+    color: #555;
+    margin: 0;
+}
+
+.breadcrumb a {
+    color: #c8102e;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+/* THANH TÌM KIẾM */
+.search-bar-container {
+    display: flex;
+    align-items: center;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 0 12px;
+    width: 250px;
+    height: 38px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-bar-container:focus-within {
+    border-color: #c8102e;
+    /* Viền đỏ khi click vào */
+    box-shadow: 0 2px 8px rgba(200, 16, 46, 0.1);
+}
+
+.search-icon {
+    color: #888;
+    margin-right: 8px;
+    font-size: 14px;
+}
+
+.search-bar-container input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    color: #333;
+    padding: 0;
+}
+
+.search-bar-container input::placeholder {
+    color: #aaa;
+}
+
+/* LƯỚI DANH SÁCH (3 CỘT) */
+.programs-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    margin-bottom: 40px;
+    min-height: 300px;
+    /* Chiều cao tối thiểu để trang không bị giật khi chuyển trang */
+}
+
+/* Hiển thị khi không tìm thấy kết quả */
+.no-results {
+    grid-column: 1 / -1;
+    /* Trải dài hết các cột */
+    text-align: center;
+    padding: 60px 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    border: 1px solid #eaeaea;
+    color: #666;
+    font-size: 16px;
+}
+
+.no-results strong {
+    color: #c8102e;
+}
+
+/* THẺ BÀI VIẾT */
+.program-card {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 30px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border: 1px solid #eaeaea;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.program-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+/* ICON VỚI VIỀN ĐỎ CONG 2 BÊN (Giống ảnh) */
+.program-icon-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 25px;
+}
+
+.program-icon {
+    width: 120px;
+    height: 120px;
+    border-left: 3px solid #c8102e;
+    border-right: 3px solid #c8102e;
+    border-radius: 50%;
+    /* Tạo độ cong giống dấu ngoặc kép () */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #c8102e;
+    /* Màu mặc định cho các icon */
+}
+
+/* Đảm bảo icon SVG bên trong có kích thước chuẩn */
+.program-icon svg {
+    width: 60px;
+    height: 60px;
+}
+
+.program-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    /* Đẩy chữ "Xem chi tiết" xuống đáy */
+}
+
+.program-date {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 10px;
+}
+
+.program-title {
+    font-size: 17px;
+    /* Giảm cỡ chữ một chút để tiêu đề dài không bị vỡ */
+    color: #002147;
+    /* Màu xanh đen đậm */
+    margin: 0 0 20px 0;
+    line-height: 1.4;
+    font-weight: 700;
+}
+
+.program-link {
+    margin-top: auto;
+    /* Tự động đẩy xuống dưới cùng thẻ */
+    color: #c8102e;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 14px;
+    display: inline-block;
+}
+
+.program-link:hover {
+    text-decoration: underline;
+}
+
+/* PHÂN TRANG */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.page-btn {
+    width: 36px;
+    height: 36px;
+    background-color: #f1f1f1;
+    border: none;
+    border-radius: 4px;
+    color: #333;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.page-btn:hover:not(:disabled) {
+    background-color: #e2e2e2;
+}
+
+.page-btn.active {
+    background-color: #c8102e;
+    /* Đỏ PTIT */
+    color: white;
+}
+
+.page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

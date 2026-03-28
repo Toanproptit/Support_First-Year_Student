@@ -3,14 +3,17 @@ import { Link } from "react-router-dom";
 import "../styles/StudentHandbook.css";
 
 export default function StudentHandbook() {
-    // Dữ liệu của 6 thẻ cẩm nang
+    // Dữ liệu của 8 thẻ cẩm nang (Đã thêm CLB và Ký túc xá)
     const handbookData = [
         { id: 1, title: "Chương trình đào tạo", desc: "Thông tin về Chương trình đào tạo" },
         { id: 2, title: "Học phí - học bổng", desc: "Thông tin về Học phí - học bổng" },
         { id: 3, title: "Hướng dẫn học vụ", desc: "Thông tin về Hướng dẫn học vụ" },
         { id: 4, title: "Kế hoạch học tập năm học", desc: "Thông tin về Kế hoạch học tập năm học" },
         { id: 5, title: "Lộ trình học", desc: "Thông tin về Lộ trình học" },
-        { id: 6, title: "Nghiên cứu khoa học", desc: "Thông tin về Nghiên cứu khoa học" }
+        { id: 6, title: "Nghiên cứu khoa học", desc: "Thông tin về Nghiên cứu khoa học" },
+        // THÊM 2 THẺ MỚI VÀO ĐÂY:
+        { id: 7, title: "Thông tin CLB", desc: "Thông tin hoạt động của các Câu lạc bộ, Đội, Nhóm" },
+        { id: 8, title: "Ký túc xá", desc: "Thông tin về quy định và đăng ký Ký túc xá" }
     ];
 
     return (
@@ -19,7 +22,7 @@ export default function StudentHandbook() {
                 <div className="handbook-header-title">
                     <h2>Nội Dung Chính</h2>
                     <p>
-                        Cẩm nang sinh viên Khoa CNTT - PTIT bao gồm những nội dung thiết yếu sau đây,
+                        Cẩm nang sinh viên PTIT bao gồm những nội dung thiết yếu sau đây,
                         giúp bạn dễ dàng tiếp cận và tham khảo mọi thông tin cần thiết.
                     </p>
                 </div>
