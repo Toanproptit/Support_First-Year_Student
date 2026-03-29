@@ -1,12 +1,19 @@
 import React, { useState } from "react";
-import "../styles/AdminLogin.css"; // Nhớ tạo file CSS này ở Bước 2 nhé
+import { useNavigate } from "react-router-dom";
+import "../styles/AdminLogin.css";
 
 export default function AdminLogin() {
-    // State để quản lý việc ẩn/hiện mật khẩu
     const [showPassword, setShowPassword] = useState(false);
+    const navigate = useNavigate();
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        // TODO: gọi API xác thực thật sau này
+        navigate("/admin/dashboard");
     };
 
     return (
@@ -17,14 +24,10 @@ export default function AdminLogin() {
                     <h2>Đăng nhập</h2>
                 </div>
 
-                <form className="admin-form" onSubmit={(e) => e.preventDefault()}>
+                <form className="admin-form" onSubmit={handleSubmit}>
                     <div className="input-group">
                         <label htmlFor="admin-email">Địa chỉ email<span className="required">*</span></label>
-                        <input
-                            type="email"
-                            id="admin-email"
-                            required
-                        />
+                        <input type="email" id="admin-email" required />
                     </div>
 
                     <div className="input-group">
@@ -35,7 +38,6 @@ export default function AdminLogin() {
                                 id="admin-password"
                                 required
                             />
-                            {/* Nút con mắt để ẩn/hiện mật khẩu */}
                             <button
                                 type="button"
                                 className="toggle-password-btn"

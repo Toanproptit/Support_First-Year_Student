@@ -1,0 +1,237 @@
+/* ===== POST MANAGEMENT ===== */
+
+/* Quick stats */
+.post-quick-stats {
+  display: flex;
+  gap: 12px;
+}
+
+.quick-stat {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 10px 18px;
+  text-align: center;
+  min-width: 70px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.quick-stat.reported {
+  border-color: #fca5a5;
+  background: #fff5f5;
+}
+
+.qs-value {
+  display: block;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.quick-stat.reported .qs-value {
+  color: #c8102e;
+}
+
+.qs-label {
+  font-size: 0.75rem;
+  color:#64748b;
+}
+
+/* Toolbar */
+.post-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.filter-tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.filter-tab {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filter-tab:hover {
+  border-color: #c8102e;
+  color: #c8102e;
+}
+
+.filter-tab.active {
+  background: #c8102e;
+  border-color: #c8102e;
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(200,16,46,0.25);
+}
+
+.report-badge {
+  background: #fee2e2;
+  color: #c8102e;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 1px 7px;
+}
+
+.filter-tab.active .report-badge {
+  background: rgba(255,255,255,0.25);
+  color: #fff;
+}
+
+/* Post list */
+.post-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.empty-state {
+  text-align: center;
+  color: #94a3b8;
+  padding: 48px;
+  background: #fff;
+  border-radius: 16px;
+  border: 1px dashed #e2e8f0;
+}
+
+/* Post card */
+.post-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  transition: box-shadow 0.2s;
+}
+
+.post-card:hover {
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+.post-card.post-reported {
+  border-color: #fca5a5;
+  background: #fffafa;
+}
+
+/* Header */
+.post-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 10px;
+}
+
+.post-author-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.post-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.post-author-name {
+  display: block;
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: #0f172a;
+}
+
+.post-time {
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.post-card-right {
+  flex-shrink: 0;
+}
+
+/* Badge thêm màu đỏ */
+.badge-red {
+  background: #fee2e2;
+  color: #c8102e;
+}
+
+/* Nội dung bài viết */
+.post-content {
+  font-size: 0.92rem;
+  color: #334155;
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.expand-btn {
+  background: none;
+  border: none;
+  color: #c8102e;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* Stats */
+.post-stats {
+  display: flex;
+  gap: 16px;
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Actions */
+.post-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-resolve {
+  padding: 7px 16px;
+  border-radius: 8px;
+  font-size: 0.83rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  background: #dcfce7;
+  color: #16a34a;
+  transition: all 0.2s;
+}
+
+.btn-resolve:hover {
+  background: #bbf7d0;
+}

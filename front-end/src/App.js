@@ -1,28 +1,51 @@
 import React from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Header from "./components/Header";
 import LoginSelection from "./components/LoginSelection";
-import StudentLogin from "./components/StudentLogin"; // Gọi file mới tạo vào đây
+import StudentLogin from "./components/StudentLogin";
 import ForgotPassword from "./components/ForgotPassword";
 import AdminLogin from "./components/AdminLogin";
 import StudentHandbook from "./components/StudentHandbook";
 import StudentDashboard from "./components/StudentDashboard";
 import TrainingPrograms from "./components/TrainingPrograms";
-export default function App() {
+
+// Admin
+import AdminLayout from "./components/admin/AdminLayout";
+import AdminDashboard from "./components/admin/AdminDashboard";
+import UserManagement from "./components/admin/UserManagement";
+import PostManagement from "./components/admin/PostManagement";
+import HandbookManagement from "./components/admin/HandbookManagement";
+
+// Layout chung cho các trang public (có Header)
+function PublicLayout({ children }) {
   return (
     <div className="app-root">
       <Header />
-      <main>
-        <Routes>
-          <Route path="/" element={<LoginSelection />} />
-          <Route path="/login/student" element={<StudentLogin />} />
-          <Route path="/login/admin" element={<AdminLogin />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/cam-nang" element={<StudentHandbook />} />
-          <Route path="/student-dashboard" element={<StudentDashboard />} />
-          <Route path="/cam-nang/1" element={<TrainingPrograms />} />
-        </Routes>
-      </main>
+      <main>{children}</main>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <Routes>
+      {/* ===== Tuyến công khai (có Header) ===== */}
+      <Route path="/" element={<PublicLayout><LoginSelection /></PublicLayout>} />
+      <Route path="/login/student" element={<PublicLayout><StudentLogin /></PublicLayout>} />
+      <Route path="/login/admin" element={<PublicLayout><AdminLogin /></PublicLayout>} />
+      <Route path="/forgot-password" element={<PublicLayout><ForgotPassword /></PublicLayout>} />
+      <Route path="/cam-nang" element={<PublicLayout><StudentHandbook /></PublicLayout>} />
+      <Route path="/student-dashboard" element={<PublicLayout><StudentDashboard /></PublicLayout>} />
+      <Route path="/cam-nang/1" element={<PublicLayout><TrainingPrograms /></PublicLayout>} />
+
+      {/* ===== Tuyến Admin (có Sidebar, KHÔNG có Header chung) ===== */}
+      <Route path="/admin" element={<AdminLayout />}>
+        <Route index element={<Navigate to="/admin/dashboard" replace />} />
+        <Route path="dashboard" element={<AdminDashboard />} />
+        <Route path="users" element={<UserManagement />} />
+        <Route path="posts" element={<PostManagement />} />
+        <Route path="handbook" element={<HandbookManagement />} />
+      </Route>
+    </Routes>
   );
 }
