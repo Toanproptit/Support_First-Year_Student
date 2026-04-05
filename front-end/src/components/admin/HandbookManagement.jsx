@@ -4,7 +4,7 @@ import Pagination from "./Pagination";
 
 const PAGE_SIZE = 5;
 
-const mockHandbook = [
+const initialMockHandbook = [
   { id: 1,  title: "Chương trình đào tạo Công nghệ Thông tin",      category: "Đào tạo",   updatedAt: "2025-09-01" },
   { id: 2,  title: "Quy định về học phần và tín chỉ",               category: "Quy định",  updatedAt: "2025-08-20" },
   { id: 3,  title: "Hỗ trợ sinh viên khó khăn",                     category: "Hỗ trợ",   updatedAt: "2025-07-15" },
@@ -20,10 +20,16 @@ const mockHandbook = [
 ];
 
 export default function HandbookManagement() {
-  const [search, setSearch]           = useState("");
+  const [handbooks, setHandbooks] = useState(initialMockHandbook);
+  const [search, setSearch]       = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const filtered = mockHandbook.filter((h) =>
+  // Modal states
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
+  const [formData, setFormData] = useState({ title: "", category: "Đào tạo" });
+
+  const filtered = handbooks.filter((h) =>
     h.title.toLowerCase().includes(search.toLowerCase()) ||
     h.category.toLowerCase().includes(search.toLowerCase())
   );
@@ -33,6 +39,53 @@ export default function HandbookManagement() {
 
   const handleSearch = (val) => { setSearch(val); setCurrentPage(1); };
 
+  const handleDelete = (id) => {
+    if (window.confirm("Bạn có chắc muốn xoá mục này khỏi cẩm nang?")) {
+      setHandbooks(prev => prev.filter(item => item.id !== id));
+      if (paginated.length === 1 && currentPage > 1) {
+        setCurrentPage(currentPage - 1);
+      }
+    }
+  };
+
+  const openAddModal = () => {
+    setEditingItem(null);
+    setFormData({ title: "", category: "Đào tạo" });
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (item) => {
+    setEditingItem(item);
+    setFormData({ title: item.title, category: item.category });
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!formData.title.trim()) return;
+
+    const today = new Date().toISOString().split('T')[0];
+
+    if (editingItem) {
+      setHandbooks(prev => prev.map(item => 
+        item.id === editingItem.id ? { ...item, ...formData, updatedAt: today } : item
+      ));
+    } else {
+      const newId = handbooks.length > 0 ? Math.max(...handbooks.map(h => h.id)) + 1 : 1;
+      setHandbooks(prev => [{ id: newId, ...formData, updatedAt: today }, ...prev]);
+      setCurrentPage(1);
+    }
+    closeModal();
+  };
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
   return (
     <div className="admin-page">
       <div className="page-header">
@@ -40,7 +93,7 @@ export default function HandbookManagement() {
           <h2 className="page-title">Quản lý Cẩm nang</h2>
           <p className="page-subtitle">Quản lý nội dung cẩm nang dành cho sinh viên mới</p>
         </div>
-        <button className="btn-primary">+ Thêm mục mới</button>
+        <button className="btn-primary" onClick={openAddModal}>+ Thêm mục mới</button>
       </div>
 
       <div className="table-toolbar">
@@ -81,8 +134,8 @@ export default function HandbookManagement() {
                   <td>{item.updatedAt}</td>
                   <td>
                     <div className="action-btns">
-                      <button className="btn-edit">Sửa</button>
-                      <button className="btn-delete">Xoá</button>
+                      <button className="btn-edit" onClick={() => openEditModal(item)}>Sửa</button>
+                      <button className="btn-delete" onClick={() => handleDelete(item.id)}>Xoá</button>
                     </div>
                   </td>
                 </tr>
@@ -92,11 +145,56 @@ export default function HandbookManagement() {
         </table>
       </div>
 
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={setCurrentPage}
-      />
+      {totalPages > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
+      )}
+
+      {/* Modal */}
+      {isModalOpen && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>{editingItem ? "Sửa cẩm nang" : "Thêm mục mới"}</h3>
+              <button className="btn-close" onClick={closeModal}>&times;</button>
+            </div>
+            
+            <form onSubmit={handleSubmit}>
+              <div className="modal-body">
+                <div className="form-group">
+                  <label>Tiêu đề:</label>
+                  <input 
+                    type="text" 
+                    name="title"
+                    value={formData.title} 
+                    onChange={handleChange} 
+                    required 
+                    placeholder="Nhập tiêu đề..."
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Danh mục:</label>
+                  <select name="category" value={formData.category} onChange={handleChange}>
+                    <option value="Đào tạo">Đào tạo</option>
+                    <option value="Quy định">Quy định</option>
+                    <option value="Hỗ trợ">Hỗ trợ</option>
+                    <option value="Hoạt động">Hoạt động</option>
+                    <option value="Dịch vụ">Dịch vụ</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div className="modal-footer">
+                <button type="button" className="btn-secondary" onClick={closeModal}>Hủy</button>
+                <button type="submit" className="btn-primary">{editingItem ? "Lưu thay đổi" : "Thêm mới"}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

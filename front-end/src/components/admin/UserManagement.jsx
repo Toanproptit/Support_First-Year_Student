@@ -5,7 +5,7 @@ import Pagination from "./Pagination";
 const PAGE_SIZE = 5;
 
 // Tạo 12 user giả để có nhiều trang
-const mockUsers = [
+const initialMockUsers = [
   { id: 1,  name: "Nguyễn Văn An",    email: "an.nv@ptit.edu.vn",    mssv: "B21DCCN001", status: "Đang học" },
   { id: 2,  name: "Trần Thị Bình",    email: "binh.tt@ptit.edu.vn",  mssv: "B21DCCN002", status: "Đang học" },
   { id: 3,  name: "Lê Minh Cường",    email: "cuong.lm@ptit.edu.vn", mssv: "B21DCCN003", status: "Bảo lưu"  },
@@ -21,10 +21,16 @@ const mockUsers = [
 ];
 
 export default function UserManagement() {
+  const [users, setUsers]         = useState(initialMockUsers);
   const [search, setSearch]       = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const filtered = mockUsers.filter(
+  // Modal states
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
+  const [formData, setFormData] = useState({ name: "", email: "", mssv: "", status: "Đang học" });
+
+  const filtered = users.filter(
     (u) =>
       u.name.toLowerCase().includes(search.toLowerCase()) ||
       u.mssv.includes(search)
@@ -38,6 +44,51 @@ export default function UserManagement() {
     setCurrentPage(1); // reset về trang 1 khi tìm kiếm
   };
 
+  const handleDelete = (id) => {
+    if (window.confirm("Bạn có chắc muốn xoá sinh viên này khỏi hệ thống?")) {
+      setUsers(prev => prev.filter(user => user.id !== id));
+      if (paginated.length === 1 && currentPage > 1) {
+        setCurrentPage(currentPage - 1);
+      }
+    }
+  };
+
+  const openAddModal = () => {
+    setEditingUser(null);
+    setFormData({ name: "", email: "", mssv: "", status: "Đang học" });
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (user) => {
+    setEditingUser(user);
+    setFormData({ name: user.name, email: user.email, mssv: user.mssv, status: user.status });
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!formData.name.trim() || !formData.mssv.trim()) return;
+
+    if (editingUser) {
+      setUsers(prev => prev.map(user => 
+        user.id === editingUser.id ? { ...user, ...formData } : user
+      ));
+    } else {
+      const newId = users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1;
+      setUsers(prev => [{ id: newId, ...formData }, ...prev]);
+      setCurrentPage(1);
+    }
+    closeModal();
+  };
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
   return (
     <div className="admin-page">
       <div className="page-header">
@@ -45,7 +96,7 @@ export default function UserManagement() {
           <h2 className="page-title">Quản lý Sinh viên</h2>
           <p className="page-subtitle">Danh sách tài khoản sinh viên trong hệ thống</p>
         </div>
-        <button className="btn-primary">+ Thêm sinh viên</button>
+        <button className="btn-primary" onClick={openAddModal}>+ Thêm sinh viên</button>
       </div>
 
       <div className="table-toolbar">
@@ -92,8 +143,8 @@ export default function UserManagement() {
                   </td>
                   <td>
                     <div className="action-btns">
-                      <button className="btn-edit">Sửa</button>
-                      <button className="btn-delete">Xoá</button>
+                      <button className="btn-edit" onClick={() => openEditModal(user)}>Sửa</button>
+                      <button className="btn-delete" onClick={() => handleDelete(user.id)}>Xoá</button>
                     </div>
                   </td>
                 </tr>
@@ -103,11 +154,75 @@ export default function UserManagement() {
         </table>
       </div>
 
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={setCurrentPage}
-      />
+      {totalPages > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
+      )}
+
+      {/* Modal */}
+      {isModalOpen && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>{editingUser ? "Sửa thông tin sinh viên" : "Thêm sinh viên mới"}</h3>
+              <button className="btn-close" onClick={closeModal}>&times;</button>
+            </div>
+            
+            <form onSubmit={handleSubmit}>
+              <div className="modal-body">
+                <div className="form-group">
+                  <label>Họ tên:</label>
+                  <input 
+                    type="text" 
+                    name="name"
+                    value={formData.name} 
+                    onChange={handleChange} 
+                    required 
+                    placeholder="Nhập họ và tên..."
+                  />
+                </div>
+                <div className="form-group">
+                  <label>MSSV:</label>
+                  <input 
+                    type="text" 
+                    name="mssv"
+                    value={formData.mssv} 
+                    onChange={handleChange} 
+                    required 
+                    placeholder="Nhập mã số sinh viên..."
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Email:</label>
+                  <input 
+                    type="email" 
+                    name="email"
+                    value={formData.email} 
+                    onChange={handleChange} 
+                    required 
+                    placeholder="Nhập địa chỉ email..."
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Trạng thái:</label>
+                  <select name="status" value={formData.status} onChange={handleChange}>
+                    <option value="Đang học">Đang học</option>
+                    <option value="Bảo lưu">Bảo lưu</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div className="modal-footer">
+                <button type="button" className="btn-secondary" onClick={closeModal}>Hủy</button>
+                <button type="submit" className="btn-primary">{editingUser ? "Lưu thay đổi" : "Thêm mới"}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
