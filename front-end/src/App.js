@@ -8,7 +8,8 @@ import AdminLogin from "./components/AdminLogin";
 import StudentHandbook from "./components/StudentHandbook";
 import StudentDashboard from "./components/StudentDashboard";
 import TrainingPrograms from "./components/TrainingPrograms";
-
+import ProgramDetail from "./components/ProgramDetail";
+import ScholarshipDetail from "./components/ScholarshipDetail";
 // Admin
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./components/admin/AdminDashboard";
@@ -37,6 +38,8 @@ export default function App() {
       <Route path="/cam-nang" element={<PublicLayout><StudentHandbook /></PublicLayout>} />
       <Route path="/student-dashboard" element={<PublicLayout><StudentDashboard /></PublicLayout>} />
       <Route path="/cam-nang/1" element={<PublicLayout><TrainingPrograms /></PublicLayout>} />
+      <Route path="/chuong-trinh/:id" element={<ProgramDetail />} />
+      <Route path="/cam-nang/2" element={<ScholarshipDetail />} />
 
       {/* ===== Tuyến Admin (có Sidebar, KHÔNG có Header chung) ===== */}
       <Route path="/admin" element={<AdminLayout />}>

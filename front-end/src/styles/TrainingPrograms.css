@@ -50,6 +50,117 @@
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
+/* --- KHU VỰC TÌM KIẾM CÓ GỢI Ý --- */
+.search-wrapper {
+    position: relative;
+    /* Rất quan trọng để dropdown canh vị trí theo nó */
+    width: 300px;
+    /* Làm cho thanh tìm kiếm dài ra một chút để chứa tên ngành dài */
+}
+
+.search-bar-container {
+    display: flex;
+    align-items: center;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    /* Bo góc nhẹ */
+    padding: 0 12px;
+    width: 100%;
+    /* Chiếm hết chiều rộng của search-wrapper */
+    height: 42px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+}
+
+.search-bar-container:focus-within {
+    border-color: #c8102e;
+    box-shadow: 0 2px 8px rgba(200, 16, 46, 0.1);
+}
+
+.search-icon {
+    color: #888;
+    margin-right: 8px;
+    font-size: 14px;
+}
+
+.search-bar-container input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    color: #333;
+    padding: 0;
+    width: 100%;
+}
+
+.search-bar-container input::placeholder {
+    color: #aaa;
+}
+
+/* MENU DROPDOWN GỢI Ý */
+.search-suggestions-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    /* Nằm ngay dưới thanh tìm kiếm, cách 4px */
+    left: 0;
+    right: 0;
+    background-color: #ffffff;
+    border: 1px solid #eaeaea;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    list-style: none;
+    margin: 0;
+    padding: 8px 0;
+    max-height: 280px;
+    /* Giới hạn chiều cao */
+    overflow-y: auto;
+    /* Thêm thanh cuộn nếu quá dài */
+    z-index: 100;
+    /* Nổi lên trên tất cả */
+}
+
+/* Tùy chỉnh thanh cuộn cho đẹp */
+.search-suggestions-dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+
+.search-suggestions-dropdown::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 3px;
+}
+
+.suggestion-item {
+    padding: 10px 15px;
+    font-size: 13.5px;
+    color: #333;
+    cursor: pointer;
+    display: flex;
+    align-items: flex-start;
+    /* Nếu tên ngành dài xuống dòng thì icon vẫn ở trên */
+    line-height: 1.4;
+    transition: background-color 0.2s, color 0.2s;
+    border-bottom: 1px solid #f9f9f9;
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.suggestion-icon {
+    margin-right: 8px;
+    font-size: 14px;
+    opacity: 0.6;
+}
+
+.suggestion-item:hover {
+    background-color: #fef2f2;
+    /* Nền đỏ cực nhạt */
+    color: #c8102e;
+    /* Chữ đỏ PTIT */
+}
+
 .search-bar-container:focus-within {
     border-color: #c8102e;
     /* Viền đỏ khi click vào */

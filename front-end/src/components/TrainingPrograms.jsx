@@ -6,7 +6,6 @@ import "../styles/TrainingPrograms.css";
 // ĐỊNH NGHĨA CÁC ICON SVG CHO TỪNG NHÓM NGÀNH
 // ========================================================
 const programIcons = {
-    // 1. Nhóm Kế toán, Fintech, Tài chính
     accounting: (
         <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#c8102e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
@@ -14,7 +13,6 @@ const programIcons = {
             <line x1="12" y1="17" x2="12" y2="21"></line>
         </svg>
     ),
-    // 2. Nhóm Công nghệ thông tin, Khoa học máy tính, Game
     it: (
         <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#c8102e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="16 18 22 12 16 6"></polyline>
@@ -22,13 +20,11 @@ const programIcons = {
             <line x1="12" y1="2" x2="12" y2="22"></line>
         </svg>
     ),
-    // 3. Nhóm Mạng, IoT, AI, Dữ liệu, An toàn thông tin
     network: (
         <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#c8102e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
         </svg>
     ),
-    // 4. Nhóm Marketing, Truyền thông, Thương mại điện tử, Báo chí
     marketing: (
         <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#c8102e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
@@ -36,7 +32,6 @@ const programIcons = {
             <circle cx="12" cy="12" r="3"></circle>
         </svg>
     ),
-    // 5. Nhóm Quản trị, Logistics
     management: (
         <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#c8102e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="12" y1="20" x2="12" y2="10"></line>
@@ -44,7 +39,6 @@ const programIcons = {
             <line x1="6" y1="20" x2="6" y2="16"></line>
         </svg>
     ),
-    // 6. Nhóm Điện, Tự động hóa
     electric: (
         <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#c8102e" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
@@ -52,7 +46,6 @@ const programIcons = {
     )
 };
 
-// Hàm hỗ trợ để lấy icon dựa trên tiêu đề ngành
 const getIconForProgram = (title) => {
     const lowerTitle = title.toLowerCase();
     if (lowerTitle.includes("kế toán") || lowerTitle.includes("tài chính")) return programIcons.accounting;
@@ -61,13 +54,10 @@ const getIconForProgram = (title) => {
     if (lowerTitle.includes("marketing") || lowerTitle.includes("truyền thông") || lowerTitle.includes("thương mại điện tử") || lowerTitle.includes("báo chí") || lowerTitle.includes("quan hệ công chúng")) return programIcons.marketing;
     if (lowerTitle.includes("quản trị kinh doanh") || lowerTitle.includes("logistics")) return programIcons.management;
     if (lowerTitle.includes("điện") || lowerTitle.includes("tự động hóa")) return programIcons.electric;
-
-    // Icon mặc định (dùng lại icon mạng/đám mây cho các ngành khác)
     return programIcons.network;
 };
 
 export default function TrainingPrograms() {
-    // DỮ LIỆU ĐẦY ĐỦ 28 NGÀNH
     const programsData = [
         { id: 1, title: "Chương trình Kỹ thuật dữ liệu (ngành Mạng máy tính và truyền thông dữ liệu)", date: "12/08/2024" },
         { id: 2, title: "Ngành Công nghệ tài chính - Fintech", date: "12/08/2024" },
@@ -100,23 +90,30 @@ export default function TrainingPrograms() {
     ];
 
     // ========================================================
-    // LOGIC TÌM KIẾM (SEARCH)
+    // LOGIC TÌM KIẾM VÀ GỢI Ý (AUTOCOMPLETE)
     // ========================================================
     const [searchTerm, setSearchTerm] = useState("");
+    const [showSuggestions, setShowSuggestions] = useState(false); // Trạng thái ẩn/hiện menu thả xuống
 
-    // Hàm xử lý khi thay đổi từ khóa tìm kiếm
     const handleSearchChange = (e) => {
         setSearchTerm(e.target.value);
-        setCurrentPage(1); // Reset về trang 1 khi tìm kiếm mới
+        setShowSuggestions(true); // Gõ chữ là hiện menu gợi ý
+        setCurrentPage(1);
     };
 
-    // Lọc danh sách chương trình dựa trên từ khóa
+    // Hàm khi click chọn 1 ngành trong menu gợi ý
+    const handleSelectSuggestion = (title) => {
+        setSearchTerm(title);
+        setShowSuggestions(false); // Ẩn menu đi
+        setCurrentPage(1);
+    };
+
     const filteredPrograms = programsData.filter((program) =>
         program.title.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     // ========================================================
-    // LOGIC PHÂN TRANG (PAGINATION) - CHẠY TRÊN DANH SÁCH ĐÃ LỌC
+    // LOGIC PHÂN TRANG (PAGINATION)
     // ========================================================
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 6;
@@ -126,37 +123,59 @@ export default function TrainingPrograms() {
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentPrograms = filteredPrograms.slice(indexOfFirstItem, indexOfLastItem);
 
-    const paginate = (pageNumber) => setCurrentPage(pageNumber);
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    };
 
     return (
         <div className="programs-page">
             <div className="programs-container">
 
-                {/* THANH ĐIỀU HƯỚNG & THANH TÌM KIẾM */}
                 <div className="programs-header-row">
                     <div className="breadcrumb">
                         <Link to="/cam-nang">Cẩm nang sinh viên</Link> &gt; <span>Chương trình đào tạo</span>
                     </div>
 
-                    {/* THANH TÌM KIẾM MỚI THÊM VÀO ĐÂY */}
-                    <div className="search-bar-container">
-                        <span className="search-icon" aria-hidden="true">🔍</span>
-                        <input
-                            type="text"
-                            placeholder="Tìm kiếm chuyên ngành..."
-                            value={searchTerm}
-                            onChange={handleSearchChange}
-                        />
+                    {/* KHU VỰC THANH TÌM KIẾM CÓ GỢI Ý */}
+                    <div className="search-wrapper">
+                        <div className="search-bar-container">
+                            <span className="search-icon" aria-hidden="true">🔍</span>
+                            <input
+                                type="text"
+                                placeholder="Tìm kiếm chuyên ngành..."
+                                value={searchTerm}
+                                onChange={handleSearchChange}
+                                onFocus={() => setShowSuggestions(true)}
+                                // Dùng setTimeout để event click vào li chạy trước khi menu bị ẩn đi
+                                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                            />
+                        </div>
+
+                        {/* MENU GỢI Ý DROPDOWN */}
+                        {showSuggestions && searchTerm.trim() !== "" && filteredPrograms.length > 0 && (
+                            <ul className="search-suggestions-dropdown">
+                                {filteredPrograms.map((prog) => (
+                                    <li
+                                        key={prog.id}
+                                        className="suggestion-item"
+                                        onClick={() => handleSelectSuggestion(prog.title)}
+                                    >
+                                        {/* Highlight chữ khớp với từ khóa tìm kiếm (tùy chọn nâng cao, ở đây in ra tên) */}
+                                        <span className="suggestion-icon">🎓</span>
+                                        {prog.title}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
                     </div>
                 </div>
 
-                {/* DANH SÁCH CÁC NGÀNH (GRID) */}
                 <div className="programs-grid">
                     {currentPrograms.length > 0 ? (
                         currentPrograms.map((program) => (
                             <div className="program-card" key={program.id}>
                                 <div className="program-icon-wrapper">
-                                    {/* SỬ DỤNG HÀM ĐỂ LẤY ICON TƯƠNG ỨNG VỚI NGÀNH */}
                                     <div className="program-icon">
                                         {getIconForProgram(program.title)}
                                     </div>
@@ -175,19 +194,17 @@ export default function TrainingPrograms() {
                             </div>
                         ))
                     ) : (
-                        // Hiển thị khi không tìm thấy kết quả
                         <div className="no-results">
                             Không tìm thấy chương trình đào tạo nào phù hợp với từ khóa "<strong>{searchTerm}</strong>".
                         </div>
                     )}
                 </div>
 
-                {/* THANH PHÂN TRANG (Chỉ hiện khi có nhiều hơn 1 trang kết quả) */}
                 {totalPages > 1 && (
                     <div className="pagination">
                         <button
                             className="page-btn"
-                            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                            onClick={() => handlePageChange(Math.max(currentPage - 1, 1))}
                             disabled={currentPage === 1}
                         >
                             &lt;
@@ -196,7 +213,7 @@ export default function TrainingPrograms() {
                         {[...Array(totalPages)].map((_, index) => (
                             <button
                                 key={index + 1}
-                                onClick={() => paginate(index + 1)}
+                                onClick={() => handlePageChange(index + 1)}
                                 className={`page-btn ${currentPage === index + 1 ? "active" : ""}`}
                             >
                                 {index + 1}
@@ -205,7 +222,7 @@ export default function TrainingPrograms() {
 
                         <button
                             className="page-btn"
-                            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                            onClick={() => handlePageChange(Math.min(currentPage + 1, totalPages))}
                             disabled={currentPage === totalPages}
                         >
                             &gt;

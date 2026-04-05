@@ -1,0 +1,220 @@
+/* ScholarshipDetail.css */
+
+.article-page {
+    background-color: #f9f9f9;
+    min-height: 100vh;
+    padding: 40px 20px;
+    font-family: Arial, sans-serif;
+}
+
+.article-container {
+    max-width: 900px;
+    margin: 0 auto;
+    background-color: #ffffff;
+    padding: 40px 50px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.article-meta {
+    font-size: 14px;
+    color: #6c757d;
+    margin-bottom: 15px;
+}
+
+.article-meta a {
+    color: #6c757d;
+    text-decoration: none;
+}
+
+.article-meta a:hover {
+    text-decoration: underline;
+}
+
+.read-time {
+    margin-left: 5px;
+}
+
+.article-title {
+    color: #c8102e;
+    /* MÀU ĐỎ PTIT CHỦ ĐẠO */
+    font-size: 28px;
+    margin-top: 0;
+    margin-bottom: 25px;
+    font-weight: 700;
+}
+
+.article-content {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #212529;
+}
+
+.article-content p {
+    margin-bottom: 15px;
+}
+
+.section-heading {
+    color: #c8102e;
+    /* MÀU ĐỎ PTIT CHỦ ĐẠO cho tiêu đề phụ */
+    font-size: 18px;
+    margin-top: 30px;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.article-content ul,
+.article-content ol {
+    margin-bottom: 20px;
+    padding-left: 25px;
+}
+
+.article-content li {
+    margin-bottom: 8px;
+}
+
+/* Kiểu cho liên kết trong nội dung */
+.article-content a {
+    color: #c8102e;
+    /* MÀU ĐỎ PTIT CHỦ ĐẠO cho liên kết */
+    text-decoration: underline;
+}
+
+.article-content a:hover {
+    color: #a00d25;
+    /* Màu đỏ sẫm hơn khi di chuột */
+}
+
+/* --- BẢNG MỨC HỌC BỔNG --- */
+.table-responsive {
+    overflow-x: auto;
+    margin-bottom: 20px;
+    margin-top: 10px;
+}
+
+.scholarship-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+}
+
+.scholarship-table th,
+.scholarship-table td {
+    border: 1px solid #dee2e6;
+    padding: 12px 15px;
+    text-align: left;
+}
+
+.scholarship-table th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    color: #212529;
+}
+
+.scholarship-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* =======================================================
+   THANH ĐIỀU HƯỚNG DƯỚI CÙNG (BOTTOM NAV)
+   ======================================================= */
+.article-bottom-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 50px;
+    padding-top: 25px;
+    border-top: 1px solid #eaeaea;
+}
+
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #f4f5f7;
+    /* Nền xám nhạt */
+    color: #334155;
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.btn-back span {
+    font-size: 18px;
+    /* Cho mũi tên to ra một chút */
+    line-height: 1;
+}
+
+.btn-back:hover {
+    background-color: #e2e8f0;
+    color: #334155;
+}
+
+.link-all {
+    color: #c8102e;
+    /* Chữ màu ĐỎ PTIT chủ đạo */
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.link-all:hover {
+    text-decoration: underline;
+    color: #a00d25;
+    /* Đỏ sẫm khi hover */
+}
+
+/* =======================================================
+   THANH ĐIỀU HƯỚNG DƯỚI CÙNG (BOTTOM NAV)
+   ======================================================= */
+.article-bottom-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 50px;
+    padding-top: 25px;
+    border-top: 1px solid #eaeaea;
+}
+
+/* Thêm !important để chống bị vạ lây gạch chân từ bài viết */
+.article-bottom-nav .btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #f4f5f7;
+    color: #c8102e;
+    /* Chữ đỏ PTIT */
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none !important;
+    /* Ép xóa gạch chân */
+    font-size: 15px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.article-bottom-nav .btn-back span {
+    font-size: 18px;
+    line-height: 1;
+}
+
+.article-bottom-nav .btn-back:hover {
+    background-color: #e2e8f0;
+}
+
+.article-bottom-nav .link-all {
+    color: #c8102e;
+    text-decoration: none !important;
+    /* Ép xóa gạch chân */
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.article-bottom-nav .link-all:hover {
+    text-decoration: underline !important;
+    /* Chỉ gạch chân khi di chuột vào */
+    color: #a00d25;
+}

@@ -160,45 +160,6 @@
     color: #111;
 }
 
-.logout-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background-color: #ffffff;
-    /* Nền trắng rõ ràng */
-    border: 1px solid #d1d5db;
-    /* Viền xám trung tính */
-    padding: 6px 12px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 600;
-    /* Tăng độ đậm của chữ */
-    color: #374151 !important;
-    /* Ép màu xám đậm để luôn nhìn thấy chữ */
-    transition: all 0.2s;
-    line-height: 1;
-}
-
-/* Đảm bảo icon SVG cũng có màu */
-.logout-btn svg {
-    stroke: #374151;
-    flex-shrink: 0;
-}
-
-.logout-btn:hover {
-    background-color: #fef2f2;
-    /* Đỏ cực nhạt khi hover */
-    border-color: #f87171;
-    /* Viền đỏ nhạt */
-    color: #dc2626 !important;
-    /* Chữ chuyển sang đỏ */
-}
-
-.logout-btn:hover svg {
-    stroke: #dc2626;
-    /* Icon chuyển sang đỏ khi hover */
-}
 
 /* Hàng chứa 2 thẻ thông tin */
 .info-cards-row {
@@ -920,4 +881,480 @@
 
 .avatar-micro.alt3 {
     background: #f59e0b;
+}
+
+/* ================================================= */
+/* CSS CHO HEADER VÀ NÚT ĐĂNG XUẤT MỚI */
+/* ================================================= */
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.logout-btn-header {
+    background: transparent;
+    border: 1px solid #d1d5db;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: #4b5563;
+    transition: all 0.2s;
+}
+
+.logout-btn-header:hover {
+    background-color: #fef2f2;
+    border-color: #f87171;
+    color: #dc2626;
+}
+
+/* ================================================= */
+/* CSS CHO PHẢN HỒI & HỒ SƠ CÁ NHÂN */
+/* ================================================= */
+
+.feature-card-ui {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+    border: 1px solid #eaeaea;
+}
+
+.feature-card-ui h3 {
+    margin: 0 0 8px 0;
+    font-size: 20px;
+    color: #111;
+}
+
+.feature-card-ui .subtitle {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 25px;
+}
+
+/* --- FORM PHẢN HỒI --- */
+.feedback-form .form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+}
+
+.feedback-form label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #333;
+}
+
+.feedback-form .required {
+    color: #c8102e;
+    /* Đỏ */
+}
+
+.feedback-form select,
+.feedback-form input,
+.feedback-form textarea {
+    padding: 12px 15px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.feedback-form select:focus,
+.feedback-form input:focus,
+.feedback-form textarea:focus {
+    border-color: #c8102e;
+}
+
+.submit-btn-primary {
+    background-color: #c8102e;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 15px;
+    transition: background-color 0.2s;
+}
+
+.submit-btn-primary:hover {
+    background-color: #a00d25;
+}
+
+/* --- HỒ SƠ CÁ NHÂN --- */
+.profile-header-box {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding-bottom: 25px;
+    border-bottom: 1px solid #eaeaea;
+    margin-bottom: 25px;
+    position: relative;
+}
+
+.avatar-huge {
+    width: 80px;
+    height: 80px;
+    background-color: #111;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 28px;
+}
+
+.profile-titles h2 {
+    margin: 0 0 5px 0;
+    font-size: 24px;
+    color: #111;
+}
+
+.student-badge {
+    background-color: #eef2ff;
+    color: #3b82f6;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+    margin: 0;
+}
+
+.edit-profile-btn {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: 1px solid #d1d5db;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #444;
+}
+
+.edit-profile-btn:hover {
+    background-color: #f9f9f9;
+}
+
+.profile-details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.detail-box {
+    display: flex;
+    flex-direction: column;
+    background-color: #f9fafb;
+    padding: 15px 20px;
+    border-radius: 8px;
+    border: 1px solid #f0f0f0;
+}
+
+.detail-label {
+    font-size: 13px;
+    color: #6b7280;
+    margin-bottom: 5px;
+}
+
+.detail-value {
+    font-size: 15px;
+    color: #111;
+}
+
+.status-active {
+    color: #10b981;
+    /* Xanh lá */
+}
+
+/* --- BẢO MẬT & ĐỔI MẬT KHẨU --- */
+.security-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f9fafb;
+    padding: 15px 20px;
+    border-radius: 8px;
+    border: 1px solid #f0f0f0;
+}
+
+.security-status p {
+    margin: 0;
+    color: #444;
+    font-size: 14.5px;
+}
+
+.open-pw-btn {
+    background-color: #f3f4f6;
+    border: 1px solid #d1d5db;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #374151;
+    transition: all 0.2s;
+}
+
+.open-pw-btn:hover {
+    background-color: #e5e7eb;
+}
+
+.change-pw-form {
+    background-color: #f9fafb;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #f0f0f0;
+}
+
+.form-group-row {
+    display: flex;
+    gap: 20px;
+}
+
+.form-group-row .form-group {
+    flex: 1;
+}
+
+.change-pw-form input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.pw-form-actions {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.cancel-pw-btn {
+    background: transparent;
+    border: none;
+    color: #6b7280;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 14.5px;
+}
+
+.cancel-pw-btn:hover {
+    text-decoration: underline;
+    color: #374151;
+}
+
+/* --- MODAL CHỈNH SỬA THÔNG TIN --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    width: 450px;
+    max-width: 90%;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.modal-content h3 {
+    margin: 0 0 10px 0;
+    color: #111;
+}
+
+.modal-content p {
+    font-size: 13.5px;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.modal-content .form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+}
+
+.modal-content label {
+    font-weight: 600;
+    font-size: 13.5px;
+    margin-bottom: 6px;
+    color: #333;
+}
+
+.modal-content input {
+    padding: 10px 15px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+}
+
+.modal-content input:focus {
+    border-color: #c8102e;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+.btn-cancel {
+    padding: 10px 15px;
+    border: 1px solid #d1d5db;
+    background-color: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #4b5563;
+}
+
+.btn-cancel:hover {
+    background-color: #f3f4f6;
+}
+
+.btn-save {
+    padding: 10px 15px;
+    background-color: #c8102e;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-save:hover {
+    background-color: #a00d25;
+}
+
+/* --- BẢO MẬT & ĐỔI MẬT KHẨU --- */
+.security-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f9fafb;
+    padding: 15px 20px;
+    border-radius: 8px;
+    border: 1px solid #f0f0f0;
+}
+
+.security-status p {
+    margin: 0;
+    color: #444;
+    font-size: 14.5px;
+}
+
+.open-pw-btn {
+    background-color: #f3f4f6;
+    border: 1px solid #d1d5db;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #374151;
+    transition: all 0.2s;
+}
+
+.open-pw-btn:hover {
+    background-color: #e5e7eb;
+}
+
+/* KHU VỰC FORM ĐỔI MẬT KHẨU MỚI */
+.change-pw-form {
+    background-color: #f9fafb;
+    padding: 25px;
+    /* Rộng rãi hơn */
+    border-radius: 8px;
+    border: 1px solid #eaeaea;
+    margin-top: 15px;
+}
+
+.change-pw-form .form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+    /* Khoảng cách giữa các hàng */
+}
+
+.change-pw-form label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    /* Khoảng cách giữa chữ và ô nhập */
+    font-size: 14px;
+    color: #333;
+}
+
+.change-pw-form .required {
+    color: #c8102e;
+    /* Dấu sao đỏ */
+}
+
+.change-pw-form input {
+    padding: 12px 15px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.change-pw-form input:focus {
+    border-color: #c8102e;
+    /* Viền đỏ PTIT khi click */
+}
+
+.form-group-row {
+    display: flex;
+    gap: 25px;
+    /* Khoảng cách giữa 2 cột */
+}
+
+.form-group-row .form-group {
+    flex: 1;
+    margin-bottom: 0;
+    /* Bỏ margin bottom thừa ở hàng cuối */
+}
+
+.pw-form-actions {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-top: 25px;
+}
+
+.cancel-pw-btn {
+    background: transparent;
+    border: none;
+    color: #6b7280;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 14.5px;
+    padding: 10px 15px;
+    border-radius: 6px;
+}
+
+.cancel-pw-btn:hover {
+    background-color: #f3f4f6;
+    color: #374151;
 }

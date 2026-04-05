@@ -7,9 +7,27 @@ export default function StudentDashboard() {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState("home");
 
-    const currentUser = "Vũ Duy Thái";
+    // ========================================================
+    // STATE CHO THÔNG TIN NGƯỜI DÙNG (PROFILE)
+    // ========================================================
+    const [userInfo, setUserInfo] = useState({
+        name: "Vũ Duy Thái",
+        studentId: "B21DCCN123",
+        class: "D21CQCN01-B",
+        major: "Công nghệ thông tin",
+        department: "Khoa CNTT 1",
+        schoolEmail: "thaivd.b21@stu.ptit.edu.vn",
+        personalEmail: "vuduythai@gmail.com", // Thêm email cá nhân
+        phone: "0987 654 321",
+        batch: "2021 - 2026",
+        status: "Đang học"
+    });
 
-    // Dữ liệu giả lập mang phong cách Facebook
+    const currentUser = userInfo.name;
+
+    // ========================================================
+    // STATE GÓC HỎI ĐÁP (Giữ nguyên)
+    // ========================================================
     const [posts, setPosts] = useState([
         {
             id: 1,
@@ -17,7 +35,7 @@ export default function StudentDashboard() {
             time: "2 giờ trước",
             text: "Mọi người cho mình hỏi lịch đăng ký tín chỉ học kỳ 2 xem ở đâu vậy ạ? Mình tìm trên web trường không thấy 😢",
             likes: 15,
-            isLiked: false, // User hiện tại đã like bài này chưa
+            isLiked: false,
             comments: [
                 {
                     id: 101, author: "Trần Thị B", time: "1 giờ trước",
@@ -45,9 +63,93 @@ export default function StudentDashboard() {
     const [openReplyBoxes, setOpenReplyBoxes] = useState({});
     const [replyInputs, setReplyInputs] = useState({});
 
+    // ========================================================
+    // STATE CHO PHẢN HỒI HỆ THỐNG
+    // ========================================================
+    const [feedbackType, setFeedbackType] = useState("Lỗi kỹ thuật / Bug");
+    const [feedbackTitle, setFeedbackTitle] = useState("");
+    const [feedbackContent, setFeedbackContent] = useState("");
+
+    // ========================================================
+    // STATE CHO EDIT PROFILE (MODAL) VÀ ĐỔI MẬT KHẨU
+    // ========================================================
+    const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
+    const [editFormData, setEditFormData] = useState({ phone: "", personalEmail: "" });
+
+    const [isChangingPassword, setIsChangingPassword] = useState(false);
+    const [currentPassword, setCurrentPassword] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+
+    // --- CÁC HÀM XỬ LÝ CHUNG ---
     const handleLogout = () => navigate("/");
 
-    // --- CÁC HÀM XỬ LÝ BÀI VIẾT ---
+    const handleSubmitFeedback = (e) => {
+        e.preventDefault();
+        if (!feedbackTitle.trim() || !feedbackContent.trim()) return;
+        alert("Cảm ơn bạn! Phản hồi của bạn đã được gửi đến Ban quản trị hệ thống.");
+        setFeedbackTitle("");
+        setFeedbackContent("");
+        setFeedbackType("Lỗi kỹ thuật / Bug");
+    };
+
+    // --- HÀM XỬ LÝ EDIT PROFILE ---
+    const openEditProfileModal = () => {
+        setEditFormData({
+            phone: userInfo.phone,
+            personalEmail: userInfo.personalEmail
+        });
+        setIsEditProfileModalOpen(true);
+    };
+
+    const handleSaveProfile = (e) => {
+        e.preventDefault();
+        setUserInfo({
+            ...userInfo,
+            phone: editFormData.phone,
+            personalEmail: editFormData.personalEmail
+        });
+        setIsEditProfileModalOpen(false);
+        alert("Cập nhật thông tin liên lạc thành công!");
+    };
+
+    // --- HÀM XỬ LÝ ĐỔI MẬT KHẨU ---
+    // --- HÀM XỬ LÝ ĐỔI MẬT KHẨU (Đã nâng cấp bảo mật) ---
+    const handlePasswordSubmit = (e) => {
+        e.preventDefault();
+
+        // 1. Kiểm tra độ dài tối thiểu
+        if (newPassword.length < 6) {
+            alert("Lỗi: Mật khẩu mới phải có ít nhất 6 ký tự.");
+            return;
+        }
+
+        // 2. Kiểm tra độ phức tạp bằng Regex
+        const hasUpperCase = /[A-Z]/.test(newPassword); // Có ít nhất 1 chữ in hoa
+        const hasLowerCase = /[a-z]/.test(newPassword); // Có ít nhất 1 chữ thường
+        const hasNumbers = /[0-9]/.test(newPassword);   // Có ít nhất 1 chữ số
+        const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(newPassword); // Có ít nhất 1 ký tự đặc biệt
+
+        if (!hasUpperCase || !hasLowerCase || !hasNumbers || !hasSpecialChar) {
+            alert("Lỗi: Mật khẩu mới phải bao gồm ít nhất 1 chữ IN HOA, 1 chữ thường, 1 chữ số và 1 ký tự đặc biệt!");
+            return;
+        }
+
+        // 3. Kiểm tra khớp mật khẩu
+        if (newPassword !== confirmPassword) {
+            alert("Lỗi: Mật khẩu mới và Nhập lại mật khẩu không khớp nhau!");
+            return;
+        }
+
+        // Thành công
+        alert("Đổi mật khẩu thành công! Vui lòng sử dụng mật khẩu mới cho lần đăng nhập sau.");
+
+        // Reset form và đóng lại
+        setCurrentPassword(""); setNewPassword(""); setConfirmPassword("");
+        setIsChangingPassword(false);
+    };
+
+    // --- CÁC HÀM XỬ LÝ BÀI VIẾT & BÌNH LUẬN (Giữ nguyên) ---
     const handleCreatePost = () => {
         if (!newPostText.trim()) return;
         const newPost = { id: Date.now(), author: currentUser, time: "Vừa xong", text: newPostText, likes: 0, isLiked: false, comments: [] };
@@ -72,7 +174,6 @@ export default function StudentDashboard() {
         setEditingPostId(null);
     };
 
-    // --- LOGIC THÍCH (LIKE) BÀI VIẾT & BÌNH LUẬN ---
     const handleLikePost = (postId) => {
         setPosts(posts.map(post => {
             if (post.id === postId) {
@@ -104,7 +205,6 @@ export default function StudentDashboard() {
         }));
     };
 
-    // --- BÌNH LUẬN & PHẢN HỒI ---
     const handleAddComment = (postId) => {
         const commentText = commentInputs[postId];
         if (!commentText || !commentText.trim()) return;
@@ -131,6 +231,7 @@ export default function StudentDashboard() {
 
     return (
         <div className="dashboard-layout">
+            {/* SIDEBAR */}
             <aside className="dashboard-sidebar">
                 <div className="sidebar-logo">
                     <div className="logo-icon"><img src={logoPtit} alt="PTIT Logo" className="sidebar-logo-img" /></div>
@@ -138,27 +239,34 @@ export default function StudentDashboard() {
                 <nav className="sidebar-nav">
                     <Link to="#" className={`nav-item ${activeTab === "home" ? "active" : ""}`} onClick={(e) => { e.preventDefault(); setActiveTab("home"); }}><span className="nav-icon">🏠</span> Bảng điều khiển</Link>
                     <Link to="#" className={`nav-item ${activeTab === "qa" ? "active" : ""}`} onClick={(e) => { e.preventDefault(); setActiveTab("qa"); }}><span className="nav-icon">❓</span> Góc Hỏi Đáp</Link>
-                    <Link to="#" className="nav-item"><span className="nav-icon">💬</span> Phản hồi hệ thống</Link>
-                    <Link to="#" className="nav-item"><span className="nav-icon">👤</span> Hồ sơ cá nhân</Link>
+                    <Link to="#" className={`nav-item ${activeTab === "feedback" ? "active" : ""}`} onClick={(e) => { e.preventDefault(); setActiveTab("feedback"); }}><span className="nav-icon">💬</span> Phản hồi hệ thống</Link>
+                    <Link to="#" className={`nav-item ${activeTab === "profile" ? "active" : ""}`} onClick={(e) => { e.preventDefault(); setActiveTab("profile"); }}><span className="nav-icon">👤</span> Hồ sơ cá nhân</Link>
                 </nav>
             </aside>
 
+            {/* MAIN CONTENT */}
             <main className="dashboard-main">
                 <header className="dashboard-header">
-                    <h2>{activeTab === "home" ? "Trang chủ sinh viên" : "Diễn đàn Hỏi Đáp"}</h2>
-                    <div className="header-avatar">VT</div>
+                    <h2>
+                        {activeTab === "home" ? "Trang chủ sinh viên" :
+                            activeTab === "qa" ? "Diễn đàn Hỏi Đáp" :
+                                activeTab === "feedback" ? "Phản hồi hệ thống" : "Hồ sơ cá nhân"}
+                    </h2>
+                    <div className="header-right">
+                        <div className="header-avatar">VT</div>
+                        <button className="logout-btn-header" onClick={handleLogout}>Đăng xuất</button>
+                    </div>
                 </header>
 
                 <div className="dashboard-content">
-                    {/* ... TAB BẢNG ĐIỀU KHIỂN GIỮ NGUYÊN ... */}
+                    {/* ----------------- TAB BẢNG ĐIỀU KHIỂN ----------------- */}
                     {activeTab === "home" && (
                         <>
                             <div className="welcome-card">
                                 <div className="user-info">
                                     <div className="avatar-large">VT</div>
-                                    <div><p className="greeting">Xin chào</p><h3 className="user-name">Vũ Duy Thái</h3></div>
+                                    <div><p className="greeting">Xin chào</p><h3 className="user-name">{userInfo.name}</h3></div>
                                 </div>
-                                <button className="logout-btn" onClick={handleLogout}>Đăng xuất</button>
                             </div>
                             <div className="info-cards-row">
                                 <div className="info-card"><h4>Chương trình đào tạo</h4><p>Tên chương trình: <strong>Cử nhân</strong></p><p>Mã chương trình: <strong>CN</strong></p></div>
@@ -167,10 +275,9 @@ export default function StudentDashboard() {
                         </>
                     )}
 
-                    {/* ----------------- TAB GÓC HỎI ĐÁP (STYLE FACEBOOK) ----------------- */}
+                    {/* ----------------- TAB GÓC HỎI ĐÁP ----------------- */}
                     {activeTab === "qa" && (
                         <div className="fb-forum-container">
-                            {/* Khu vực tạo bài viết */}
                             <div className="fb-create-post-card">
                                 <div className="fb-create-input-row">
                                     <div className="avatar-small">VT</div>
@@ -185,7 +292,6 @@ export default function StudentDashboard() {
                                 </div>
                             </div>
 
-                            {/* Danh sách bài viết */}
                             <div className="fb-post-list">
                                 {posts.map(post => {
                                     const sortedComments = [...post.comments].sort((a, b) => b.likes - a.likes);
@@ -196,7 +302,6 @@ export default function StudentDashboard() {
 
                                     return (
                                         <div key={post.id} className="fb-post-card">
-                                            {/* HEADER BÀI VIẾT */}
                                             <div className="fb-post-header">
                                                 <div className="fb-post-author-info">
                                                     <div className="avatar-small alt">{post.author.charAt(0)}</div>
@@ -213,7 +318,6 @@ export default function StudentDashboard() {
                                                 )}
                                             </div>
 
-                                            {/* NỘI DUNG BÀI VIẾT */}
                                             {editingPostId === post.id ? (
                                                 <div className="fb-post-edit-box">
                                                     <textarea value={editPostText} onChange={(e) => setEditPostText(e.target.value)} />
@@ -226,27 +330,19 @@ export default function StudentDashboard() {
                                                 <div className="fb-post-content">{post.text}</div>
                                             )}
 
-                                            {/* THỐNG KÊ LIKE/COMMENT */}
                                             <div className="fb-post-stats">
                                                 <span className="stats-likes">👍 {post.likes}</span>
                                                 <span className="stats-comments">{totalCommentsCount} bình luận</span>
                                             </div>
 
-                                            {/* THANH NÚT LIKE / BÌNH LUẬN (GIỐNG FB) */}
                                             <div className="fb-post-action-bar">
-                                                <button className={`fb-action-btn ${post.isLiked ? 'liked' : ''}`} onClick={() => handleLikePost(post.id)}>
-                                                    👍 Thích
-                                                </button>
-                                                <button className="fb-action-btn" onClick={() => document.getElementById(`comment-input-${post.id}`).focus()}>
-                                                    💬 Bình luận
-                                                </button>
+                                                <button className={`fb-action-btn ${post.isLiked ? 'liked' : ''}`} onClick={() => handleLikePost(post.id)}>👍 Thích</button>
+                                                <button className="fb-action-btn" onClick={() => document.getElementById(`comment-input-${post.id}`).focus()}>💬 Bình luận</button>
                                             </div>
 
-                                            {/* KHU VỰC BÌNH LUẬN */}
                                             <div className="fb-post-comments">
                                                 {displayedComments.map(cmt => (
                                                     <div key={cmt.id} className="fb-comment-thread">
-                                                        {/* BÌNH LUẬN GỐC */}
                                                         <div className="fb-comment-row">
                                                             <div className="avatar-small alt2">{cmt.author.charAt(0)}</div>
                                                             <div className="fb-comment-body">
@@ -263,7 +359,6 @@ export default function StudentDashboard() {
                                                             </div>
                                                         </div>
 
-                                                        {/* DANH SÁCH PHẢN HỒI (REPLIES) */}
                                                         {cmt.replies && cmt.replies.length > 0 && (
                                                             <div className="fb-replies-list">
                                                                 {cmt.replies.map(reply => (
@@ -277,17 +372,12 @@ export default function StudentDashboard() {
                                                                             </div>
                                                                             <div className="fb-comment-actions">
                                                                                 <button className={reply.isLiked ? "liked" : ""} onClick={() => handleLikeComment(post.id, cmt.id, true, reply.id)}>Thích</button>
-
-                                                                                {/* --- NÚT PHẢN HỒI MỚI THÊM VÀO ĐÂY --- */}
                                                                                 <button onClick={() => {
-                                                                                    // Mở ô nhập liệu
                                                                                     toggleReplyBox(cmt.id);
-                                                                                    // Tự động điền tên người được phản hồi (vd: "@Lê Văn C ")
                                                                                     setReplyInputs(prev => ({ ...prev, [cmt.id]: `@${reply.author} ` }));
                                                                                 }}>
                                                                                     Phản hồi
                                                                                 </button>
-
                                                                                 <span>{reply.time}</span>
                                                                             </div>
                                                                         </div>
@@ -296,7 +386,6 @@ export default function StudentDashboard() {
                                                             </div>
                                                         )}
 
-                                                        {/* Ô NHẬP PHẢN HỒI */}
                                                         {openReplyBoxes[cmt.id] && (
                                                             <div className="fb-reply-input-row">
                                                                 <div className="avatar-micro">VT</div>
@@ -313,18 +402,12 @@ export default function StudentDashboard() {
                                                     </div>
                                                 ))}
 
-                                                {/* NÚT TẢI THÊM BÌNH LUẬN */}
                                                 {remainingComments > 0 ? (
-                                                    <button className="fb-see-more-btn" onClick={() => handleLoadMoreComments(post.id)}>
-                                                        Xem thêm {remainingComments} bình luận...
-                                                    </button>
+                                                    <button className="fb-see-more-btn" onClick={() => handleLoadMoreComments(post.id)}>Xem thêm {remainingComments} bình luận...</button>
                                                 ) : sortedComments.length > 2 ? (
-                                                    <button className="fb-see-more-btn" onClick={() => handleCollapseComments(post.id)}>
-                                                        Thu gọn bình luận
-                                                    </button>
+                                                    <button className="fb-see-more-btn" onClick={() => handleCollapseComments(post.id)}>Thu gọn bình luận</button>
                                                 ) : null}
 
-                                                {/* Ô NHẬP BÌNH LUẬN GỐC */}
                                                 <div className="fb-comment-input-row">
                                                     <div className="avatar-small">VT</div>
                                                     <input
@@ -344,8 +427,197 @@ export default function StudentDashboard() {
                             </div>
                         </div>
                     )}
+
+                    {/* ----------------- TAB PHẢN HỒI HỆ THỐNG ----------------- */}
+                    {activeTab === "feedback" && (
+                        <div className="feedback-container">
+                            <div className="feature-card-ui">
+                                <h3>Gửi phản hồi / Báo lỗi</h3>
+                                <p className="subtitle">Nếu bạn gặp vấn đề trong quá trình sử dụng hệ thống, vui lòng gửi phản hồi để Ban quản trị hỗ trợ khắc phục.</p>
+
+                                <form className="feedback-form" onSubmit={handleSubmitFeedback}>
+                                    <div className="form-group">
+                                        <label>Loại vấn đề <span className="required">*</span></label>
+                                        <select value={feedbackType} onChange={(e) => setFeedbackType(e.target.value)}>
+                                            <option>Lỗi kỹ thuật / Bug (Không tải được trang, lỗi đăng nhập...)</option>
+                                            <option>Thắc mắc về Dữ liệu (Sai điểm, thiếu môn học...)</option>
+                                            <option>Góp ý cải thiện tính năng</option>
+                                            <option>Khác</option>
+                                        </select>
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Tiêu đề <span className="required">*</span></label>
+                                        <input
+                                            type="text"
+                                            placeholder="Tóm tắt ngắn gọn vấn đề..."
+                                            value={feedbackTitle}
+                                            onChange={(e) => setFeedbackTitle(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Nội dung chi tiết <span className="required">*</span></label>
+                                        <textarea
+                                            rows="6"
+                                            placeholder="Mô tả chi tiết vấn đề bạn đang gặp phải..."
+                                            value={feedbackContent}
+                                            onChange={(e) => setFeedbackContent(e.target.value)}
+                                            required
+                                        ></textarea>
+                                    </div>
+                                    <button type="submit" className="submit-btn-primary">Gửi Phản Hồi</button>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* ----------------- TAB HỒ SƠ CÁ NHÂN ----------------- */}
+                    {activeTab === "profile" && (
+                        <div className="profile-container">
+                            <div className="feature-card-ui profile-card">
+                                <div className="profile-header-box">
+                                    <div className="avatar-huge">VT</div>
+                                    <div className="profile-titles">
+                                        <h2>{userInfo.name}</h2>
+                                        <p className="student-badge">Sinh viên Đại học Chính quy</p>
+                                    </div>
+                                    <button className="edit-profile-btn" onClick={openEditProfileModal}>Chỉnh sửa</button>
+                                </div>
+
+                                <div className="profile-details-grid">
+                                    <div className="detail-box">
+                                        <span className="detail-label">Mã sinh viên</span>
+                                        <strong className="detail-value">{userInfo.studentId}</strong>
+                                    </div>
+                                    <div className="detail-box">
+                                        <span className="detail-label">Lớp</span>
+                                        <strong className="detail-value">{userInfo.class}</strong>
+                                    </div>
+                                    <div className="detail-box">
+                                        <span className="detail-label">Chuyên ngành</span>
+                                        <strong className="detail-value">{userInfo.major}</strong>
+                                    </div>
+                                    <div className="detail-box">
+                                        <span className="detail-label">Khoa / Viện</span>
+                                        <strong className="detail-value">{userInfo.department}</strong>
+                                    </div>
+                                    <div className="detail-box">
+                                        <span className="detail-label">Email trường cấp</span>
+                                        <strong className="detail-value">{userInfo.schoolEmail}</strong>
+                                    </div>
+                                    <div className="detail-box">
+                                        <span className="detail-label">Email cá nhân</span>
+                                        <strong className="detail-value">{userInfo.personalEmail}</strong>
+                                    </div>
+                                    <div className="detail-box">
+                                        <span className="detail-label">Số điện thoại liên hệ</span>
+                                        <strong className="detail-value">{userInfo.phone}</strong>
+                                    </div>
+                                    <div className="detail-box">
+                                        <span className="detail-label">Niên khóa</span>
+                                        <strong className="detail-value">{userInfo.batch}</strong>
+                                    </div>
+                                    <div className="detail-box">
+                                        <span className="detail-label">Trạng thái học tập</span>
+                                        <strong className="detail-value status-active">{userInfo.status}</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* BẢO MẬT TÀI KHOẢN (ĐỔI MẬT KHẨU) */}
+                            <div className="feature-card-ui security-card" style={{ marginTop: '20px' }}>
+                                <h3>Bảo mật tài khoản</h3>
+
+                                {!isChangingPassword ? (
+                                    <div className="security-status">
+                                        <p>Mật khẩu của bạn đã được bảo vệ. Bạn nên đổi mật khẩu định kỳ để đảm bảo an toàn.</p>
+                                        <button className="open-pw-btn" onClick={() => setIsChangingPassword(true)}>
+                                            Đổi mật khẩu
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <form className="change-pw-form" onSubmit={handlePasswordSubmit}>
+                                        <div className="form-group">
+                                            <label>Mật khẩu hiện tại <span className="required">*</span></label>
+                                            <input
+                                                type="password"
+                                                placeholder="Nhập mật khẩu hiện tại..."
+                                                value={currentPassword}
+                                                onChange={(e) => setCurrentPassword(e.target.value)}
+                                                required
+                                            />
+                                        </div>
+                                        <div className="form-group-row">
+                                            <div className="form-group">
+                                                <label>Mật khẩu mới <span className="required">*</span></label>
+                                                <input
+                                                    type="password"
+                                                    placeholder="In hoa, in thường, số, ký tự đặc biệt..."
+                                                    value={newPassword}
+                                                    onChange={(e) => setNewPassword(e.target.value)}
+                                                    required
+                                                />
+                                            </div>
+                                            <div className="form-group">
+                                                <label>Nhập lại mật khẩu mới <span className="required">*</span></label>
+                                                <input
+                                                    type="password"
+                                                    placeholder="Nhập lại mật khẩu mới..."
+                                                    value={confirmPassword}
+                                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                                    required
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="pw-form-actions">
+                                            <button type="submit" className="submit-btn-primary">Lưu mật khẩu mới</button>
+                                            <button type="button" className="cancel-pw-btn" onClick={() => setIsChangingPassword(false)}>Hủy</button>
+                                        </div>
+                                    </form>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </main>
+
+            {/* ========================================================
+                MODAL CHỈNH SỬA THÔNG TIN LIÊN LẠC
+                ======================================================== */}
+            {isEditProfileModalOpen && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <h3>Cập nhật thông tin liên lạc</h3>
+                        <p>Bạn chỉ có thể thay đổi các thông tin liên hệ. Các thông tin học vụ khác vui lòng liên hệ phòng giáo vụ.</p>
+
+                        <form onSubmit={handleSaveProfile}>
+                            <div className="form-group">
+                                <label>Số điện thoại</label>
+                                <input
+                                    type="text"
+                                    value={editFormData.phone}
+                                    onChange={(e) => setEditFormData({ ...editFormData, phone: e.target.value })}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Email cá nhân</label>
+                                <input
+                                    type="email"
+                                    value={editFormData.personalEmail}
+                                    onChange={(e) => setEditFormData({ ...editFormData, personalEmail: e.target.value })}
+                                    required
+                                />
+                            </div>
+                            <div className="modal-actions">
+                                <button type="button" className="btn-cancel" onClick={() => setIsEditProfileModalOpen(false)}>Hủy</button>
+                                <button type="submit" className="btn-save">Lưu thay đổi</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 }
