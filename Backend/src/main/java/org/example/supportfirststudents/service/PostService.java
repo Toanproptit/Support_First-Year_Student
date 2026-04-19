@@ -7,11 +7,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.supportfirststudents.dto.request.CreatePost;
 import org.example.supportfirststudents.dto.request.UpdatePost;
 import org.example.supportfirststudents.dto.response.PostResponse;
+import org.example.supportfirststudents.entity.Category;
 import org.example.supportfirststudents.entity.Post;
+import org.example.supportfirststudents.entity.PostCategory;
 import org.example.supportfirststudents.entity.User;
 import org.example.supportfirststudents.enums.ErrorCode;
 import org.example.supportfirststudents.exception.Appexception;
 import org.example.supportfirststudents.mapper.PostMapper;
+import org.example.supportfirststudents.repository.CategoryRepository;
+import org.example.supportfirststudents.repository.PostCategoryRepository;
 import org.example.supportfirststudents.repository.PostRepository;
 import org.example.supportfirststudents.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -26,9 +30,11 @@ import java.util.stream.Collectors;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PostService {
 
-    PostRepository postRepository;
-    UserRepository userRepository;
-    PostMapper postMapper;
+    final PostCategoryRepository postCategoryRepository;
+    final CategoryRepository categoryRepository;
+    final PostRepository postRepository;
+    final UserRepository userRepository;
+    final PostMapper postMapper;
 
     @Transactional
     public PostResponse createPost(CreatePost request) {
@@ -38,6 +44,20 @@ public class PostService {
         Post post = postMapper.toPost(request);
 
         user.addPost(post);
+
+        if(request.getCategoryIds() != null && !request.getCategoryIds().isEmpty()) {
+            for(Long categoryId : request.getCategoryIds()) {
+                Category category = categoryRepository.findById(categoryId)
+                        .orElseThrow(() -> new Appexception(ErrorCode.CATEGORY_NOT_FOUND));
+                PostCategory postCategory = new PostCategory();
+
+                postCategory.setCategory(category);
+                postCategory.setPost(post);
+
+                post.addPostCategory(postCategory);
+            }
+        }
+
 
         Post savedPost = postRepository.save(post);
         return postMapper.toPostResponse(savedPost);
@@ -49,7 +69,7 @@ public class PostService {
     }
 
     public List<PostResponse> getAllPosts() {
-        return postRepository.findAll()
+        return postRepository.findAllWithCategories()
                 .stream()
                 .map(postMapper::toPostResponse)
                 .collect(Collectors.toList());

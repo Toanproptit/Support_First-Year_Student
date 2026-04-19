@@ -91,7 +91,6 @@ public class CommentService {
     public void deleteComment(Long id) {
         Comment comment = findCommentById(id);
 
-        // ✅ Sử dụng helper method để remove - tự động đồng bộ 2 chiều
         Post post = comment.getPost();
         if (post != null) {
             post.removeComment(comment);

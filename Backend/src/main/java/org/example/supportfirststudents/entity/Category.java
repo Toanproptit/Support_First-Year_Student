@@ -30,9 +30,4 @@ public class Category {
     )
     List<PostCategory> postCategory = new ArrayList<>();
 
-    public void addPostCategory(PostCategory postCategory) {
-        this.postCategory.add(postCategory);
-        postCategory.setCategory(this);
-    }
-
 }

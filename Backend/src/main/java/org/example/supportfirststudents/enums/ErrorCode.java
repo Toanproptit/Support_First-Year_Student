@@ -47,6 +47,9 @@ public enum ErrorCode {
     DATA_INTEGRITY_VIOLATION(1032, "Database data integrity violation", HttpStatus.BAD_REQUEST),
     POST_NOT_FOUND(1033, "Post not found", HttpStatus.NOT_FOUND),
     COMMENT_NOT_FOUND(1034, "Comment not found", HttpStatus.NOT_FOUND),
+    CATEGORY_NOT_FOUND(1034, "Category not found", HttpStatus.NOT_FOUND),
+    REACTION_NOT_FOUND(1035, "Reaction not found", HttpStatus.NOT_FOUND),
+    FEEDBACK_NOT_FOUND(1036, "Feedback not found", HttpStatus.NOT_FOUND),
     ;
 
     final int code;

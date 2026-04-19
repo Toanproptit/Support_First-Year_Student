@@ -36,6 +36,7 @@ public class User {
     List<Post> posts = new ArrayList<>();
 
 
+
     public void addPost(Post post) {
         posts.add(post);
         post.setUser(this);

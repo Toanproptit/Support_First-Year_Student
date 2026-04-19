@@ -1,18 +1,16 @@
 package org.example.supportfirststudents.dto.request;
 
-
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.example.supportfirststudents.enums.ReactionType;
 
-@Getter
-@Setter
+
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CreateCategory {
-    @NotBlank
-    String name;
-    @NotBlank
-    String slug;
+public class CreateReaction {
+    Long userId;
+    Long postId;
+    ReactionType reactionType;
 }

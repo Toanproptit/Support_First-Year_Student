@@ -3,6 +3,7 @@ package org.example.supportfirststudents.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.example.supportfirststudents.enums.Status;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -23,6 +24,9 @@ public class Post {
 
     @Column(columnDefinition = "TEXT")
     String content;
+
+    @Enumerated(EnumType.STRING)
+    Status status;
 
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
