@@ -50,6 +50,11 @@ public enum ErrorCode {
     CATEGORY_NOT_FOUND(1034, "Category not found", HttpStatus.NOT_FOUND),
     REACTION_NOT_FOUND(1035, "Reaction not found", HttpStatus.NOT_FOUND),
     FEEDBACK_NOT_FOUND(1036, "Feedback not found", HttpStatus.NOT_FOUND),
+    FACULTY_NOT_FOUND(1037, "Faculty not found", HttpStatus.NOT_FOUND),
+    FACULTY_CODE_EXISTED(1038, "Faculty code existed", HttpStatus.BAD_REQUEST),
+    SUBJECT_NOT_FOUND(1039, "Subject not found", HttpStatus.NOT_FOUND),
+    MAJOR_NOT_FOUND(1040, "Major not found", HttpStatus.NOT_FOUND),
+    COURSE_SECTION_NOT_FOUND(1041, "Course section not found", HttpStatus.NOT_FOUND),
     ;
 
     final int code;
