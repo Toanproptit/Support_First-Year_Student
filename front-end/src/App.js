@@ -8,13 +8,15 @@ import AdminLogin from "./components/AdminLogin";
 import StudentHandbook from "./components/StudentHandbook";
 import StudentDashboard from "./components/StudentDashboard";
 import TrainingPrograms from "./components/TrainingPrograms";
-import ProgramDetail from "./components/ProgramDetail";
 import ScholarshipDetail from "./components/ScholarshipDetail";
 import AcademicGuideList from "./components/AcademicGuideList";
 import StudyLocations from "./components/StudyLocations";
 import ClassSchedule from "./components/ClassSchedule";
 import StudentInfoSystems from "./components/StudentInfoSystems";
 import AwardsAndCommendations from "./components/AwardsAndCommendations";
+import TuitionAndScholarshipList from "./components/TuitionAndScholarshipList";
+import TuitionFeeDetail from "./components/TuitionFeeDetail";
+import TuitionExemptionDetail from "./components/TuitionExemptionDetail";
 // Admin
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./components/admin/AdminDashboard";
@@ -24,6 +26,7 @@ import HandbookManagement from "./components/admin/HandbookManagement";
 import FacultyManagement from "./components/admin/FacultyManagement";
 import MajorManagement from "./components/admin/MajorManagement";
 import ActivityManagement from "./components/admin/ActivityManagement";
+
 
 // Layout chung cho các trang public (có Header)
 function PublicLayout({ children }) {
@@ -46,14 +49,15 @@ export default function App() {
       <Route path="/cam-nang" element={<PublicLayout><StudentHandbook /></PublicLayout>} />
       <Route path="/student-dashboard" element={<PublicLayout><StudentDashboard /></PublicLayout>} />
       <Route path="/cam-nang/1" element={<PublicLayout><TrainingPrograms /></PublicLayout>} />
-      <Route path="/chuong-trinh/:id" element={<ProgramDetail />} />
-      <Route path="/cam-nang/2" element={<ScholarshipDetail />} />
+      <Route path="/cam-nang/2" element={<TuitionAndScholarshipList />} />
       <Route path="/cam-nang/3" element={<AcademicGuideList />} />
       <Route path="/cam-nang/3/bai-viet/1" element={<StudyLocations />} />
       <Route path="/cam-nang/3/bai-viet/2" element={<ClassSchedule />} />
       <Route path="/cam-nang/3/bai-viet/3" element={<StudentInfoSystems />} />
       <Route path="/cam-nang/3/bai-viet/4" element={<AwardsAndCommendations />} />
-
+      <Route path="/cam-nang/2/bai-viet/1" element={<TuitionFeeDetail />} />
+      <Route path="/cam-nang/2/bai-viet/2" element={<ScholarshipDetail />} />
+      <Route path="/cam-nang/2/bai-viet/3" element={<TuitionExemptionDetail />} />
 
       {/* ===== Tuyến Admin (có Sidebar, KHÔNG có Header chung) ===== */}
       <Route path="/admin" element={<AdminLayout />}>
