@@ -103,7 +103,7 @@ public class CommentService {
         return commentRepository.countByPostId(postId);
     }
 
-    // ✅ Helper methods để tránh lặp code
+
     private Comment findCommentById(Long id) {
         return commentRepository.findById(id)
                 .orElseThrow(() -> new Appexception(ErrorCode.COMMENT_NOT_FOUND));

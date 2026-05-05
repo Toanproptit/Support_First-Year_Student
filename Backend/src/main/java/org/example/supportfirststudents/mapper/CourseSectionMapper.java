@@ -9,7 +9,7 @@ public class CourseSectionMapper {
     public CourseSectionResponse toCourseSectionResponse(CourseSection courseSection) {
         return CourseSectionResponse.builder()
                 .code(courseSection.getCode())
-                .name(courseSection.getName())
+                .name(courseSection.getSubject().getName())
                 .build();
     }
 }
