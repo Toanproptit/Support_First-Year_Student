@@ -145,20 +145,39 @@ export default function ProgramDetail() {
     useEffect(() => {
         const handleScroll = () => {
             const sectionElements = menuItems.map(item => document.getElementById(item.id));
-            let currentActiveId = "tong-quan";
-            for (let i = sectionElements.length - 1; i >= 0; i--) {
-                const section = sectionElements[i];
-                if (section && section.getBoundingClientRect().top <= 150) {
-                    currentActiveId = menuItems[i].id;
-                    break;
+            let currentActiveId = menuItems[0].id; // Mặc định là phần đầu tiên
+
+            // Bổ sung: Kiểm tra xem người dùng đã cuộn chạm đáy trang web chưa (sai số 50px)
+            const isAtBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 50;
+
+            if (isAtBottom) {
+                // Nếu đã chạm đáy, ép hệ thống chọn mục cuối cùng ("Học phí")
+                currentActiveId = menuItems[menuItems.length - 1].id;
+            } else {
+                // Nếu chưa chạm đáy, duyệt từ dưới lên để tìm phần tử đang ở gần đỉnh màn hình
+                for (let i = sectionElements.length - 1; i >= 0; i--) {
+                    const section = sectionElements[i];
+                    if (section) {
+                        const rect = section.getBoundingClientRect();
+                        // Tăng độ nhạy từ 150 lên 250 để menu nhạy hơn khi click
+                        if (rect.top <= 250) {
+                            currentActiveId = menuItems[i].id;
+                            break;
+                        }
+                    }
                 }
             }
+
             setActiveSection(currentActiveId);
 
+            // Hiện nút trượt lên đầu trang nếu cuộn qua 300px
             setShowScrollTop(window.scrollY > 300);
         };
 
         window.addEventListener("scroll", handleScroll);
+        // Chạy thử 1 lần ngay khi load trang để set active đúng
+        handleScroll();
+
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
