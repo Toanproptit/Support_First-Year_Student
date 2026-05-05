@@ -26,6 +26,7 @@ public class Feedback {
 
     String content;
 
+    @Enumerated(EnumType.STRING)
     FeedbackStatus status;
 
     LocalDateTime createdAt;

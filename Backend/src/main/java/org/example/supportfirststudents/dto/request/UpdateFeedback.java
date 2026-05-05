@@ -1,7 +1,6 @@
 package org.example.supportfirststudents.dto.request;
 
-
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.example.supportfirststudents.enums.FeedbackStatus;
@@ -13,6 +12,6 @@ import org.example.supportfirststudents.enums.FeedbackStatus;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UpdateFeedback {
 
-    @NotBlank
+    @NotNull
     FeedbackStatus status;
 }

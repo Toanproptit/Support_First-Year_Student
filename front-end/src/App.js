@@ -16,6 +16,9 @@ import AdminDashboard from "./components/admin/AdminDashboard";
 import UserManagement from "./components/admin/UserManagement";
 import PostManagement from "./components/admin/PostManagement";
 import HandbookManagement from "./components/admin/HandbookManagement";
+import FacultyManagement from "./components/admin/FacultyManagement";
+import MajorManagement from "./components/admin/MajorManagement";
+import ActivityManagement from "./components/admin/ActivityManagement";
 
 // Layout chung cho các trang public (có Header)
 function PublicLayout({ children }) {
@@ -48,6 +51,9 @@ export default function App() {
         <Route path="users" element={<UserManagement />} />
         <Route path="posts" element={<PostManagement />} />
         <Route path="handbook" element={<HandbookManagement />} />
+        <Route path="faculties" element={<FacultyManagement />} />
+        <Route path="majors" element={<MajorManagement />} />
+        <Route path="activities" element={<ActivityManagement />} />
       </Route>
     </Routes>
   );

@@ -20,6 +20,9 @@ import lombok.experimental.FieldDefaults;
 public class CourseSection {
     @Id
     String code;
+
+    String name;
+
     Integer maxStudents;
     LocalDate startDate;
     LocalDate endDate;
