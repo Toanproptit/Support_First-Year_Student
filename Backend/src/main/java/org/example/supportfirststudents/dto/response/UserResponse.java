@@ -11,6 +11,7 @@ import org.example.supportfirststudents.enums.Role;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserResponse {
+    Long id ;
     String fullName;
     String email;
     Role Role;

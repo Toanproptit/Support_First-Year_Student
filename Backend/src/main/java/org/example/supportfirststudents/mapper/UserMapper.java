@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 @Component
 public class UserMapper {
     public UserResponse toUserResponse(User user) {
-        return new UserResponse(user.getFullName() , user.getEmail() ,user.getRole() );
+        return new UserResponse(user.getId(), user.getFullName() , user.getEmail() ,user.getRole() );
     }
 
     public List<UserResponse> toUserResponse(List<User> users) {
