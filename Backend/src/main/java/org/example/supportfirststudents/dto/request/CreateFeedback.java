@@ -11,17 +11,15 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 
 public class CreateFeedback {
-    Long userId;
-
     @NotBlank
-    String Subject;
-
-    @NotBlank
-    String content;
+    String subject;
 
     @NotBlank
     String title;
 
+    @NotBlank
+    String content;
 
-
+    @jakarta.validation.constraints.NotNull
+    Long userId;
 }

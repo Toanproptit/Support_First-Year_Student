@@ -1,0 +1,9 @@
++ Thêm thông tin CLB , Kí túc xá 
+- Page Sinh Viên: 
+    + Thêm Hỏi Đáp : Tạo , xóa , sửa 
+    + Bình luận : 
+    + Xóa : Yêu cầu chỉnh lớp , yêu cầu mở lớp , lớp học phần đang mở , Điểm môn học 
+- Page : Admin
+    + Quản lí người dùng , 
+    + Quản lí bài viết 
+    + Quản lí thông tin cẩm năng 

@@ -1,0 +1,640 @@
+.program-detail-page {
+    background-color: #ffffff;
+    min-height: 100vh;
+    padding-bottom: 50px;
+}
+
+/* BANNER HEADER */
+.pd-banner {
+    background-color: #1a233a;
+    /* Màu xanh đen tạm thời thay cho ảnh nền */
+    padding: 60px 0 0 0;
+    color: white;
+}
+
+.pd-banner-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.pd-banner h1 {
+    font-size: 32px;
+    margin-bottom: 40px;
+    font-weight: 700;
+}
+
+.pd-summary-cards {
+    display: flex;
+    gap: 20px;
+    transform: translateY(30px);
+    /* Kéo các thẻ xệ xuống đè lên nền trắng */
+}
+
+.summary-card {
+    flex: 1;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    color: #333;
+}
+
+.summary-card span {
+    font-size: 14px;
+    font-weight: 600;
+    color: #002147;
+}
+
+.summary-card strong {
+    font-size: 16px;
+    color: #c8102e;
+}
+
+/* BỐ CỤC CHÍNH */
+.pd-main-container {
+    max-width: 1200px;
+    margin: 60px auto 0;
+    padding: 0 20px;
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+}
+
+/* SIDEBAR MENU TRÁI */
+.pd-sidebar {
+    width: 250px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 20px;
+}
+
+.pd-nav-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.pd-nav-list li {
+    padding: 15px 20px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+    color: #333;
+    border-left: 2px solid transparent;
+    /* Viền ẩn mặc định */
+    transition: all 0.2s;
+}
+
+.pd-nav-list li:hover {
+    color: #c8102e;
+    background-color: #f9f9f9;
+}
+
+.pd-nav-list li.active {
+    color: #002147;
+    font-weight: bold;
+    border-left: 2px solid #c8102e;
+    /* Hiện viền đỏ khi chọn */
+    background-color: #f9f9f9;
+}
+
+/* NỘI DUNG CHÍNH */
+.pd-content {
+    flex: 1;
+}
+
+.section-title {
+    color: #c8102e;
+    font-size: 20px;
+    margin: 0 0 20px 0;
+}
+
+.section-text {
+    line-height: 1.7;
+    color: #444;
+    font-size: 15px;
+}
+
+/* BANNER TUYỂN SINH */
+.admission-banner {
+    margin-top: 30px;
+    background-color: #0f172a;
+    color: white;
+    padding: 20px 30px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.admission-banner .adm-icon {
+    font-size: 40px;
+    background: rgba(255, 255, 255, 0.1);
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admission-banner h3 {
+    margin: 0 0 5px 0;
+    font-size: 20px;
+}
+
+.admission-banner p {
+    margin: 0;
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+/* CHUẨN ĐẦU RA */
+.lo-item {
+    margin-bottom: 12px;
+    line-height: 1.6;
+    color: #444;
+}
+
+/* CẤU TRÚC CHƯƠNG TRÌNH (THẺ MÔN HỌC) */
+.semester-group {
+    margin-bottom: 30px;
+}
+
+.semester-title {
+    font-size: 16px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.course-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.course-card {
+    background: white;
+    border: 1px solid #eaeaea;
+    border-radius: 8px;
+    padding: 15px;
+    border-left: 5px solid #ccc;
+    /* Màu viền trái mặc định, sẽ bị ghi đè bởi style inline */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+}
+
+.course-credits {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.course-name {
+    margin: 0;
+    font-size: 15px;
+    color: #c8102e;
+    /* Tên môn học màu đỏ theo thiết kế */
+}
+
+.program-detail-page {
+    background-color: #ffffff;
+    padding-bottom: 80px;
+}
+
+/* BANNER HEADER */
+.pd-banner {
+    background-color: #1a233a;
+    /* Màu xanh đen tạm thời */
+    padding: 60px 0 0 0;
+    color: white;
+}
+
+.pd-banner-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.pd-banner h1 {
+    font-size: 32px;
+    margin-bottom: 40px;
+    font-weight: 700;
+}
+
+.pd-summary-cards {
+    display: flex;
+    gap: 20px;
+    transform: translateY(30px);
+}
+
+.summary-card {
+    flex: 1;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    color: #333;
+}
+
+.summary-card span {
+    font-size: 14px;
+    font-weight: 600;
+    color: #002147;
+}
+
+.summary-card strong {
+    font-size: 16px;
+    color: #c8102e;
+}
+
+/* BỐ CỤC CHÍNH */
+.pd-main-container {
+    max-width: 1200px;
+    margin: 60px auto 0;
+    padding: 0 20px;
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+}
+
+/* SIDEBAR MENU TRÁI (LÀM NÓ DÍNH CHẶT KHI CUỘN) */
+.pd-sidebar {
+    width: 250px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 40px;
+    /* Cách mép trên màn hình 40px khi cuộn */
+}
+
+.pd-nav-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.pd-nav-list li {
+    padding: 15px 20px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+    color: #333;
+    border-left: 2px solid transparent;
+    transition: all 0.2s;
+}
+
+.pd-nav-list li:hover {
+    color: #c8102e;
+    background-color: #f9f9f9;
+}
+
+.pd-nav-list li.active {
+    color: #002147;
+    font-weight: bold;
+    border-left: 2px solid #c8102e;
+    background-color: #f9f9f9;
+}
+
+/* NỘI DUNG CHÍNH BÊN PHẢI */
+.pd-content {
+    flex: 1;
+}
+
+/* CÁC ĐOẠN NỘI DUNG NỐI TIẾP NHAU */
+.content-section {
+    margin-bottom: 60px;
+    /* Tạo khoảng cách rộng giữa các phần để dễ đọc */
+    scroll-margin-top: 40px;
+    /* Khi dùng lệnh scrollTo, nó sẽ cách mép trên 40px thay vì dính tịt lên nóc */
+}
+
+.section-title {
+    color: #c8102e;
+    font-size: 20px;
+    margin: 0 0 20px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eaeaea;
+    /* Thêm đường kẻ phân cách cho rõ ràng */
+}
+
+.section-text {
+    line-height: 1.7;
+    color: #444;
+    font-size: 15px;
+}
+
+/* BANNER TUYỂN SINH */
+.admission-banner {
+    margin-top: 30px;
+    background-color: #0f172a;
+    color: white;
+    padding: 20px 30px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.admission-banner .adm-icon {
+    font-size: 40px;
+    background: rgba(255, 255, 255, 0.1);
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.admission-banner h3 {
+    margin: 0 0 5px 0;
+    font-size: 20px;
+}
+
+.admission-banner p {
+    margin: 0;
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+/* CHUẨN ĐẦU RA */
+.lo-item {
+    margin-bottom: 12px;
+    line-height: 1.6;
+    color: #444;
+}
+
+/* CẤU TRÚC CHƯƠNG TRÌNH (THẺ MÔN HỌC) */
+.semester-group {
+    margin-bottom: 30px;
+}
+
+.semester-title {
+    font-size: 16px;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+/* =======================================================
+   CẤU TRÚC CHƯƠNG TRÌNH (TABS & GRID THEO HỌC KỲ)
+   ======================================================= */
+
+.specialty-tabs {
+    display: flex;
+    gap: 30px;
+    border-bottom: 1px solid #eaeaea;
+    margin-bottom: 30px;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 10px 0;
+    font-size: 16px;
+    font-weight: 500;
+    color: #6a7a8c;
+    /* Màu xám xanh */
+    cursor: pointer;
+    position: relative;
+    outline: none;
+}
+
+.tab-btn.active {
+    color: #b92b27;
+    /* Đỏ PTIT đậm */
+    font-weight: bold;
+}
+
+.tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #b92b27;
+}
+
+/* Từng hàng học kỳ */
+.semester-row {
+    display: flex;
+    align-items: stretch;
+    margin-bottom: 20px;
+}
+
+/* Khu vực nhãn Học kỳ xoay dọc */
+/* Khu vực nhãn Học kỳ xoay dọc */
+.semester-label-wrapper {
+    width: 50px;
+    display: flex;
+    justify-content: center;
+
+    /* ======================================= */
+    /* HIỆU ỨNG GHI CHÚ HỌC KỲ DÍNH (STICKY)   */
+    /* ======================================= */
+    position: sticky;
+    top: 100px;
+    /* Cách mép trên màn hình khi cuộn (bạn có thể tăng giảm cho vừa header) */
+    align-self: flex-start;
+    /* Đảm bảo nó luôn nằm ở trên cùng của khối row */
+    height: max-content;
+    /* Không chiếm full chiều cao row */
+    padding-top: 15px;
+    /* Căn cho chữ bằng với thẻ khóa học đầu tiên */
+}
+
+.semester-vertical-text {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-weight: bold;
+    color: #002147;
+    font-size: 15px;
+    white-space: nowrap;
+}
+
+/* Lưới các môn học */
+.course-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    /* 4 cột như ảnh */
+    gap: 15px;
+    padding-bottom: 10px;
+    /* Tránh sát viền dưới */
+}
+
+/* Thẻ môn học */
+.course-card {
+    background: white;
+    border: 1px solid #f2e2e4;
+    /* Viền bao quanh cực nhạt */
+    border-radius: 6px;
+    padding: 18px 15px;
+    border-left-width: 5px;
+    /* Viền trái có màu */
+    border-left-style: solid;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+/* Badge số tín chỉ (Nền hồng, chữ đỏ) */
+.course-credits {
+    display: inline-block;
+    background-color: #fcebeb;
+    /* Nền hồng nhạt */
+    color: #df7a7a;
+    /* Chữ đỏ/cam */
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+/* Tên môn học */
+.course-name {
+    margin: 0;
+    font-size: 15px;
+    font-weight: bold;
+    color: #ba322e;
+    /* Màu đỏ rượu */
+    line-height: 1.4;
+}
+
+/* =======================================================
+   CHÚ GIẢI MÀU SẮC (LEGEND)
+   ======================================================= */
+/* =======================================================
+   CHÚ GIẢI MÀU SẮC (LEGEND) - GHIM DƯỚI ĐÁY MÀN HÌNH
+   ======================================================= */
+.curriculum-legend {
+    /* Các thuộc tính ghim (sticky) */
+    position: sticky;
+    bottom: 0;
+    /* Ghim sát mép dưới của trình duyệt */
+    background-color: #ffffff;
+    /* Bắt buộc phải có nền trắng để che các môn học bị cuộn xuống dưới */
+    z-index: 10;
+    /* Nổi lên trên các thẻ môn học */
+
+    /* Trang trí giao diện */
+    margin-top: 40px;
+    padding: 20px 0;
+    /* Tăng padding để nhìn thoáng hơn khi nổi */
+    border-top: 1px solid #eaeaea;
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.03);
+    /* Đổ bóng nhẹ lên trên để tạo cảm giác nổi */
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.legend-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    font-size: 13.5px;
+    color: #4b5563;
+}
+
+.color-box {
+    width: 24px;
+    height: 8px;
+    border-radius: 10px;
+    margin-right: 12px;
+    display: inline-block;
+}
+
+.legend-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    /* Chia 4 cột để giống 2 hàng ngang trong ảnh */
+    gap: 10px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    font-size: 13.5px;
+    color: #4b5563;
+    /* Màu xám */
+}
+
+.color-box {
+    width: 24px;
+    height: 8px;
+    border-radius: 10px;
+    margin-right: 12px;
+    display: inline-block;
+}
+
+/* =======================================================
+   THANH ĐIỀU HƯỚNG DƯỚI CÙNG (BOTTOM NAV)
+   ======================================================= */
+.pd-bottom-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 60px;
+    padding-top: 25px;
+    border-top: 1px solid #eaeaea;
+    margin-bottom: 20px;
+}
+
+/* Ép xóa gạch chân bằng !important và đổi sang màu Đỏ PTIT */
+.pd-bottom-nav .btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #f4f5f7;
+    color: #c8102e;
+    /* Chữ màu đỏ PTIT */
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none !important;
+    /* Ép xóa gạch chân */
+    font-size: 15px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.pd-bottom-nav .btn-back span {
+    font-size: 18px;
+    line-height: 1;
+}
+
+.pd-bottom-nav .btn-back:hover {
+    background-color: #e2e8f0;
+}
+
+.pd-bottom-nav .link-all {
+    color: #c8102e;
+    /* Chữ màu đỏ PTIT */
+    text-decoration: none !important;
+    /* Ép xóa gạch chân */
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.pd-bottom-nav .link-all:hover {
+    text-decoration: underline !important;
+    /* Gạch chân khi hover cho rõ ràng */
+    color: #a00d25;
+    /* Chuyển thành đỏ sẫm khi hover */
+}

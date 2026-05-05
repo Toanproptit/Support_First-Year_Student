@@ -1,0 +1,121 @@
+/* StudentHandbook.css */
+
+.handbook-page {
+    background-color: #f8f9fa;
+    /* Màu nền xám nhạt */
+    min-height: 100vh;
+}
+
+.handbook-container {
+    padding: 50px 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* Phần Tiêu đề chính */
+.handbook-header-title {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.handbook-header-title h2 {
+    color: #c8102e;
+    /* Chữ màu đỏ PTIT */
+    font-size: 32px;
+    font-weight: 700;
+    margin: 0 0 12px;
+}
+
+.handbook-header-title p {
+    color: #555;
+    font-size: 16px;
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.5;
+}
+
+/* Lưới Grid 3 cột chứa 6 thẻ */
+.handbook-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 30px;
+}
+
+/* Từng thẻ nội dung */
+.handbook-card {
+    background: #ffffff;
+    padding: 35px 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.03);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.handbook-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 30px rgba(200, 16, 46, 0.08);
+    /* Đổ bóng ửng đỏ nhẹ */
+    border-color: rgba(200, 16, 46, 0.1);
+}
+
+/* Hình icon cuốn sổ */
+.hb-icon {
+    width: 56px;
+    height: 56px;
+    background-color: #fdf2f2;
+    /* Nền tròn đỏ nhạt */
+    color: #c8102e;
+    /* Hình icon đỏ PTIT */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.handbook-card h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111;
+    margin: 0 0 10px;
+}
+
+.handbook-card p {
+    font-size: 14px;
+    color: #666;
+    margin: 0 0 24px;
+    line-height: 1.5;
+}
+
+/* Link Xem chi tiết */
+.hb-link {
+    margin-top: auto;
+    /* Đẩy link xuống sát đáy thẻ */
+    color: #c8102e;
+    font-weight: 700;
+    font-size: 15px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: opacity 0.2s;
+}
+
+.hb-link:hover {
+    opacity: 0.8;
+}
+
+/* Responsive cho màn hình nhỏ */
+@media (max-width: 768px) {
+    .handbook-header-title h2 {
+        font-size: 26px;
+    }
+
+    .handbook-grid {
+        gap: 20px;
+    }
+}

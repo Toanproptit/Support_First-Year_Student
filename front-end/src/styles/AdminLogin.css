@@ -1,0 +1,151 @@
+.admin-login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa;
+    /* Màu nền xám cực nhạt */
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    padding: 20px;
+}
+
+.admin-login-card {
+    background: white;
+    width: 100%;
+    max-width: 450px;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.admin-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.admin-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 8px;
+}
+
+.admin-header h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #111;
+    margin: 0;
+}
+
+.admin-form .input-group {
+    margin-bottom: 20px;
+}
+
+.admin-form label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.admin-form .required {
+    color: #e53e3e;
+    /* Dấu sao đỏ */
+    margin-left: 3px;
+}
+
+.admin-form input[type="email"],
+.password-input-wrapper input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: all 0.2s;
+    box-sizing: border-box;
+}
+
+.admin-form input[type="email"]:focus,
+.password-input-wrapper input:focus {
+    outline: none;
+    border-color: #2563eb;
+    /* Viền xanh dương khi focus */
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Khu vực ô mật khẩu có hình con mắt */
+.password-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-input-wrapper input {
+    padding-right: 45px;
+    /* Chừa chỗ cho cái nút con mắt */
+}
+
+.toggle-password-btn {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #9ca3af;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.toggle-password-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.toggle-password-btn:hover {
+    color: #4b5563;
+}
+
+/* Nút ghi nhớ đăng nhập */
+.remember-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+
+.remember-group input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #2563eb;
+}
+
+.remember-group label {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 400;
+    cursor: pointer;
+}
+
+/* Nút Đăng nhập xanh dương */
+.admin-submit-btn {
+    width: 100%;
+    background-color: #2563eb;
+    /* Màu xanh dương chuẩn */
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.admin-submit-btn:hover {
+    background-color: #1d4ed8;
+}
