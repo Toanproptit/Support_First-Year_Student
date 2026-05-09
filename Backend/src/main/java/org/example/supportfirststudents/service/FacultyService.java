@@ -7,7 +7,7 @@ import org.example.supportfirststudents.dto.request.CreateFaculty;
 import org.example.supportfirststudents.dto.response.FacultyResponse;
 import org.example.supportfirststudents.entity.Faculty;
 import org.example.supportfirststudents.enums.ErrorCode;
-import org.example.supportfirststudents.exception.Appexception;
+import org.example.supportfirststudents.exception.AppException;
 import org.example.supportfirststudents.mapper.FacultyMapper;
 import org.example.supportfirststudents.repository.FacultyRepository;
 import org.springframework.data.domain.Sort;
@@ -46,12 +46,12 @@ public class FacultyService {
 
     private Faculty findFacultyByCode(String code) {
         return facultyRepository.findById(normalizeCode(code))
-                .orElseThrow(() -> new Appexception(ErrorCode.FACULTY_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.FACULTY_NOT_FOUND));
     }
 
     private void validateCodeNotExists(String code) {
         if (facultyRepository.existsById(code)) {
-            throw new Appexception(ErrorCode.FACULTY_CODE_EXISTED);
+            throw new AppException(ErrorCode.FACULTY_CODE_EXISTED);
         }
     }
 

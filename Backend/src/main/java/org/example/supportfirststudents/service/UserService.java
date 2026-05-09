@@ -10,7 +10,7 @@ import org.example.supportfirststudents.dto.response.UserResponse;
 import org.example.supportfirststudents.entity.User;
 import org.example.supportfirststudents.enums.ErrorCode;
 import org.example.supportfirststudents.enums.Role;
-import org.example.supportfirststudents.exception.Appexception;
+import org.example.supportfirststudents.exception.AppException;
 import org.example.supportfirststudents.mapper.UserMapper;
 import org.example.supportfirststudents.repository.UserRepository;
 import org.springframework.data.domain.Page;
@@ -32,11 +32,11 @@ public class UserService {
     public UserResponse create(CreateUser request) {
 
         if(userRepository.existsByUserName(request.getUsername())){
-            throw new Appexception(ErrorCode.USERNAME_EXISTED);
+            throw new AppException(ErrorCode.USERNAME_EXISTED);
         }
 
         if(userRepository.existsByEmail(request.getEmail())) {
-            throw new Appexception(ErrorCode.EMAIL_EXISTED);
+            throw new AppException(ErrorCode.EMAIL_EXISTED);
         }
 
         User user = new User();
@@ -83,20 +83,20 @@ public class UserService {
     }
 
 
-    @Transactional(rollbackOn =  Appexception.class)
+    @Transactional(rollbackOn =  AppException.class)
     public UserResponse update(Long id , UpdateUser request) {
         User oldUser = getUser(id);
 
         // Kiểm tra userName mới có trùng với user khác không
         if(!oldUser.getUserName().equals(request.getUsername())
                 && userRepository.existsByUserName(request.getUsername())) {
-            throw new Appexception(ErrorCode.USERNAME_EXISTED);
+            throw new AppException(ErrorCode.USERNAME_EXISTED);
         }
 
         // Kiểm tra email mới có trùng với user khác không
         if(!oldUser.getEmail().equals(request.getEmail())
                 && userRepository.existsByEmail(request.getEmail())) {
-            throw new Appexception(ErrorCode.EMAIL_EXISTED);
+            throw new AppException(ErrorCode.EMAIL_EXISTED);
         }
 
         oldUser.setFullName(request.getFullName());
@@ -112,7 +112,7 @@ public class UserService {
         return userMapper.toUserResponse(userRepository.save(oldUser));
     }
 
-    @Transactional(rollbackOn =  Appexception.class)
+    @Transactional(rollbackOn =  AppException.class)
     public void delete(Long id) {
         User user = getUser(id);
         userRepository.delete(user);
@@ -120,7 +120,7 @@ public class UserService {
 
 
     private User getUser(Long id){
-        return userRepository.findById(id).orElseThrow(()-> new Appexception(ErrorCode.USER_NOT_FOUND));
+        return userRepository.findById(id).orElseThrow(()-> new AppException(ErrorCode.USER_NOT_FOUND));
     }
 
 

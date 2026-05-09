@@ -10,11 +10,14 @@ import org.example.supportfirststudents.entity.Comment;
 import org.example.supportfirststudents.entity.Post;
 import org.example.supportfirststudents.entity.User;
 import org.example.supportfirststudents.enums.ErrorCode;
-import org.example.supportfirststudents.exception.Appexception;
+import org.example.supportfirststudents.exception.AppException;
 import org.example.supportfirststudents.mapper.CommentMapper;
 import org.example.supportfirststudents.repository.CommentRepository;
 import org.example.supportfirststudents.repository.PostRepository;
 import org.example.supportfirststudents.repository.UserRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +36,9 @@ public class CommentService {
 
     @Transactional
     public CommentResponse createComment(CreateComment request) {
+        if (!isAdminCaller() && !isCallerUserId(request.getUserId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
         // Tìm post và user
         Post post = findPostById(request.getPostId());
         User user = findUserById(request.getUserId());
@@ -82,6 +88,9 @@ public class CommentService {
     @Transactional
     public CommentResponse updateComment(Long id, UpdateComment request) {
         Comment comment = findCommentById(id);
+        if (!canWriteComment(comment)) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
         commentMapper.updateComment(comment, request);
         Comment updatedComment = commentRepository.save(comment);
         return commentMapper.toCommentResponse(updatedComment);
@@ -90,6 +99,9 @@ public class CommentService {
     @Transactional
     public void deleteComment(Long id) {
         Comment comment = findCommentById(id);
+        if (!canWriteComment(comment)) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
 
         Post post = comment.getPost();
         if (post != null) {
@@ -106,28 +118,62 @@ public class CommentService {
 
     private Comment findCommentById(Long id) {
         return commentRepository.findById(id)
-                .orElseThrow(() -> new Appexception(ErrorCode.COMMENT_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_FOUND));
     }
 
     private Post findPostById(Long postId) {
         return postRepository.findById(postId)
-                .orElseThrow(() -> new Appexception(ErrorCode.POST_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
     }
 
     private User findUserById(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new Appexception(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
     }
 
     private void validatePostExists(Long postId) {
         if (!postRepository.existsById(postId)) {
-            throw new Appexception(ErrorCode.POST_NOT_FOUND);
+            throw new AppException(ErrorCode.POST_NOT_FOUND);
         }
     }
 
     private void validateUserExists(Long userId) {
         if (!userRepository.existsById(userId)) {
-            throw new Appexception(ErrorCode.USER_NOT_FOUND);
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
         }
+    }
+
+    private boolean isCallerUserId(Long userId) {
+        User caller = getCallerUser();
+        return caller != null && caller.getId() != null && caller.getId().equals(userId);
+    }
+
+    private User getCallerUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getName() == null) {
+            return null;
+        }
+        return userRepository.findByEmail(authentication.getName()).orElse(null);
+    }
+
+    private boolean canWriteComment(Comment comment) {
+        if (isAdminCaller()) {
+            return true;
+        }
+        User caller = getCallerUser();
+        return caller != null && comment.getUser() != null && caller.getId().equals(comment.getUser().getId());
+    }
+
+    private boolean isAdminCaller() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getAuthorities() == null) {
+            return false;
+        }
+        for (GrantedAuthority authority : authentication.getAuthorities()) {
+            if ("ROLE_Admin".equals(authority.getAuthority())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

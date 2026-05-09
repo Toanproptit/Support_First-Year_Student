@@ -6,7 +6,7 @@ import lombok.experimental.FieldDefaults;
 import org.example.supportfirststudents.dto.response.SubjectResponse;
 import org.example.supportfirststudents.entity.Subject;
 import org.example.supportfirststudents.enums.ErrorCode;
-import org.example.supportfirststudents.exception.Appexception;
+import org.example.supportfirststudents.exception.AppException;
 import org.example.supportfirststudents.mapper.SubjectMapper;
 import org.example.supportfirststudents.repository.SubjectRepository;
 import org.springframework.data.domain.Sort;
@@ -35,7 +35,7 @@ public class SubjectService {
 
     private Subject findSubjectByCode(String code) {
         return subjectRepository.findById(normalizeCode(code))
-                .orElseThrow(() -> new Appexception(ErrorCode.SUBJECT_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.SUBJECT_NOT_FOUND));
     }
 
     private String normalizeCode(String value) {

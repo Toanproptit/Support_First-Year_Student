@@ -9,12 +9,14 @@ import org.example.supportfirststudents.dto.request.UpdatePost;
 import org.example.supportfirststudents.dto.response.ApiResponse;
 import org.example.supportfirststudents.dto.response.PostResponse;
 import org.example.supportfirststudents.service.PostService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/posts")
+@PreAuthorize("hasAnyRole('Admin','Student')")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PostController {
@@ -24,6 +26,8 @@ public class PostController {
     @PostMapping
     public ApiResponse<PostResponse> createPost(@Valid @RequestBody CreatePost request) {
         return ApiResponse.<PostResponse>builder()
+                .code(200)
+                .message("Successfully created post")
                 .result(postService.createPost(request))
                 .build();
     }
@@ -42,6 +46,30 @@ public class PostController {
                 .build();
     }
 
+    @PreAuthorize("hasRole('Admin')")
+    @GetMapping("/pending")
+    public ApiResponse<List<PostResponse>> getPendingPosts() {
+        return ApiResponse.<List<PostResponse>>builder()
+                .result(postService.getPendingPosts())
+                .build();
+    }
+
+    @PreAuthorize("hasRole('Admin')")
+    @PutMapping("/{id}/approve")
+    public ApiResponse<PostResponse> approvePost(@PathVariable Long id) {
+        return ApiResponse.<PostResponse>builder()
+                .result(postService.approvePost(id))
+                .build();
+    }
+
+    @PreAuthorize("hasRole('Admin')")
+    @PutMapping("/{id}/reject")
+    public ApiResponse<PostResponse> rejectPost(@PathVariable Long id) {
+        return ApiResponse.<PostResponse>builder()
+                .result(postService.rejectPost(id))
+                .build();
+    }
+
     @GetMapping("/user/{userId}")
     public ApiResponse<List<PostResponse>> getPostsByUserId(@PathVariable Long userId) {
         return ApiResponse.<List<PostResponse>>builder()
@@ -56,6 +84,7 @@ public class PostController {
                 .build();
     }
 
+    @PreAuthorize("hasAnyRole('Admin','Student')")
     @PutMapping("/{id}")
     public ApiResponse<PostResponse> updatePost(
             @PathVariable Long id,
@@ -65,6 +94,7 @@ public class PostController {
                 .build();
     }
 
+    @PreAuthorize("hasAnyRole('Admin','Student')")
     @DeleteMapping("/{id}")
     public ApiResponse<Void> deletePost(@PathVariable Long id) {
         postService.deletePost(id);

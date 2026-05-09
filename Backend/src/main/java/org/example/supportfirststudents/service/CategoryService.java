@@ -9,7 +9,7 @@ import org.example.supportfirststudents.dto.request.UpdateCategory;
 import org.example.supportfirststudents.dto.response.CategoryResponse;
 import org.example.supportfirststudents.entity.Category;
 import org.example.supportfirststudents.enums.ErrorCode;
-import org.example.supportfirststudents.exception.Appexception;
+import org.example.supportfirststudents.exception.AppException;
 import org.example.supportfirststudents.mapper.CategoryMapper;
 import org.example.supportfirststudents.repository.CategoryRepository;
 import org.springframework.stereotype.Service;
@@ -26,11 +26,11 @@ public class CategoryService {
     final CategoryMapper categoryMapper;
 
 
-    private List<CategoryResponse> getAllCategories() {
+    public List<CategoryResponse> getAllCategories() {
         return categoryRepository.findAll().stream().map(categoryMapper :: toCategoryResponse).toList();
     }
 
-    private CategoryResponse create(CreateCategory request) {
+    public CategoryResponse create(CreateCategory request) {
         Category category = new Category();
         category.setName(request.getName());
         category.setSlug(request.getSlug());
@@ -38,7 +38,7 @@ public class CategoryService {
         return categoryMapper.toCategoryResponse(category);
     }
 
-    private CategoryResponse update(Long id,UpdateCategory request) {
+    public CategoryResponse update(Long id,UpdateCategory request) {
         Category category = getCategory(id);
         category.setName(request.getName());
         category.setSlug(request.getSlug());
@@ -46,12 +46,12 @@ public class CategoryService {
         return categoryMapper.toCategoryResponse(categoryRepository.save(category));
     }
 
-    private void delete(Long id) {
+    public void delete(Long id) {
         categoryRepository.deleteById(id);
     }
 
-    private Category getCategory(Long id) {
-        return categoryRepository.findById(id).orElseThrow(() -> new Appexception(ErrorCode.CATEGORY_NOT_FOUND));
+    public Category getCategory(Long id) {
+        return categoryRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
     }
 
     

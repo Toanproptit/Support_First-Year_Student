@@ -19,7 +19,7 @@ public class PostMapper {
         Post post = new Post();
         post.setTitle(request.getTitle());
         post.setContent(request.getContent());
-        post.setStatus(Status.APPROVED);
+        post.setStatus(Status.PENDING);
         return post;
     }
 
@@ -54,6 +54,8 @@ public class PostMapper {
     public void updatePost(Post post, UpdatePost request) {
         post.setTitle(request.getTitle());
         post.setContent(request.getContent());
-        post.setStatus(request.getStatus());
+        if (request.getStatus() != null) {
+            post.setStatus(request.getStatus());
+        }
     }
 }

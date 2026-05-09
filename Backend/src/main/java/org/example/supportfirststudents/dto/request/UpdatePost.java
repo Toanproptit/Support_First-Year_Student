@@ -19,6 +19,5 @@ public class UpdatePost {
     @NotBlank(message = "Content không được để trống")
     String content;
 
-    @NotBlank
     Status status;
 }

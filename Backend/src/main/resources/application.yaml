@@ -6,4 +6,6 @@ spring:
     password: ${DB_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: update  
+      ddl-auto: update
+
+signer_key: ${SIGNER_KEY}

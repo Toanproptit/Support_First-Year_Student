@@ -12,13 +12,14 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public enum ErrorCode {
     UNCATEGORIZED_EXCEPTION(9999, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR),
-    USER_EXISTED(1001, "User existed", HttpStatus.BAD_REQUEST),
+    USER_EXISTED(409, "User existed", HttpStatus.BAD_REQUEST),
     USERNAME_INVALID(1002, "Username cannot be blank", HttpStatus.BAD_REQUEST),
     PASSWORD_INVALID(1003, "Password is incorrect", HttpStatus.BAD_REQUEST),
     EMAIL_INVALID(1004, "Email invalid", HttpStatus.BAD_REQUEST),
     INVALID_KEY(1005, "Key invalid", HttpStatus.BAD_REQUEST),
     UNAUTHORIZED(1006, "You do not have permission", HttpStatus.FORBIDDEN),
     USER_NOT_FOUND(1007, "User not found", HttpStatus.NOT_FOUND),
+    EMAIL_NOT_FOUND(1007, "Email not found", HttpStatus.NOT_FOUND),
     UNAUTHENTICATED(1008, "Unauthenticated", HttpStatus.UNAUTHORIZED),
     FILE_UPLOAD_ERROR(1009, "Cannot upload file", HttpStatus.BAD_REQUEST),
     SIGN_TYPE_NOT_FOUND(1012, "Sign type not found", HttpStatus.NOT_FOUND),
@@ -59,6 +60,7 @@ public enum ErrorCode {
     MAJOR_NOT_FOUND(1040, "Major not found", HttpStatus.NOT_FOUND),
     COURSE_SECTION_NOT_FOUND(1041, "Course section not found", HttpStatus.NOT_FOUND),
     CLUB_NOT_FOUND(1042, "Club not found", HttpStatus.NOT_FOUND),
+    ACTIVITY_DATE_INVALID(1043, "Activity startDate must be before endDate", HttpStatus.BAD_REQUEST),
     ;
 
     final int code;

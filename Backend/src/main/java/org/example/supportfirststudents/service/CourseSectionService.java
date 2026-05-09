@@ -6,7 +6,7 @@ import lombok.experimental.FieldDefaults;
 import org.example.supportfirststudents.dto.response.CourseSectionResponse;
 import org.example.supportfirststudents.entity.CourseSection;
 import org.example.supportfirststudents.enums.ErrorCode;
-import org.example.supportfirststudents.exception.Appexception;
+import org.example.supportfirststudents.exception.AppException;
 import org.example.supportfirststudents.mapper.CourseSectionMapper;
 import org.example.supportfirststudents.repository.CourseSectionRepository;
 import org.springframework.data.domain.Sort;
@@ -35,7 +35,7 @@ public class CourseSectionService {
 
     private CourseSection findCourseSectionByCode(String code) {
         return courseSectionRepository.findById(normalizeCode(code))
-                .orElseThrow(() -> new Appexception(ErrorCode.COURSE_SECTION_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.COURSE_SECTION_NOT_FOUND));
     }
 
     private String normalizeCode(String value) {

@@ -9,7 +9,7 @@ import org.example.supportfirststudents.dto.response.FeedbackResponse;
 import org.example.supportfirststudents.entity.Feedback;
 import org.example.supportfirststudents.entity.User;
 import org.example.supportfirststudents.enums.ErrorCode;
-import org.example.supportfirststudents.exception.Appexception;
+import org.example.supportfirststudents.exception.AppException;
 
 import org.example.supportfirststudents.mapper.FeedbackMapper;
 import org.example.supportfirststudents.repository.FeedbackRepository;
@@ -31,7 +31,7 @@ public class FeedbackService {
     @Transactional
     public FeedbackResponse createFeedback(CreateFeedback request) {
         User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new Appexception(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         Feedback feedback = feedbackMapper.toFeedback(request);
         feedback.setUser(user);
@@ -72,12 +72,12 @@ public class FeedbackService {
 
     private Feedback findFeedbackById(Long id) {
         return feedbackRepository.findById(id)
-                .orElseThrow(() -> new Appexception(ErrorCode.FEEDBACK_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.FEEDBACK_NOT_FOUND));
     }
 
     private void validateUserExists(Long userId) {
         if (!userRepository.existsById(userId)) {
-            throw new Appexception(ErrorCode.USER_NOT_FOUND);
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
         }
     }
 }

@@ -6,7 +6,7 @@ import lombok.experimental.FieldDefaults;
 import org.example.supportfirststudents.dto.response.MajorResponse;
 import org.example.supportfirststudents.entity.Major;
 import org.example.supportfirststudents.enums.ErrorCode;
-import org.example.supportfirststudents.exception.Appexception;
+import org.example.supportfirststudents.exception.AppException;
 import org.example.supportfirststudents.mapper.MajorMapper;
 import org.example.supportfirststudents.repository.MajorRepository;
 import org.springframework.data.domain.Sort;
@@ -35,7 +35,7 @@ public class MajorService {
 
     private Major findMajorByCode(String code) {
         return majorRepository.findById(normalizeCode(code))
-                .orElseThrow(() -> new Appexception(ErrorCode.MAJOR_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.MAJOR_NOT_FOUND));
     }
 
     private String normalizeCode(String value) {

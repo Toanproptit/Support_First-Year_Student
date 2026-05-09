@@ -9,6 +9,7 @@ import org.example.supportfirststudents.dto.request.UpdateActivity;
 import org.example.supportfirststudents.dto.response.ActivityResponse;
 import org.example.supportfirststudents.dto.response.ApiResponse;
 import org.example.supportfirststudents.service.ActivityService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,11 +17,13 @@ import java.util.List;
 @RestController
 @RequestMapping("/activities")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('Admin','Student')")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ActivityController {
 
     ActivityService activityService;
 
+    @PreAuthorize("hasRole('Admin')")
     @PostMapping
     public ApiResponse<ActivityResponse> createActivity(@Valid @RequestBody CreateActivity request) {
         return ApiResponse.<ActivityResponse>builder()
@@ -48,6 +51,7 @@ public class ActivityController {
                 .build();
     }
 
+    @PreAuthorize("hasRole('Admin')")
     @PutMapping("/{id}")
     public ApiResponse<ActivityResponse> updateActivity(@PathVariable Long id, @Valid @RequestBody UpdateActivity request) {
         return ApiResponse.<ActivityResponse>builder()
@@ -57,6 +61,7 @@ public class ActivityController {
                 .build();
     }
 
+    @PreAuthorize("hasRole('Admin')")
     @DeleteMapping("/{id}")
     public ApiResponse<Void> deleteActivity(@PathVariable Long id) {
         activityService.deleteActivity(id);

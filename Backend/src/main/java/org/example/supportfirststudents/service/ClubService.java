@@ -8,13 +8,12 @@ import org.example.supportfirststudents.dto.request.CreateClub;
 import org.example.supportfirststudents.dto.response.ClubResponse;
 import org.example.supportfirststudents.entity.Club;
 import org.example.supportfirststudents.enums.ErrorCode;
-import org.example.supportfirststudents.exception.Appexception;
+import org.example.supportfirststudents.exception.AppException;
 import org.example.supportfirststudents.mapper.ClubMapper;
 import org.example.supportfirststudents.repository.ClubRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -48,6 +47,6 @@ public class ClubService {
     }
 
     public Club getClub(Long id){
-        return clubRepository.findById(id).orElseThrow(() -> new Appexception(ErrorCode.CLUB_NOT_FOUND));
+        return clubRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.CLUB_NOT_FOUND));
     }
 }

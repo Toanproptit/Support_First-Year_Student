@@ -8,6 +8,7 @@ import org.example.supportfirststudents.dto.request.CreateParticipation;
 import org.example.supportfirststudents.dto.response.ApiResponse;
 import org.example.supportfirststudents.dto.response.ParticipationResponse;
 import org.example.supportfirststudents.service.ParticipationService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/participations")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('Admin','Student')")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ParticipationController {
 
@@ -38,6 +40,7 @@ public class ParticipationController {
                 .build();
     }
 
+    @PreAuthorize("hasRole('Admin')")
     @GetMapping("/activity/{activityId}")
     public ApiResponse<List<ParticipationResponse>> getParticipationsByActivityId(@PathVariable Long activityId) {
         return ApiResponse.<List<ParticipationResponse>>builder()
@@ -47,12 +50,31 @@ public class ParticipationController {
                 .build();
     }
 
+    @PreAuthorize("hasRole('Admin')")
+    @PutMapping("/{id}/lead")
+    public ApiResponse<ParticipationResponse> setParticipationLead(@PathVariable Long id) {
+        return ApiResponse.<ParticipationResponse>builder()
+                .code(200)
+                .message("Participation updated")
+                .result(participationService.setParticipationLead(id))
+                .build();
+    }
+
+    @PreAuthorize("hasRole('Admin')")
+    @DeleteMapping("/{id}/lead")
+    public ApiResponse<ParticipationResponse> unsetParticipationLead(@PathVariable Long id) {
+        return ApiResponse.<ParticipationResponse>builder()
+                .code(200)
+                .message("Participation updated")
+                .result(participationService.unsetParticipationLead(id))
+                .build();
+    }
+
     @DeleteMapping
     public ApiResponse<Void> deleteParticipation(@RequestParam Long userId, @RequestParam Long activityId) {
         participationService.deleteParticipation(userId, activityId);
         return ApiResponse.<Void>builder()
                 .code(200)
-                .message("Participation Deleted")
                 .message("Participation deleted successfully")
                 .build();
     }

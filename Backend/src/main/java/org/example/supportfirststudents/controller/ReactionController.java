@@ -6,11 +6,13 @@ import org.example.supportfirststudents.dto.response.ApiResponse;
 import org.example.supportfirststudents.entity.Reaction;
 import org.example.supportfirststudents.repository.ReactionRepository;
 import org.example.supportfirststudents.service.ReactionService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/reactions")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('Admin','Student')")
 public class ReactionController {
     private final ReactionRepository reactionRepository;
     private final ReactionService reactionService;
