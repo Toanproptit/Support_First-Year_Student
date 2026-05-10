@@ -6,4 +6,9 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface StudentCourseSectionRepository extends JpaRepository<StudentCourseSection, Long> {
+    boolean existsByUser_IdAndCourseSection_Code(Long userId, String courseSectionCode);
+
+    void deleteByUser_IdAndCourseSection_Code(Long userId, String courseSectionCode);
+
+    java.util.List<StudentCourseSection> findByUser_Id(Long userId);
 }

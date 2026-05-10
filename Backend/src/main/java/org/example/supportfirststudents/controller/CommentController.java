@@ -8,6 +8,7 @@ import org.example.supportfirststudents.dto.request.CreateComment;
 import org.example.supportfirststudents.dto.request.UpdateComment;
 import org.example.supportfirststudents.dto.response.ApiResponse;
 import org.example.supportfirststudents.dto.response.CommentResponse;
+import org.example.supportfirststudents.dto.response.PageResponse;
 import org.example.supportfirststudents.service.CommentService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -44,6 +45,15 @@ public class CommentController {
                 .build();
     }
 
+    @GetMapping("/page")
+    public ApiResponse<PageResponse<CommentResponse>> getAllCommentsPaged(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ApiResponse.<PageResponse<CommentResponse>>builder()
+                .result(commentService.getAllCommentsPaged(page, size))
+                .build();
+    }
+
     @GetMapping("/post/{postId}")
     public ApiResponse<List<CommentResponse>> getCommentsByPostId(@PathVariable Long postId) {
         return ApiResponse.<List<CommentResponse>>builder()
@@ -51,10 +61,30 @@ public class CommentController {
                 .build();
     }
 
+    @GetMapping("/post/{postId}/page")
+    public ApiResponse<PageResponse<CommentResponse>> getCommentsByPostIdPaged(
+            @PathVariable Long postId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ApiResponse.<PageResponse<CommentResponse>>builder()
+                .result(commentService.getCommentsByPostIdPaged(postId, page, size))
+                .build();
+    }
+
     @GetMapping("/user/{userId}")
     public ApiResponse<List<CommentResponse>> getCommentsByUserId(@PathVariable Long userId) {
         return ApiResponse.<List<CommentResponse>>builder()
                 .result(commentService.getCommentsByUserId(userId))
+                .build();
+    }
+
+    @GetMapping("/user/{userId}/page")
+    public ApiResponse<PageResponse<CommentResponse>> getCommentsByUserIdPaged(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ApiResponse.<PageResponse<CommentResponse>>builder()
+                .result(commentService.getCommentsByUserIdPaged(userId, page, size))
                 .build();
     }
 

@@ -3,20 +3,23 @@ package org.example.supportfirststudents.dto.response;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
-@Data
-@Builder
-@NoArgsConstructor
+import java.time.LocalDate;
+
+@Getter
+@Setter
 @AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CourseSectionResponse {
+public class TermResponse {
     String code;
     String name;
-    String termCode;
-    String majorCode;
-    String subjectCode;
-    Long teacherId;
+    LocalDate startDate;
+    LocalDate endDate;
 }
+

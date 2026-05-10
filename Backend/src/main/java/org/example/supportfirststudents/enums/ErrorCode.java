@@ -56,11 +56,23 @@ public enum ErrorCode {
     PARTICIPATION_ALREADY_EXISTS(1039, "Participation already exists", HttpStatus.BAD_REQUEST),
     FACULTY_NOT_FOUND(1040, "Faculty not found", HttpStatus.NOT_FOUND),
     FACULTY_CODE_EXISTED(1038, "Faculty code existed", HttpStatus.BAD_REQUEST),
+    FACULTY_HAS_MAJORS(1045, "Faculty has majors", HttpStatus.BAD_REQUEST),
     SUBJECT_NOT_FOUND(1039, "Subject not found", HttpStatus.NOT_FOUND),
+    SUBJECT_CODE_EXISTED(1053, "Subject code existed", HttpStatus.BAD_REQUEST),
+    SUBJECT_HAS_COURSE_SECTIONS(1054, "Subject has course sections", HttpStatus.BAD_REQUEST),
+    SUBJECT_WEIGHT_INVALID(1055, "Subject weights must sum to 100", HttpStatus.BAD_REQUEST),
     MAJOR_NOT_FOUND(1040, "Major not found", HttpStatus.NOT_FOUND),
+    MAJOR_CODE_EXISTED(1046, "Major code existed", HttpStatus.BAD_REQUEST),
     COURSE_SECTION_NOT_FOUND(1041, "Course section not found", HttpStatus.NOT_FOUND),
     CLUB_NOT_FOUND(1042, "Club not found", HttpStatus.NOT_FOUND),
     ACTIVITY_DATE_INVALID(1043, "Activity startDate must be before endDate", HttpStatus.BAD_REQUEST),
+    FEEDBACK_ALREADY_REVIEWED(1044, "Feedback already reviewed", HttpStatus.BAD_REQUEST),
+    USER_ID_REQUIRED(1047, "User id is required", HttpStatus.BAD_REQUEST),
+    COURSE_SECTION_REVIEW_NOT_FOUND(1048, "Course section review not found", HttpStatus.NOT_FOUND),
+    COURSE_SECTION_REVIEW_ALREADY_EXISTS(1049, "Course section review already exists", HttpStatus.BAD_REQUEST),
+    TERM_NOT_FOUND(1050, "Term not found", HttpStatus.NOT_FOUND),
+    TERM_CODE_EXISTED(1051, "Term code existed", HttpStatus.BAD_REQUEST),
+    COURSE_SECTION_CODE_EXISTED(1052, "Course section code existed", HttpStatus.BAD_REQUEST),
     ;
 
     final int code;

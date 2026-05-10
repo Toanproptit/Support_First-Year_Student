@@ -22,8 +22,20 @@ public class CourseSection {
     Integer maxStudents;
     LocalDate startDate;
     LocalDate endDate;
-    String semester;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "term_code")
+    Term term;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "major_code")
+    Major major;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subject_code")  
     Subject subject;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "teacher_id")
+    User teacher;
 }

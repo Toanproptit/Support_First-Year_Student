@@ -7,6 +7,7 @@ import lombok.experimental.FieldDefaults;
 import org.example.supportfirststudents.dto.request.CreatePost;
 import org.example.supportfirststudents.dto.request.UpdatePost;
 import org.example.supportfirststudents.dto.response.ApiResponse;
+import org.example.supportfirststudents.dto.response.PageResponse;
 import org.example.supportfirststudents.dto.response.PostResponse;
 import org.example.supportfirststudents.service.PostService;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -46,11 +47,30 @@ public class PostController {
                 .build();
     }
 
+    @GetMapping("/page")
+    public ApiResponse<PageResponse<PostResponse>> getAllPostsPaged(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ApiResponse.<PageResponse<PostResponse>>builder()
+                .result(postService.getAllPostsPaged(page, size))
+                .build();
+    }
+
     @PreAuthorize("hasRole('Admin')")
     @GetMapping("/pending")
     public ApiResponse<List<PostResponse>> getPendingPosts() {
         return ApiResponse.<List<PostResponse>>builder()
                 .result(postService.getPendingPosts())
+                .build();
+    }
+
+    @PreAuthorize("hasRole('Admin')")
+    @GetMapping("/pending/page")
+    public ApiResponse<PageResponse<PostResponse>> getPendingPostsPaged(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ApiResponse.<PageResponse<PostResponse>>builder()
+                .result(postService.getPendingPostsPaged(page, size))
                 .build();
     }
 
@@ -77,6 +97,16 @@ public class PostController {
                 .build();
     }
 
+    @GetMapping("/user/{userId}/page")
+    public ApiResponse<PageResponse<PostResponse>> getPostsByUserIdPaged(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ApiResponse.<PageResponse<PostResponse>>builder()
+                .result(postService.getPostsByUserIdPaged(userId, page, size))
+                .build();
+    }
+
     @GetMapping("/user/{userId}/count")
     public ApiResponse<Long> countPostsByUserId(@PathVariable Long userId) {
         return ApiResponse.<Long>builder()
@@ -99,6 +129,7 @@ public class PostController {
     public ApiResponse<Void> deletePost(@PathVariable Long id) {
         postService.deletePost(id);
         return ApiResponse.<Void>builder()
+                .code(200)
                 .message("Post deleted successfully")
                 .build();
     }

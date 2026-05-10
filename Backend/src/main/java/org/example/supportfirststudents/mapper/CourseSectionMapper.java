@@ -9,7 +9,11 @@ public class CourseSectionMapper {
     public CourseSectionResponse toCourseSectionResponse(CourseSection courseSection) {
         return CourseSectionResponse.builder()
                 .code(courseSection.getCode())
-                .name(courseSection.getSubject().getName())
+                .name(courseSection.getName())
+                .termCode(courseSection.getTerm() != null ? courseSection.getTerm().getCode() : null)
+                .majorCode(courseSection.getMajor() != null ? courseSection.getMajor().getCode() : null)
+                .subjectCode(courseSection.getSubject() != null ? courseSection.getSubject().getCode() : null)
+                .teacherId(courseSection.getTeacher() != null ? courseSection.getTeacher().getId() : null)
                 .build();
     }
 }

@@ -7,6 +7,7 @@ import org.example.supportfirststudents.dto.response.ApiResponse;
 import org.example.supportfirststudents.dto.response.PageResponse;
 import org.example.supportfirststudents.dto.response.UserResponse;
 import org.example.supportfirststudents.service.UserService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,8 +15,10 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/users")
+@PreAuthorize("hasAnyRole('Admin')")
 public class UserController {
     private final UserService userService;
+
 
     @GetMapping
     public ApiResponse<PageResponse<UserResponse>> getUser(@RequestParam(defaultValue = "0") int page,
@@ -27,6 +30,8 @@ public class UserController {
                 .result(userService.findAll(page, size))
                 .build();
     }
+
+
     @PostMapping
     public ApiResponse<UserResponse> createUser(@RequestBody CreateUser request){
         return ApiResponse.<UserResponse>builder()
@@ -35,6 +40,8 @@ public class UserController {
                 .result(userService.create(request))
                 .build();
     }
+
+
     @PutMapping("/{id}")
     public ApiResponse<UserResponse> updateUser(@PathVariable Long id , @RequestBody UpdateUser request){
         return ApiResponse.<UserResponse>builder()
@@ -43,6 +50,8 @@ public class UserController {
                 .result(userService.update(id,request))
                 .build();
     }
+
+
     @DeleteMapping("/{id}")
     public ApiResponse<Void> deleteUser(@PathVariable Long id){
         userService.delete(id);

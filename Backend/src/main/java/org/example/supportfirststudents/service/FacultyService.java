@@ -4,12 +4,14 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.example.supportfirststudents.dto.request.CreateFaculty;
+import org.example.supportfirststudents.dto.request.UpdateFaculty;
 import org.example.supportfirststudents.dto.response.FacultyResponse;
 import org.example.supportfirststudents.entity.Faculty;
 import org.example.supportfirststudents.enums.ErrorCode;
 import org.example.supportfirststudents.exception.AppException;
 import org.example.supportfirststudents.mapper.FacultyMapper;
 import org.example.supportfirststudents.repository.FacultyRepository;
+import org.example.supportfirststudents.repository.MajorRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,7 @@ import java.util.Locale;
 public class FacultyService {
     FacultyRepository facultyRepository;
     FacultyMapper facultyMapper;
+    MajorRepository majorRepository;
 
     @Transactional
     public FacultyResponse createFaculty(CreateFaculty request) {
@@ -44,6 +47,13 @@ public class FacultyService {
                 .toList();
     }
 
+    @Transactional
+    public FacultyResponse updateFaculty(String code, UpdateFaculty request) {
+        Faculty faculty = findFacultyByCode(code);
+        faculty.setName(request.getName() == null ? null : request.getName().trim());
+        return facultyMapper.toFacultyResponse(facultyRepository.save(faculty));
+    }
+
     private Faculty findFacultyByCode(String code) {
         return facultyRepository.findById(normalizeCode(code))
                 .orElseThrow(() -> new AppException(ErrorCode.FACULTY_NOT_FOUND));
@@ -53,6 +63,17 @@ public class FacultyService {
         if (facultyRepository.existsById(code)) {
             throw new AppException(ErrorCode.FACULTY_CODE_EXISTED);
         }
+    }
+
+    public void delete(String code) {
+        String normalized = normalizeCode(code);
+        if (!facultyRepository.existsById(normalized)) {
+            throw new AppException(ErrorCode.FACULTY_NOT_FOUND);
+        }
+        if (majorRepository.existsByFaculty_Code(normalized)) {
+            throw new AppException(ErrorCode.FACULTY_HAS_MAJORS);
+        }
+        facultyRepository.deleteById(normalized);
     }
 
     private String normalizeCode(String value) {

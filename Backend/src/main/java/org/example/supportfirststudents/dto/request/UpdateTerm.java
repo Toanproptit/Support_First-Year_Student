@@ -1,20 +1,25 @@
 package org.example.supportfirststudents.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDate;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CreateFaculty {
+public class UpdateTerm {
     @NotBlank
-    private String name;
+    String name;
 
-    @NotBlank
-    private String code;
-
+    LocalDate startDate;
+    LocalDate endDate;
 }
+

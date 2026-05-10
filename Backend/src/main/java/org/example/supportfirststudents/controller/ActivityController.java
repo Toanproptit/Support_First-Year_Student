@@ -8,6 +8,7 @@ import org.example.supportfirststudents.dto.request.CreateActivity;
 import org.example.supportfirststudents.dto.request.UpdateActivity;
 import org.example.supportfirststudents.dto.response.ActivityResponse;
 import org.example.supportfirststudents.dto.response.ApiResponse;
+import org.example.supportfirststudents.dto.response.PageResponse;
 import org.example.supportfirststudents.service.ActivityService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -48,6 +49,17 @@ public class ActivityController {
                 .code(200)
                 .message("Successfully retrieved activities")
                 .result(activityService.getAllActivities())
+                .build();
+    }
+
+    @GetMapping("/page")
+    public ApiResponse<PageResponse<ActivityResponse>> getAllActivitiesPaged(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ApiResponse.<PageResponse<ActivityResponse>>builder()
+                .code(200)
+                .message("Successfully retrieved activities")
+                .result(activityService.getAllActivitiesPaged(page, size))
                 .build();
     }
 

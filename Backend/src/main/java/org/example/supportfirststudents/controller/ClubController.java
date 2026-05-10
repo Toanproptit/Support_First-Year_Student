@@ -7,6 +7,7 @@ import lombok.experimental.FieldDefaults;
 import org.example.supportfirststudents.dto.request.CreateClub;
 import org.example.supportfirststudents.dto.response.ApiResponse;
 import org.example.supportfirststudents.dto.response.ClubResponse;
+import org.example.supportfirststudents.dto.response.PageResponse;
 import org.example.supportfirststudents.repository.ClubRepository;
 import org.example.supportfirststudents.service.ClubService;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +28,17 @@ public class ClubController {
                 .code(200)
                 .message("Success")
                 .result(clubService.getAllClubs())
+                .build();
+    }
+
+    @GetMapping("/page")
+    public ApiResponse<PageResponse<ClubResponse>> getAllClubsPaged(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ApiResponse.<PageResponse<ClubResponse>>builder()
+                .code(200)
+                .message("Success")
+                .result(clubService.getAllClubsPaged(page, size))
                 .build();
     }
 

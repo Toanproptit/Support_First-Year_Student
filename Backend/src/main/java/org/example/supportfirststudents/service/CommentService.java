@@ -6,6 +6,7 @@ import lombok.experimental.FieldDefaults;
 import org.example.supportfirststudents.dto.request.CreateComment;
 import org.example.supportfirststudents.dto.request.UpdateComment;
 import org.example.supportfirststudents.dto.response.CommentResponse;
+import org.example.supportfirststudents.dto.response.PageResponse;
 import org.example.supportfirststudents.entity.Comment;
 import org.example.supportfirststudents.entity.Post;
 import org.example.supportfirststudents.entity.User;
@@ -15,6 +16,9 @@ import org.example.supportfirststudents.mapper.CommentMapper;
 import org.example.supportfirststudents.repository.CommentRepository;
 import org.example.supportfirststudents.repository.PostRepository;
 import org.example.supportfirststudents.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -65,6 +69,26 @@ public class CommentService {
                 .collect(Collectors.toList());
     }
 
+    public PageResponse<CommentResponse> getAllCommentsPaged(int page, int size) {
+        PageRequest pageable = buildPageRequest(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Comment> commentPage = commentRepository.findAll(pageable);
+
+        List<CommentResponse> content = commentPage.getContent()
+                .stream()
+                .map(commentMapper::toCommentResponse)
+                .toList();
+
+        return PageResponse.<CommentResponse>builder()
+                .results(content)
+                .page(pageable.getPageNumber())
+                .size(pageable.getPageSize())
+                .totalElements(commentPage.getTotalElements())
+                .totalPages(commentPage.getTotalPages())
+                .first(commentPage.isFirst())
+                .last(commentPage.isLast())
+                .build();
+    }
+
     public List<CommentResponse> getCommentsByPostId(Long postId) {
         // Kiểm tra post có tồn tại không
         validatePostExists(postId);
@@ -75,6 +99,28 @@ public class CommentService {
                 .collect(Collectors.toList());
     }
 
+    public PageResponse<CommentResponse> getCommentsByPostIdPaged(Long postId, int page, int size) {
+        validatePostExists(postId);
+
+        PageRequest pageable = buildPageRequest(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Comment> commentPage = commentRepository.findByPostId(postId, pageable);
+
+        List<CommentResponse> content = commentPage.getContent()
+                .stream()
+                .map(commentMapper::toCommentResponse)
+                .toList();
+
+        return PageResponse.<CommentResponse>builder()
+                .results(content)
+                .page(pageable.getPageNumber())
+                .size(pageable.getPageSize())
+                .totalElements(commentPage.getTotalElements())
+                .totalPages(commentPage.getTotalPages())
+                .first(commentPage.isFirst())
+                .last(commentPage.isLast())
+                .build();
+    }
+
     public List<CommentResponse> getCommentsByUserId(Long userId) {
         // Kiểm tra user có tồn tại không
         validateUserExists(userId);
@@ -83,6 +129,28 @@ public class CommentService {
                 .stream()
                 .map(commentMapper::toCommentResponse)
                 .collect(Collectors.toList());
+    }
+
+    public PageResponse<CommentResponse> getCommentsByUserIdPaged(Long userId, int page, int size) {
+        validateUserExists(userId);
+
+        PageRequest pageable = buildPageRequest(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Comment> commentPage = commentRepository.findByUserId(userId, pageable);
+
+        List<CommentResponse> content = commentPage.getContent()
+                .stream()
+                .map(commentMapper::toCommentResponse)
+                .toList();
+
+        return PageResponse.<CommentResponse>builder()
+                .results(content)
+                .page(pageable.getPageNumber())
+                .size(pageable.getPageSize())
+                .totalElements(commentPage.getTotalElements())
+                .totalPages(commentPage.getTotalPages())
+                .first(commentPage.isFirst())
+                .last(commentPage.isLast())
+                .build();
     }
 
     @Transactional
@@ -175,5 +243,11 @@ public class CommentService {
             }
         }
         return false;
+    }
+
+    private PageRequest buildPageRequest(int page, int size, Sort sort) {
+        int validatePage = Math.max(page, 0);
+        int validateSize = size <= 0 ? 10 : Math.min(size, 100);
+        return PageRequest.of(validatePage, validateSize, sort);
     }
 }

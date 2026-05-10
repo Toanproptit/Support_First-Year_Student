@@ -6,6 +6,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.example.supportfirststudents.dto.request.CreatePost;
 import org.example.supportfirststudents.dto.request.UpdatePost;
+import org.example.supportfirststudents.dto.response.PageResponse;
 import org.example.supportfirststudents.dto.response.PostResponse;
 import org.example.supportfirststudents.entity.Category;
 import org.example.supportfirststudents.entity.Post;
@@ -20,6 +21,9 @@ import org.example.supportfirststudents.repository.CategoryRepository;
 import org.example.supportfirststudents.repository.PostCategoryRepository;
 import org.example.supportfirststudents.repository.PostRepository;
 import org.example.supportfirststudents.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -88,6 +92,29 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
+    public PageResponse<PostResponse> getAllPostsPaged(int page, int size) {
+        PageRequest pageable = buildPageRequest(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        Page<Post> postPage = isAdminCaller()
+                ? postRepository.findAll(pageable)
+                : postRepository.findByStatus(Status.APPROVED, pageable);
+
+        List<PostResponse> content = postPage.getContent()
+                .stream()
+                .map(postMapper::toPostResponse)
+                .toList();
+
+        return PageResponse.<PostResponse>builder()
+                .results(content)
+                .page(pageable.getPageNumber())
+                .size(pageable.getPageSize())
+                .totalElements(postPage.getTotalElements())
+                .totalPages(postPage.getTotalPages())
+                .first(postPage.isFirst())
+                .last(postPage.isLast())
+                .build();
+    }
+
     public List<PostResponse> getPendingPosts() {
         if (!isAdminCaller()) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
@@ -96,6 +123,30 @@ public class PostService {
                 .stream()
                 .map(postMapper::toPostResponse)
                 .collect(Collectors.toList());
+    }
+
+    public PageResponse<PostResponse> getPendingPostsPaged(int page, int size) {
+        if (!isAdminCaller()) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        PageRequest pageable = buildPageRequest(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Post> postPage = postRepository.findByStatus(Status.PENDING, pageable);
+
+        List<PostResponse> content = postPage.getContent()
+                .stream()
+                .map(postMapper::toPostResponse)
+                .toList();
+
+        return PageResponse.<PostResponse>builder()
+                .results(content)
+                .page(pageable.getPageNumber())
+                .size(pageable.getPageSize())
+                .totalElements(postPage.getTotalElements())
+                .totalPages(postPage.getTotalPages())
+                .first(postPage.isFirst())
+                .last(postPage.isLast())
+                .build();
     }
 
     @Transactional
@@ -130,6 +181,32 @@ public class PostService {
                 .stream()
                 .map(postMapper::toPostResponse)
                 .collect(Collectors.toList());
+    }
+
+    public PageResponse<PostResponse> getPostsByUserIdPaged(Long userId, int page, int size) {
+        validateUserExists(userId);
+
+        if (!isAdminCaller() && !isCallerUserId(userId)) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        PageRequest pageable = buildPageRequest(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Post> postPage = postRepository.findByUserId(userId, pageable);
+
+        List<PostResponse> content = postPage.getContent()
+                .stream()
+                .map(postMapper::toPostResponse)
+                .toList();
+
+        return PageResponse.<PostResponse>builder()
+                .results(content)
+                .page(pageable.getPageNumber())
+                .size(pageable.getPageSize())
+                .totalElements(postPage.getTotalElements())
+                .totalPages(postPage.getTotalPages())
+                .first(postPage.isFirst())
+                .last(postPage.isLast())
+                .build();
     }
 
     @Transactional
@@ -227,5 +304,11 @@ public class PostService {
             }
         }
         return false;
+    }
+
+    private PageRequest buildPageRequest(int page, int size, Sort sort) {
+        int validatePage = Math.max(page, 0);
+        int validateSize = size <= 0 ? 10 : Math.min(size, 100);
+        return PageRequest.of(validatePage, validateSize, sort);
     }
 }

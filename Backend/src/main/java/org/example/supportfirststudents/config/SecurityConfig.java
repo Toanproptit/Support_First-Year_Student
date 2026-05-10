@@ -18,7 +18,8 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 @EnableMethodSecurity
 public class SecurityConfig {
     private static final String [] PUBLIC_ENDPOINTS = {
-            "/auth/**"
+            "/auth/**",
+            "/clubs/**"
     };
 
     @Bean

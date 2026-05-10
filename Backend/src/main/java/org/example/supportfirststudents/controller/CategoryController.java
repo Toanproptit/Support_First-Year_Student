@@ -5,6 +5,7 @@ import org.example.supportfirststudents.dto.request.CreateCategory;
 import org.example.supportfirststudents.dto.request.UpdateCategory;
 import org.example.supportfirststudents.dto.response.ApiResponse;
 import org.example.supportfirststudents.dto.response.CategoryResponse;
+import org.example.supportfirststudents.dto.response.PageResponse;
 import org.example.supportfirststudents.service.CategoryService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +32,17 @@ public class CategoryController {
     }
 
     // 2. TẠO: Chỉ ADMIN
+    @GetMapping("/page")
+    public ApiResponse<PageResponse<CategoryResponse>> getAllCategoriesPaged(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ApiResponse.<PageResponse<CategoryResponse>>builder()
+                .code(200)
+                .message("Success")
+                .result(categoryService.getAllCategoriesPaged(page, size))
+                .build();
+    }
+
     @PostMapping
     public ApiResponse<CategoryResponse> createCategory(@RequestBody CreateCategory request) {
         return ApiResponse.<CategoryResponse>builder()

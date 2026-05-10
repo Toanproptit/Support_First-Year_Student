@@ -11,4 +11,5 @@ import lombok.experimental.FieldDefaults;
 public class MajorResponse {
     String code;
     String name;
+    String facultyCode;
 }
