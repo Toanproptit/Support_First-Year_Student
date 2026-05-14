@@ -35,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 @Service
@@ -255,14 +256,20 @@ public class PostService {
         }
 
         List<Long> postIds = posts.stream().map(Post::getId).toList();
-        Map<Long, Integer> likeCountByPostId = loadLikeCounts(postIds);
-        Set<Long> likedPostIds = loadLikedPostIdsByCaller(postIds);
+        Map<Long, Map<String, Integer>> counts = loadReactionCounts(postIds);
+        Map<Long, String> myTypes = loadMyReactionTypesByCaller(postIds);
 
         for (PostResponse response : responses) {
             if (response == null || response.getId() == null) continue;
             Long postId = response.getId();
-            response.setLikeCount(likeCountByPostId.getOrDefault(postId, 0));
-            response.setLikedByMe(likedPostIds.contains(postId));
+
+            Map<String, Integer> postCounts = counts.getOrDefault(postId, Map.of());
+            response.setReactionCounts(postCounts);
+            response.setMyReactionType(myTypes.get(postId));
+
+            int likeCount = postCounts.getOrDefault(ReactionType.LIKE.name(), 0);
+            response.setLikeCount(likeCount);
+            response.setLikedByMe(Objects.equals(response.getMyReactionType(), ReactionType.LIKE.name()));
         }
 
         return responses;
@@ -272,10 +279,17 @@ public class PostService {
         if (response == null || post == null || post.getId() == null) {
             return response;
         }
-        Map<Long, Integer> likeCounts = loadLikeCounts(List.of(post.getId()));
-        Set<Long> likedPostIds = loadLikedPostIdsByCaller(List.of(post.getId()));
-        response.setLikeCount(likeCounts.getOrDefault(post.getId(), 0));
-        response.setLikedByMe(likedPostIds.contains(post.getId()));
+
+        Map<Long, Map<String, Integer>> counts = loadReactionCounts(List.of(post.getId()));
+        Map<Long, String> myTypes = loadMyReactionTypesByCaller(List.of(post.getId()));
+
+        Map<String, Integer> postCounts = counts.getOrDefault(post.getId(), Map.of());
+        response.setReactionCounts(postCounts);
+        response.setMyReactionType(myTypes.get(post.getId()));
+
+        int likeCount = postCounts.getOrDefault(ReactionType.LIKE.name(), 0);
+        response.setLikeCount(likeCount);
+        response.setLikedByMe(Objects.equals(response.getMyReactionType(), ReactionType.LIKE.name()));
         return response;
     }
 
@@ -308,6 +322,50 @@ public class PostService {
         }
         List<Long> likedIds = reactionRepository.findPostIdsByUserAndType(caller.getId(), postIds, ReactionType.LIKE);
         return likedIds == null ? Set.of() : Set.copyOf(likedIds);
+    }
+
+    private Map<Long, Map<String, Integer>> loadReactionCounts(List<Long> postIds) {
+        if (postIds == null || postIds.isEmpty()) {
+            return Map.of();
+        }
+        Map<Long, Map<String, Integer>> result = new HashMap<>();
+        List<Object[]> rows = reactionRepository.countByPostIdsGroupByType(postIds);
+        if (rows == null) return result;
+
+        for (Object[] row : rows) {
+            if (row == null || row.length < 3) continue;
+            Long postId = (Long) row[0];
+            ReactionType type = (ReactionType) row[1];
+            Long count = (Long) row[2];
+            if (postId == null || type == null || count == null) continue;
+
+            Map<String, Integer> byType = result.computeIfAbsent(postId, k -> new HashMap<>());
+            byType.put(type.name(), Math.toIntExact(count));
+        }
+        return result;
+    }
+
+    private Map<Long, String> loadMyReactionTypesByCaller(List<Long> postIds) {
+        if (postIds == null || postIds.isEmpty()) {
+            return Map.of();
+        }
+        User caller = getCallerUser();
+        if (caller == null || caller.getId() == null) {
+            return Map.of();
+        }
+        Map<Long, String> result = new HashMap<>();
+        List<Object[]> rows = reactionRepository.findMyReactionTypesByPostIds(caller.getId(), postIds);
+        if (rows == null) return result;
+
+        for (Object[] row : rows) {
+            if (row == null || row.length < 2) continue;
+            Long postId = (Long) row[0];
+            ReactionType type = (ReactionType) row[1];
+            if (postId != null && type != null) {
+                result.put(postId, type.name());
+            }
+        }
+        return result;
     }
 
 

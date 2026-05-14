@@ -15,6 +15,25 @@
     padding: 40px 30px;
 }
 
+.cas-back-home {
+    margin-bottom: 16px;
+}
+
+.cas-back-home-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #c8102e;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 13px;
+}
+
+.cas-back-home-link:hover {
+    color: #a00a24;
+    text-decoration: underline;
+}
+
 .cas-logo-header {
     text-align: center;
     margin-bottom: 30px;

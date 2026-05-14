@@ -42,6 +42,11 @@ export default function StudentLogin() {
   return (
     <div className="cas-layout">
       <div className="cas-sidebar">
+        <div className="cas-back-home">
+          <Link to="/" className="cas-back-home-link" aria-label="Trở về Home">
+            ← Trở về Home
+          </Link>
+        </div>
         <div className="cas-logo-header">
           <img src={logoPtit} alt="PTIT Logo" className="cas-logo-img" />
           <h2>Central Authentication Service</h2>

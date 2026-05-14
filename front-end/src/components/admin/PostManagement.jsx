@@ -6,17 +6,7 @@ import { approvePost, deletePost, getAllPosts, getPendingPosts, rejectPost } fro
 
 const PAGE_SIZE = 4;
 
-const mockPosts = []; /*
-  { id: 1, author: "Nguyễn Văn A",   avatar: "N", avatarColor: "#c8102e", content: "Mọi người cho mình hỏi lịch đăng ký tín chỉ học kỳ 2 xem ở đâu vậy ạ? Mình tìm trên web trường không thấy 🥺", likes: 15, comments: 3, postedAt: "2 giờ trước",   status: "Bình thường", reported: false },
-  { id: 2, author: "Trần Thị Bình",  avatar: "T", avatarColor: "#10b981", content: "Ai biết phòng học môn Giải tích 2 tuần này chuyển sang phòng nào không ạ? Trong QLDT không thấy cập nhật.", likes: 8,  comments: 5, postedAt: "5 giờ trước",   status: "Bình thường", reported: false },
-  { id: 3, author: "Lê Văn C",       avatar: "L", avatarColor: "#f59e0b", content: "Trang tín chỉ ptit dạo này hay sập lắm, mọi người có cách nào đăng ký không bị lỗi không ạ? =))", likes: 22, comments: 10, postedAt: "1 ngày trước",  status: "Bình thường", reported: false },
-  { id: 4, author: "Phạm Thị D",     avatar: "P", avatarColor: "#3b82f6", content: "Cho mình hỏi thủ tục làm thẻ sinh viên lần đầu cần những giấy tờ gì ạ? Cảm ơn mọi người!", likes: 5,  comments: 2, postedAt: "2 ngày trước",  status: "Bình thường", reported: false },
-  { id: 5, author: "Vũ Quốc Nam",    avatar: "V", avatarColor: "#8b5cf6", content: "Mình muốn hỏi về việc chuyển ngành/chuyên ngành ở trường thì làm thế nào ạ? Cần điều kiện gì không?", likes: 11, comments: 4, postedAt: "3 ngày trước",  status: "Bình thường", reported: false },
-  { id: 6, author: "Hoàng Đức Long", avatar: "H", avatarColor: "#06b6d4", content: "Bạn nào biết ký túc xá còn phòng không? Mình chuẩn bị nhập học và cần thuê chỗ ở gấp.", likes: 7,  comments: 6, postedAt: "4 ngày trước",  status: "Bình thường", reported: false },
-  { id: 7, author: "Đỗ Thanh Mai",   avatar: "Đ", avatarColor: "#f97316", content: "Học bổng khuyến khích học tập học kỳ này có nộp hồ sơ không hay tự động xét ạ?", likes: 19, comments: 8, postedAt: "5 ngày trước",  status: "Bình thường", reported: false },
-  { id: 8, author: "Ẩn danh",        avatar: "?", avatarColor: "#94a3b8", content: "Bài viết có nội dung không phù hợp (đã bị báo cáo)...",                                                        likes: 1,  comments: 0, postedAt: "6 ngày trước",  status: "Bị báo cáo",  reported: true  },
-  { id: 9, author: "Bùi Thị Oanh",   avatar: "B", avatarColor: "#ec4899", content: "Các bạn ơi lịch thi lại học phần Vật lý đã ra chưa ạ? Mình tìm mãi không thấy trên cổng thông tin.", likes: 9,  comments: 3, postedAt: "7 ngày trước",  status: "Bình thường", reported: false },
-*/
+const mockPosts = [];
 
 const STATUS_FILTERS = ["Tất cả", "PENDING", "APPROVED", "REJECTED"];
 
@@ -30,17 +20,31 @@ function hashColor(input) {
 
 function mapPostToUi(p) {
   const author = p?.userName || "Unknown";
+  const reactionCounts = p?.reactionCounts || {};
+  const totalReactions =
+    Object.values(reactionCounts).reduce((acc, v) => acc + (Number(v) || 0), 0) || Number(p?.likeCount || 0);
   return {
     id: p?.id,
     author,
     avatar: author?.[0]?.toUpperCase?.() || "?",
     avatarColor: hashColor(author),
     content: `${p?.title ? p.title + "\n" : ""}${p?.content || ""}`,
-    likes: 0,
+    likes: totalReactions,
+    reactionCounts,
     comments: p?.commentCount ?? 0,
     postedAt: p?.createdAt ? new Date(p.createdAt).toLocaleString("vi-VN") : "",
     status: p?.status || "UNKNOWN",
   };
+}
+
+function reactionSummary(reactionCounts) {
+  const entries = Object.entries(reactionCounts || {}).filter(([, v]) => Number(v) > 0);
+  if (entries.length === 0) return "";
+  entries.sort((a, b) => Number(b[1]) - Number(a[1]));
+  return entries
+    .slice(0, 3)
+    .map(([type, count]) => `${type} ${count}`)
+    .join(" · ");
 }
 
 export default function PostManagement() {
@@ -198,7 +202,9 @@ export default function PostManagement() {
             </div>
 
             <div className="post-stats">
-              <span className="stat-item">🔥 {post.likes} thích</span>
+              <span className="stat-item" title={reactionSummary(post.reactionCounts)}>
+                🔥 {post.likes} thích
+              </span>
               <span className="stat-item">💬 {post.comments} bình luận</span>
             </div>
 

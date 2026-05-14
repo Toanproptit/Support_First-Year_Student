@@ -4,6 +4,8 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -11,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CommentResponse {
+public class CommentTreeResponse {
     Long id;
     String content;
     LocalDateTime createdAt;
@@ -21,4 +23,8 @@ public class CommentResponse {
     String postTitle;
     Long userId;
     String userName;
+
+    @Builder.Default
+    List<CommentTreeResponse> replies = new ArrayList<>();
 }
+

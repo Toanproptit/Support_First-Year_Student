@@ -20,4 +20,8 @@ public class CreateComment {
 
     @NotNull(message = "User ID không được để trống")
     Long userId;
+
+    // optional: reply to another comment
+    Long parentId;
 }
+

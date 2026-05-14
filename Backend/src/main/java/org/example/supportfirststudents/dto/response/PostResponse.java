@@ -3,11 +3,11 @@ package org.example.supportfirststudents.dto.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.example.supportfirststudents.entity.Category;
 import org.example.supportfirststudents.enums.Status;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @Builder
@@ -26,5 +26,7 @@ public class PostResponse {
     Integer commentCount;
     Integer likeCount;
     Boolean likedByMe;
+    Map<String, Integer> reactionCounts;
+    String myReactionType;
     List<CategoryResponse> categories;
 }

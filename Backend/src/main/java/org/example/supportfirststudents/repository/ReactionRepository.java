@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 
@@ -38,4 +39,19 @@ public interface ReactionRepository extends JpaRepository<Reaction,Long> {
             @Param("postIds") List<Long> postIds,
             @Param("type") ReactionType type
     );
+
+    @Query("""
+            select r.post.id, r.type, count(r)
+            from Reaction r
+            where r.post.id in :postIds
+            group by r.post.id, r.type
+            """)
+    List<Object[]> countByPostIdsGroupByType(@Param("postIds") List<Long> postIds);
+
+    @Query("""
+            select r.post.id, r.type
+            from Reaction r
+            where r.user.id = :userId and r.post.id in :postIds
+            """)
+    List<Object[]> findMyReactionTypesByPostIds(@Param("userId") Long userId, @Param("postIds") List<Long> postIds);
 }

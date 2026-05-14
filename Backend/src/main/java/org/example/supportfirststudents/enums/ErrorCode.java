@@ -73,6 +73,7 @@ public enum ErrorCode {
     TERM_NOT_FOUND(1050, "Term not found", HttpStatus.NOT_FOUND),
     TERM_CODE_EXISTED(1051, "Term code existed", HttpStatus.BAD_REQUEST),
     COURSE_SECTION_CODE_EXISTED(1052, "Course section code existed", HttpStatus.BAD_REQUEST),
+    INVALID_COMMENT_PARENT(1056, "Invalid parent comment", HttpStatus.BAD_REQUEST),
     ;
 
     final int code;

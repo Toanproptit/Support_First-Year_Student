@@ -1,14 +1,68 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { getMe } from "../../../service/me";
 import { getAllCategories } from "../../../service/categories";
 import {
   createPost as createPostApi,
   deletePost as deletePostApi,
   getAllPosts as getAllPostsApi,
+  getPostsByUserId as getPostsByUserIdApi,
   updatePost as updatePostApi,
 } from "../../../service/posts";
-import { createComment as createCommentApi, getCommentsByPostId as getCommentsByPostIdApi } from "../../../service/comments";
+import { createComment as createCommentApi, createReply as createReplyApi, getCommentsTreeByPostId as getCommentsTreeByPostIdApi } from "../../../service/comments";
 import { createReaction as createReactionApi, deleteReaction as deleteReactionApi } from "../../../service/reactions";
+
+const mapTreeCommentToUi = (c) => ({
+  id: c?.id,
+  author: c?.userName || "Unknown",
+  time: c?.createdAt ? new Date(c.createdAt).toLocaleString("vi-VN") : "",
+  text: c?.content || "",
+  likes: 0,
+  isLiked: false,
+  replies: Array.isArray(c?.replies) ? c.replies.map(mapTreeCommentToUi) : [],
+});
+
+const addReplyToTree = (nodes, targetId, replyNode) => {
+  if (!Array.isArray(nodes) || nodes.length === 0) return nodes || [];
+  return nodes.map((n) => {
+    if (n?.id === targetId) {
+      return { ...n, replies: [...(n.replies || []), replyNode] };
+    }
+    if (Array.isArray(n?.replies) && n.replies.length > 0) {
+      return { ...n, replies: addReplyToTree(n.replies, targetId, replyNode) };
+    }
+    return n;
+  });
+};
+
+const countCommentsInTree = (nodes) => {
+  if (!Array.isArray(nodes) || nodes.length === 0) return 0;
+  return nodes.reduce((acc, n) => acc + 1 + countCommentsInTree(n?.replies), 0);
+};
+
+const REACTIONS = [
+  { type: "LIKE", label: "Like" },
+  { type: "LOVE", label: "Love" },
+  { type: "HAHA", label: "Haha" },
+  { type: "WOW", label: "Wow" },
+  { type: "SAD", label: "Sad" },
+  { type: "ANGRY", label: "Angry" },
+];
+
+const sumReactionCounts = (counts) =>
+  Object.values(counts || {}).reduce((acc, v) => acc + (Number(v) || 0), 0);
+
+const buildReactionSummary = (counts) => {
+  const entries = Object.entries(counts || {}).filter(([, v]) => Number(v) > 0);
+  if (entries.length === 0) return "";
+  const byCountDesc = entries.sort((a, b) => Number(b[1]) - Number(a[1]));
+  return byCountDesc
+    .slice(0, 3)
+    .map(([type, count]) => {
+      const label = REACTIONS.find((r) => r.type === type)?.label || type;
+      return `${label} ${count}`;
+    })
+    .join(" · ");
+};
 
 export default function QaTab({ toast, fallbackUserName }) {
   const [me, setMe] = useState(null);
@@ -17,6 +71,8 @@ export default function QaTab({ toast, fallbackUserName }) {
   const [categories, setCategories] = useState([]);
   const [selectedCategoryIds, setSelectedCategoryIds] = useState([]);
   const [filterCategoryId, setFilterCategoryId] = useState("");
+  const [postScope, setPostScope] = useState("all"); // all | mine
+  const [myStatusFilter, setMyStatusFilter] = useState("ALL"); // ALL | PENDING | APPROVED | REJECTED
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [createTitle, setCreateTitle] = useState("");
@@ -30,14 +86,23 @@ export default function QaTab({ toast, fallbackUserName }) {
   const [visibleCommentsCount, setVisibleCommentsCount] = useState({});
   const [openReplyBoxes, setOpenReplyBoxes] = useState({});
   const [replyInputs, setReplyInputs] = useState({});
+  const [collapsedReplies, setCollapsedReplies] = useState({});
+  const [openReactionPickerForPostId, setOpenReactionPickerForPostId] = useState(null);
+  const reactionPickerCloseTimerRef = useRef(null);
 
   const currentUser = me?.fullName || fallbackUserName || "User";
 
   const filteredPosts = useMemo(() => {
+    let result = posts || [];
+
+    if (postScope === "mine" && myStatusFilter !== "ALL") {
+      result = result.filter((p) => String(p.status || "").toUpperCase() === myStatusFilter);
+    }
+
     const id = Number(filterCategoryId);
-    if (!id) return posts || [];
-    return (posts || []).filter((p) => Array.isArray(p.categories) && p.categories.some((c) => Number(c.id) === id));
-  }, [posts, filterCategoryId]);
+    if (!id) return result;
+    return result.filter((p) => Array.isArray(p.categories) && p.categories.some((c) => Number(c.id) === id));
+  }, [posts, filterCategoryId, postScope, myStatusFilter]);
 
   useEffect(() => {
     let cancelled = false;
@@ -52,41 +117,15 @@ export default function QaTab({ toast, fallbackUserName }) {
         if (cancelled) return;
         setMe(meRes);
 
-        const postResponses = await getAllPostsApi();
-        if (cancelled) return;
+        // const postResponses = await getAllPostsApi();
+        // if (cancelled) return;
 
-        const uiPosts = await Promise.all(
-          (postResponses || []).map(async (p) => {
-            const commentsRes = await getCommentsByPostIdApi(p.id);
-            return {
-              id: p.id,
-              author: p.userName || "Unknown",
-              time: p.createdAt ? new Date(p.createdAt).toLocaleString("vi-VN") : "",
-              title: p.title || "",
-              text: p.content || "",
-              categories: p.categories || [],
-              likes: Number(p.likeCount ?? 0),
-              isLiked: Boolean(p.likedByMe),
-              comments: (commentsRes || []).map((c) => ({
-                id: c.id,
-                author: c.userName || "Unknown",
-                time: c.createdAt ? new Date(c.createdAt).toLocaleString("vi-VN") : "",
-                text: c.content || "",
-                likes: 0,
-                isLiked: false,
-                replies: [],
-              })),
-            };
-          })
-        );
-
-        if (cancelled) return;
-        setPosts(uiPosts);
+        // Posts are loaded in a separate effect so "Bai cua toi" can use a different source.
       } catch (e) {
         toast?.show?.({
           type: "error",
-          title: "Không tải được bài viết",
-          message: e?.message || "Vui lòng thử lại.",
+          title: "Khong tai duoc bai viet",
+          message: e?.message || "Vui long thu lai.",
         });
       } finally {
         if (!cancelled) setQaLoading(false);
@@ -98,6 +137,57 @@ export default function QaTab({ toast, fallbackUserName }) {
       cancelled = true;
     };
   }, [toast]);
+
+  useEffect(() => {
+    if (!me?.id) return;
+
+    let cancelled = false;
+    async function loadPosts() {
+      try {
+        setQaLoading(true);
+
+        const postResponses = postScope === "mine" ? await getPostsByUserIdApi(me.id) : await getAllPostsApi();
+        if (cancelled) return;
+
+        const uiPosts = await Promise.all(
+          (postResponses || []).map(async (p) => {
+            const commentsTreeRes = await getCommentsTreeByPostIdApi(p.id);
+            return {
+              id: p.id,
+              userId: p.userId,
+              status: p.status,
+              author: p.userName || "Unknown",
+              time: p.createdAt ? new Date(p.createdAt).toLocaleString("vi-VN") : "",
+              title: p.title || "",
+              text: p.content || "",
+              categories: p.categories || [],
+              reactionCounts: p?.reactionCounts || {},
+              myReactionType: p?.myReactionType || null,
+              likes: sumReactionCounts(p?.reactionCounts) || Number(p.likeCount ?? 0),
+              isLiked: Boolean(p?.myReactionType) || Boolean(p.likedByMe),
+              comments: (commentsTreeRes || []).map(mapTreeCommentToUi),
+            };
+          })
+        );
+
+        if (cancelled) return;
+        setPosts(uiPosts);
+      } catch (e) {
+        toast?.show?.({
+          type: "error",
+          title: "Khong tai duoc bai viet",
+          message: e?.message || "Vui long thu lai",
+        });
+      } finally {
+        if (!cancelled) setQaLoading(false);
+      }
+    }
+
+    loadPosts();
+    return () => {
+      cancelled = true;
+    };
+  }, [toast, me?.id, postScope]);
 
   const handleStartEdit = (post) => {
     setEditingPostId(post.id);
@@ -127,16 +217,36 @@ export default function QaTab({ toast, fallbackUserName }) {
       const created = await createPostApi({ title, content, userId: me.id, categoryIds: selectedCategoryIds });
       const uiPost = {
         id: created?.id,
+        userId: created?.userId ?? me.id,
+        status: created?.status,
         author: created?.userName || currentUser,
         time: created?.createdAt ? new Date(created.createdAt).toLocaleString("vi-VN") : "Vừa xong",
         title: created?.title || title,
         text: created?.content || content,
         categories: created?.categories || [],
-        likes: Number(created?.likeCount ?? 0),
-        isLiked: Boolean(created?.likedByMe),
+        reactionCounts: created?.reactionCounts || {},
+        myReactionType: created?.myReactionType || null,
+        likes: sumReactionCounts(created?.reactionCounts) || Number(created?.likeCount ?? 0),
+        isLiked: Boolean(created?.myReactionType) || Boolean(created?.likedByMe),
         comments: [],
       };
-      setPosts((prev) => [uiPost, ...(prev || [])]);
+      toast?.show?.({
+        type: "success",
+        title: "Đã gửi bài",
+        message:
+          String(uiPost.status || "").toUpperCase() === "APPROVED"
+            ? "Bài viết đã đăng thành công."
+            : "Bài viết đang chờ duyệt. Bạn có thể xem trong \"Bài của tôi\".",
+      });
+
+      if (String(uiPost.status || "").toUpperCase() !== "APPROVED") {
+        setPostScope("mine");
+        setMyStatusFilter("ALL");
+      }
+
+      if (postScope === "mine" || String(uiPost.status || "").toUpperCase() === "APPROVED") {
+        setPosts((prev) => [uiPost, ...(prev || [])]);
+      }
       setSelectedCategoryIds([]);
       setIsCreateOpen(false);
     } catch (e) {
@@ -171,33 +281,53 @@ export default function QaTab({ toast, fallbackUserName }) {
     }
   };
 
-  const handleLikePost = async (postId) => {
+  const handleReactPost = async (postId, reactionType) => {
     if (!me?.id) return;
     const post = (posts || []).find((p) => p.id === postId);
     if (!post) return;
 
-    const nextLiked = !post.isLiked;
+    const prevType = post.myReactionType || null;
+    const isRemoving = prevType && prevType === reactionType;
+    const nextType = isRemoving ? null : reactionType;
+
     setPosts((prev) =>
-      (prev || []).map((p) =>
-        p.id === postId
-          ? { ...p, isLiked: nextLiked, likes: nextLiked ? p.likes + 1 : Math.max(0, p.likes - 1) }
-          : p
-      )
+      (prev || []).map((p) => {
+        if (p.id !== postId) return p;
+        const nextCounts = { ...(p.reactionCounts || {}) };
+        if (prevType) nextCounts[prevType] = Math.max(0, Number(nextCounts[prevType] || 0) - 1);
+        if (nextType) nextCounts[nextType] = Number(nextCounts[nextType] || 0) + 1;
+        return {
+          ...p,
+          reactionCounts: nextCounts,
+          myReactionType: nextType,
+          isLiked: Boolean(nextType),
+          likes: sumReactionCounts(nextCounts),
+        };
+      })
     );
+    setOpenReactionPickerForPostId((prev) => (prev === postId ? null : prev));
 
     try {
-      if (nextLiked) {
-        await createReactionApi({ userId: me.id, postId, reactionType: "LIKE" });
-      } else {
+      if (isRemoving) {
         await deleteReactionApi({ userId: me.id, postId });
+      } else {
+        await createReactionApi({ userId: me.id, postId, reactionType });
       }
     } catch (e) {
       setPosts((prev) =>
-        (prev || []).map((p) =>
-          p.id === postId
-            ? { ...p, isLiked: !nextLiked, likes: !nextLiked ? p.likes + 1 : Math.max(0, p.likes - 1) }
-            : p
-        )
+        (prev || []).map((p) => {
+          if (p.id !== postId) return p;
+          const rollbackCounts = { ...(p.reactionCounts || {}) };
+          if (nextType) rollbackCounts[nextType] = Math.max(0, Number(rollbackCounts[nextType] || 0) - 1);
+          if (prevType) rollbackCounts[prevType] = Number(rollbackCounts[prevType] || 0) + 1;
+          return {
+            ...p,
+            reactionCounts: rollbackCounts,
+            myReactionType: prevType,
+            isLiked: Boolean(prevType),
+            likes: sumReactionCounts(rollbackCounts),
+          };
+        })
       );
       toast?.show?.({ type: "error", title: "Thao tác thất bại", message: e?.message || "Vui lòng thử lại." });
     }
@@ -228,39 +358,163 @@ export default function QaTab({ toast, fallbackUserName }) {
     }
   };
 
-  const handleAddReply = (postId, commentId) => {
-    const replyText = replyInputs[commentId];
-    if (!replyText || !replyText.trim()) return;
-    const newReply = { id: Date.now(), author: currentUser, time: "Vừa xong", text: replyText, likes: 0, isLiked: false };
-    setPosts((prev) =>
-      (prev || []).map((post) => {
-        if (post.id !== postId) return post;
-        return {
-          ...post,
-          comments: (post.comments || []).map((cmt) =>
-            cmt.id === commentId ? { ...cmt, replies: [...(cmt.replies || []), newReply] } : cmt
-          ),
-        };
-      })
-    );
-    setReplyInputs((prev) => ({ ...(prev || {}), [commentId]: "" }));
-    setOpenReplyBoxes((prev) => ({ ...(prev || {}), [commentId]: false }));
+  const handleAddReply = async (postId, commentId) => {
+    const replyText = (replyInputs?.[commentId] || "").trim();
+    if (!replyText) return;
+    if (!me?.id) return;
+    try {
+      const created = await createReplyApi({ content: replyText, postId, userId: me.id, parentId: commentId });
+      const newReply = {
+        id: created?.id,
+        author: created?.userName || currentUser,
+        time: created?.createdAt ? new Date(created.createdAt).toLocaleString("vi-VN") : "Vừa xong",
+        text: created?.content || replyText,
+        likes: 0,
+        isLiked: false,
+        replies: [],
+      };
+
+      setPosts((prev) =>
+        (prev || []).map((post) => {
+          if (post.id !== postId) return post;
+          return {
+            ...post,
+            comments: addReplyToTree(post.comments || [], commentId, newReply),
+          };
+        })
+      );
+
+      setReplyInputs((prev) => ({ ...(prev || {}), [commentId]: "" }));
+      setOpenReplyBoxes((prev) => ({ ...(prev || {}), [commentId]: false }));
+    } catch (e) {
+      toast?.show?.({ type: "error", title: "Phản hồi thất bại", message: e?.message || "Vui lòng thử lại." });
+    }
   };
 
   const toggleReplyBox = (cmtId) => setOpenReplyBoxes((prev) => ({ ...(prev || {}), [cmtId]: !prev?.[cmtId] }));
+  const toggleReplies = (cmtId) =>
+    setCollapsedReplies((prev) => {
+      const current = prev?.[cmtId];
+      const next = current === undefined ? false : !current;
+      return { ...(prev || {}), [cmtId]: next };
+    });
   const handleLoadMoreComments = (postId) =>
     setVisibleCommentsCount((prev) => ({ ...(prev || {}), [postId]: (prev?.[postId] || 2) + 2 }));
   const handleCollapseComments = (postId) => setVisibleCommentsCount((prev) => ({ ...(prev || {}), [postId]: 2 }));
 
+  const openReactionPicker = (postId) => {
+    if (reactionPickerCloseTimerRef.current) {
+      clearTimeout(reactionPickerCloseTimerRef.current);
+      reactionPickerCloseTimerRef.current = null;
+    }
+    setOpenReactionPickerForPostId(postId);
+  };
+
+  const scheduleCloseReactionPicker = (postId) => {
+    if (reactionPickerCloseTimerRef.current) {
+      clearTimeout(reactionPickerCloseTimerRef.current);
+    }
+    reactionPickerCloseTimerRef.current = setTimeout(() => {
+      setOpenReactionPickerForPostId((prev) => (prev === postId ? null : prev));
+      reactionPickerCloseTimerRef.current = null;
+    }, 250);
+  };
+
+  const CommentNode = ({ node, postId, depth = 0 }) => {
+    if (!node?.id) return null;
+    const isReply = depth > 0;
+    const bubbleClass = isReply ? "fb-comment-bubble reply-bubble" : "fb-comment-bubble";
+    const isCollapsed = collapsedReplies?.[node.id] ?? true;
+    const repliesCount = Array.isArray(node.replies) ? node.replies.length : 0;
+
+    return (
+      <div className="fb-comment-thread" style={depth ? { marginLeft: Math.min(depth * 18, 72) } : undefined}>
+        <div className="fb-comment-row">
+          <div className={`avatar-small ${isReply ? "alt3" : "alt2"}`}>{node.author?.charAt?.(0) || "?"}</div>
+          <div className="fb-comment-body">
+            <div className={bubbleClass}>
+              <strong>{node.author}</strong>
+              <span>{node.text}</span>
+              {node.likes > 0 && <div className="fb-comment-like-count">Like {node.likes}</div>}
+            </div>
+            <div className="fb-comment-actions">
+              <button onClick={() => toggleReplyBox(node.id)}>Phản hồi</button>
+              {repliesCount > 0 && (
+                <button onClick={() => toggleReplies(node.id)}>
+                  {isCollapsed ? `Xem ${repliesCount} phản hồi` : "Thu gọn"}
+                </button>
+              )}
+            </div>
+
+            {!isCollapsed && Array.isArray(node.replies) && node.replies.length > 0 && (
+              <div className="fb-replies-list">
+                {node.replies.map((child) => (
+                  <CommentNode key={child.id} node={child} postId={postId} depth={depth + 1} />
+                ))}
+              </div>
+            )}
+
+            {openReplyBoxes[node.id] && (
+              <div className="fb-reply-input-row">
+                <input
+                  type="text"
+                  placeholder="Viết phản hồi..."
+                  value={replyInputs[node.id] || ""}
+                  onChange={(e) => setReplyInputs((prev) => ({ ...(prev || {}), [node.id]: e.target.value }))}
+                  onKeyDown={(e) => {
+                    if (e.key !== "Enter") return;
+                    handleAddReply(postId, node.id);
+                  }}
+                />
+                <button className="send-icon-btn" onClick={() => handleAddReply(postId, node.id)}>
+                  Gửi
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="fb-forum-container">
-      {qaLoading && <div style={{ padding: 12 }}>Đang tải bài viết...</div>}
+      {qaLoading && <div style={{ padding: 12 }}>{"Đang tải bài viết..."}</div>}
 
       <div className="fb-forum-topbar">
-        <div className="fb-field">
-          <label className="fb-label">Lọc theo danh mục</label>
+        <div className="fb-topbar-left">
+          <div className="fb-field">
+            <label className="fb-label">{"Hiển thị"}</label>
+            <select
+              className="fb-select"
+              value={postScope}
+              onChange={(e) => {
+                const next = e.target.value;
+                setPostScope(next);
+                if (next !== "mine") setMyStatusFilter("ALL");
+              }}
+            >
+              <option value="all">{"Tất cả bài đã duyệt"}</option>
+              <option value="mine">{"Bài của tôi"}</option>
+            </select>
+          </div>
+
+          {postScope === "mine" && (
+            <div className="fb-field">
+              <label className="fb-label">{"Trạng thái"}</label>
+              <select className="fb-select" value={myStatusFilter} onChange={(e) => setMyStatusFilter(e.target.value)}>
+                <option value="ALL">{"Tất cả"}</option>
+                <option value="PENDING">{"Chờ duyệt"}</option>
+                <option value="APPROVED">{"Đã duyệt"}</option>
+                <option value="REJECTED">{"Từ chối"}</option>
+              </select>
+            </div>
+          )}
+
+          <div className="fb-field">
+          <label className="fb-label">{"Lọc theo danh mục"}</label>
           <select className="fb-select" value={filterCategoryId} onChange={(e) => setFilterCategoryId(e.target.value)}>
-            <option value="">Tất cả</option>
+            <option value="">{"Tất cả"}</option>
             {(categories || []).map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
@@ -269,8 +523,10 @@ export default function QaTab({ toast, fallbackUserName }) {
           </select>
         </div>
 
+        </div>
+
         <button className="fb-post-btn" type="button" onClick={openCreate}>
-          + Đăng bài
+          {"+ Đăng bài"}
         </button>
       </div>
 
@@ -283,7 +539,7 @@ export default function QaTab({ toast, fallbackUserName }) {
                 <div className="fb-modal-subtitle">Chọn danh mục, nhập tiêu đề và nội dung chi tiết</div>
               </div>
               <button className="fb-modal-close" type="button" onClick={() => setIsCreateOpen(false)} aria-label="Đóng">
-                ×
+                x
               </button>
             </div>
 
@@ -299,7 +555,7 @@ export default function QaTab({ toast, fallbackUserName }) {
                     setSelectedCategoryIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
                   }}
                 >
-                  <option value="">Chọn danh mục…</option>
+                  <option value="">Chọn danh mục...</option>
                   {(categories || []).map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.name}
@@ -322,7 +578,7 @@ export default function QaTab({ toast, fallbackUserName }) {
                         title="Bỏ chọn"
                       >
                         <span className="fb-chip-text">{label}</span>
-                        <span className="fb-chip-x">×</span>
+                        <span className="fb-chip-x">x</span>
                       </button>
                     );
                   })}
@@ -334,7 +590,7 @@ export default function QaTab({ toast, fallbackUserName }) {
                 <input
                   className="fb-input"
                   type="text"
-                  placeholder="Nhập tiêu đề ngắn gọn…"
+                  placeholder="Nhập tiêu đề ngắn gọn..."
                   value={createTitle}
                   onChange={(e) => setCreateTitle(e.target.value)}
                 />
@@ -345,7 +601,7 @@ export default function QaTab({ toast, fallbackUserName }) {
                 <textarea
                   className="fb-textarea"
                   rows={6}
-                  placeholder="Mô tả chi tiết vấn đề bạn đang gặp phải…"
+                  placeholder="Mô tả chi tiết vấn đề bạn đang gặp phải..."
                   value={createContent}
                   onChange={(e) => setCreateContent(e.target.value)}
                 />
@@ -370,9 +626,7 @@ export default function QaTab({ toast, fallbackUserName }) {
           const visibleCount = visibleCommentsCount[post.id] || 2;
           const displayedComments = sortedComments.slice(0, visibleCount);
           const remainingComments = sortedComments.length - visibleCount;
-          const totalCommentsCount =
-            (post.comments || []).length +
-            (post.comments || []).reduce((acc, cmt) => acc + ((cmt.replies || []).length || 0), 0);
+          const totalCommentsCount = countCommentsInTree(post.comments || []);
 
           return (
             <div key={post.id} className="fb-post-card">
@@ -381,10 +635,19 @@ export default function QaTab({ toast, fallbackUserName }) {
                   <div className="avatar-small alt">{post.author?.charAt?.(0) || "?"}</div>
                   <div>
                     <strong>{post.author}</strong>
-                    <span className="fb-post-time">{post.time} • 🌎</span>
+                    <span className="fb-post-time">{post.time}</span>
                   </div>
                 </div>
-                {post.author === currentUser && (
+                {postScope === "mine" && post.status ? (
+                  <span className={`fb-post-status status-${String(post.status || "").toLowerCase()}`}>
+                    {String(post.status).toUpperCase() === "APPROVED"
+                      ? "Đã duyệt"
+                      : String(post.status).toUpperCase() === "REJECTED"
+                        ? "Từ chối"
+                        : "Chờ duyệt"}
+                  </span>
+                ) : null}
+                {post.userId && me?.id && Number(post.userId) === Number(me.id) && (
                   <div className="fb-post-actions-menu">
                     <button onClick={() => handleStartEdit(post)}>Sửa</button>
                     <button onClick={() => handleDeletePost(post.id)}>Xóa</button>
@@ -423,78 +686,57 @@ export default function QaTab({ toast, fallbackUserName }) {
               )}
 
               <div className="fb-post-stats">
-                <span className="stats-likes">👍 {post.likes}</span>
+                <span className="stats-likes">
+                  {sumReactionCounts(post?.reactionCounts) > 0 ? buildReactionSummary(post?.reactionCounts) : `Like ${post.likes}`}
+                </span>
                 <span className="stats-comments">{totalCommentsCount} bình luận</span>
               </div>
 
               <div className="fb-post-action-bar">
-                <button className={`fb-action-btn ${post.isLiked ? "liked" : ""}`} onClick={() => handleLikePost(post.id)}>
-                  👍 Thích
-                </button>
+                <div
+                  className="fb-reaction-wrap"
+                  onMouseEnter={() => openReactionPicker(post.id)}
+                  onMouseLeave={() => scheduleCloseReactionPicker(post.id)}
+                >
+                  <button
+                    className={`fb-action-btn ${post?.myReactionType ? "liked" : ""}`}
+                    type="button"
+                    onClick={() => handleReactPost(post.id, post?.myReactionType || "LIKE")}
+                  >
+                    {post?.myReactionType
+                      ? (REACTIONS.find((r) => r.type === post.myReactionType)?.label || post.myReactionType)
+                      : "React"}
+                  </button>
+
+                  {openReactionPickerForPostId === post.id && (
+                    <div
+                      className="fb-reaction-picker"
+                      role="menu"
+                      onMouseEnter={() => openReactionPicker(post.id)}
+                      onMouseLeave={() => scheduleCloseReactionPicker(post.id)}
+                    >
+                      {REACTIONS.map((r) => (
+                        <button
+                          key={r.type}
+                          type="button"
+                          className={`fb-reaction-item ${post?.myReactionType === r.type ? "active" : ""}`}
+                          onClick={() => handleReactPost(post.id, r.type)}
+                          title={r.type}
+                        >
+                          {r.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <button className="fb-action-btn" onClick={() => document.getElementById(`comment-input-${post.id}`)?.focus?.()}>
-                  💬 Bình luận
+                  Bình luận
                 </button>
               </div>
 
               <div className="fb-post-comments">
                 {displayedComments.map((cmt) => (
-                  <div key={cmt.id} className="fb-comment-thread">
-                    <div className="fb-comment-row">
-                      <div className="avatar-small alt2">{cmt.author?.charAt?.(0) || "?"}</div>
-                      <div className="fb-comment-body">
-                        <div className="fb-comment-bubble">
-                          <strong>{cmt.author}</strong>
-                          <span>{cmt.text}</span>
-                          {cmt.likes > 0 && <div className="fb-comment-like-count">👍 {cmt.likes}</div>}
-                        </div>
-                        <div className="fb-comment-actions">
-                          <button onClick={() => toggleReplyBox(cmt.id)}>Phản hồi</button>
-                        </div>
-
-                        {(cmt.replies || []).length > 0 && (
-                          <div className="fb-replies-list">
-                            {(cmt.replies || []).map((reply) => (
-                              <div key={reply.id} className="fb-comment-row">
-                                <div className="avatar-small alt3">{reply.author?.charAt?.(0) || "?"}</div>
-                                <div className="fb-comment-body">
-                                  <div className="fb-comment-bubble reply-bubble">
-                                    <strong>{reply.author}</strong>
-                                    <span>{reply.text}</span>
-                                    {reply.likes > 0 && <div className="fb-comment-like-count">👍 {reply.likes}</div>}
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-
-                        {openReplyBoxes[cmt.id] && (
-                          <div className="fb-reply-input-row">
-                            <input
-                              type="text"
-                              placeholder="Viết phản hồi..."
-                              value={replyInputs[cmt.id] || ""}
-                              onChange={(e) => setReplyInputs((prev) => ({ ...(prev || {}), [cmt.id]: e.target.value }))}
-                              onKeyDown={(e) => {
-                                if (e.key !== "Enter") return;
-                                handleAddReply(post.id, cmt.id);
-                                toggleReplyBox(cmt.id);
-                              }}
-                            />
-                            <button
-                              className="send-icon-btn"
-                              onClick={() => {
-                                handleAddReply(post.id, cmt.id);
-                                toggleReplyBox(cmt.id);
-                              }}
-                            >
-                              ➢
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+                  <CommentNode key={cmt.id} node={cmt} postId={post.id} depth={0} />
                 ))}
 
                 {remainingComments > 0 ? (
@@ -517,7 +759,7 @@ export default function QaTab({ toast, fallbackUserName }) {
                     onKeyDown={(e) => e.key === "Enter" && handleAddComment(post.id)}
                   />
                   <button className="send-icon-btn" onClick={() => handleAddComment(post.id)}>
-                    ➢
+                    Gửi
                   </button>
                 </div>
               </div>

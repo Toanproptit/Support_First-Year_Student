@@ -9,7 +9,6 @@ import org.example.supportfirststudents.entity.Post;
 import org.example.supportfirststudents.enums.Status;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Component

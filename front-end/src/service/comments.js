@@ -5,6 +5,11 @@ export async function createComment({ content, postId, userId }) {
   return res?.data?.result ?? null;
 }
 
+export async function createReply({ content, postId, userId, parentId }) {
+  const res = await api.post("/comments", { content, postId, userId, parentId });
+  return res?.data?.result ?? null;
+}
+
 export async function getCommentById(id) {
   const res = await api.get(`/comments/${id}`);
   return res?.data?.result ?? null;
@@ -22,6 +27,11 @@ export async function getAllCommentsPaged({ page = 0, size = 10 } = {}) {
 
 export async function getCommentsByPostId(postId) {
   const res = await api.get(`/comments/post/${postId}`);
+  return res?.data?.result ?? [];
+}
+
+export async function getCommentsTreeByPostId(postId) {
+  const res = await api.get(`/comments/post/${postId}/tree`);
   return res?.data?.result ?? [];
 }
 
@@ -54,4 +64,3 @@ export async function deleteComment(id) {
   const res = await api.delete(`/comments/${id}`);
   return res?.data ?? null;
 }
-

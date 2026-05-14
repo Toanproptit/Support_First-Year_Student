@@ -3,6 +3,7 @@ package org.example.supportfirststudents.mapper;
 import org.example.supportfirststudents.dto.request.CreateComment;
 import org.example.supportfirststudents.dto.request.UpdateComment;
 import org.example.supportfirststudents.dto.response.CommentResponse;
+import org.example.supportfirststudents.dto.response.CommentTreeResponse;
 import org.example.supportfirststudents.entity.Comment;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,21 @@ public class CommentMapper {
                 .content(comment.getContent())
                 .createdAt(comment.getCreatedAt())
                 .updatedAt(comment.getUpdatedAt())
+                .parentId(comment.getParent() != null ? comment.getParent().getId() : null)
+                .postId(comment.getPost() != null ? comment.getPost().getId() : null)
+                .postTitle(comment.getPost() != null ? comment.getPost().getTitle() : null)
+                .userId(comment.getUser() != null ? comment.getUser().getId() : null)
+                .userName(comment.getUser() != null ? comment.getUser().getUserName() : null)
+                .build();
+    }
+
+    public CommentTreeResponse toCommentTreeResponse(Comment comment) {
+        return CommentTreeResponse.builder()
+                .id(comment.getId())
+                .content(comment.getContent())
+                .createdAt(comment.getCreatedAt())
+                .updatedAt(comment.getUpdatedAt())
+                .parentId(comment.getParent() != null ? comment.getParent().getId() : null)
                 .postId(comment.getPost() != null ? comment.getPost().getId() : null)
                 .postTitle(comment.getPost() != null ? comment.getPost().getTitle() : null)
                 .userId(comment.getUser() != null ? comment.getUser().getId() : null)

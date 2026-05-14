@@ -6,6 +6,7 @@ import lombok.experimental.FieldDefaults;
 import org.example.supportfirststudents.dto.request.CreateComment;
 import org.example.supportfirststudents.dto.request.UpdateComment;
 import org.example.supportfirststudents.dto.response.CommentResponse;
+import org.example.supportfirststudents.dto.response.CommentTreeResponse;
 import org.example.supportfirststudents.dto.response.PageResponse;
 import org.example.supportfirststudents.entity.Comment;
 import org.example.supportfirststudents.entity.Post;
@@ -25,7 +26,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,6 +54,14 @@ public class CommentService {
         // Tạo comment
         Comment comment = commentMapper.toComment(request);
         comment.setUser(user);
+
+        if (request.getParentId() != null) {
+            Comment parent = findCommentById(request.getParentId());
+            if (parent.getPost() == null || parent.getPost().getId() == null || !parent.getPost().getId().equals(post.getId())) {
+                throw new AppException(ErrorCode.INVALID_COMMENT_PARENT);
+            }
+            comment.setParent(parent);
+        }
 
         post.addComment(comment);
 
@@ -87,6 +99,35 @@ public class CommentService {
                 .first(commentPage.isFirst())
                 .last(commentPage.isLast())
                 .build();
+    }
+
+    public List<CommentTreeResponse> getCommentsTreeByPostId(Long postId) {
+        validatePostExists(postId);
+
+        List<Comment> comments = commentRepository.findByPostIdOrderByCreatedAtAsc(postId);
+        Map<Long, CommentTreeResponse> nodesById = new HashMap<>();
+
+        for (Comment comment : comments) {
+            nodesById.put(comment.getId(), commentMapper.toCommentTreeResponse(comment));
+        }
+
+        List<CommentTreeResponse> roots = new ArrayList<>();
+        for (Comment comment : comments) {
+            CommentTreeResponse node = nodesById.get(comment.getId());
+            Long parentId = node.getParentId();
+            if (parentId == null) {
+                roots.add(node);
+                continue;
+            }
+            CommentTreeResponse parentNode = nodesById.get(parentId);
+            if (parentNode == null) {
+                roots.add(node);
+                continue;
+            }
+            parentNode.getReplies().add(node);
+        }
+
+        return roots;
     }
 
     public List<CommentResponse> getCommentsByPostId(Long postId) {
@@ -169,6 +210,12 @@ public class CommentService {
         Comment comment = findCommentById(id);
         if (!canWriteComment(comment)) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        List<Comment> replies = commentRepository.findByParentId(id);
+        if (!replies.isEmpty()) {
+            replies.forEach(r -> r.setParent(null));
+            commentRepository.saveAll(replies);
         }
 
         Post post = comment.getPost();

@@ -574,6 +574,13 @@
     flex-wrap: wrap;
 }
 
+.fb-topbar-left {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
 .fb-field {
     display: flex;
     flex-direction: column;
@@ -843,6 +850,33 @@
     margin-top: 2px;
 }
 
+.fb-post-status {
+    display: inline-flex;
+    align-items: center;
+    height: 26px;
+    padding: 0 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    margin-left: auto;
+}
+
+.fb-post-status.status-pending {
+    background: #ffedd5;
+    color: #9a3412;
+}
+
+.fb-post-status.status-approved {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.fb-post-status.status-rejected {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
 .fb-post-actions-menu button {
     background: none;
     border: none;
@@ -895,6 +929,51 @@
     display: flex;
     border-bottom: 1px solid #ced0d4;
     padding: 4px 0;
+}
+
+.fb-reaction-wrap {
+    position: relative;
+    flex: 1;
+}
+
+.fb-reaction-wrap .fb-action-btn {
+    width: 100%;
+}
+
+.fb-reaction-picker {
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 8px);
+    transform: translateX(-50%);
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+    border-radius: 999px;
+    padding: 6px;
+    display: flex;
+    gap: 6px;
+    z-index: 20;
+    white-space: nowrap;
+}
+
+.fb-reaction-item {
+    border: none;
+    background: #f0f2f5;
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    color: #1c1e21;
+}
+
+.fb-reaction-item:hover {
+    background: #e4e6eb;
+}
+
+.fb-reaction-item.active {
+    background: rgba(24, 119, 242, 0.12);
+    color: #1877f2;
 }
 
 .fb-action-btn {

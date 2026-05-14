@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "../styles/AdminLogin.css";
 import { clearAuth, login, saveAuth } from "../service/auth";
 import { useToast } from "./ToastProvider";
@@ -44,6 +44,11 @@ export default function AdminLogin() {
   return (
     <div className="admin-login-page">
       <div className="admin-login-card">
+        <div className="admin-back-home">
+          <Link to="/" className="admin-back-home-link" aria-label="Trở về Home">
+            ← Trở về Home
+          </Link>
+        </div>
         <div className="admin-header">
           <h3>Quản trị hệ thống</h3>
           <h2>Đăng nhập</h2>

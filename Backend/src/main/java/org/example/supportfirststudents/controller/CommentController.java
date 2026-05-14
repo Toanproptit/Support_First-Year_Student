@@ -8,6 +8,7 @@ import org.example.supportfirststudents.dto.request.CreateComment;
 import org.example.supportfirststudents.dto.request.UpdateComment;
 import org.example.supportfirststudents.dto.response.ApiResponse;
 import org.example.supportfirststudents.dto.response.CommentResponse;
+import org.example.supportfirststudents.dto.response.CommentTreeResponse;
 import org.example.supportfirststudents.dto.response.PageResponse;
 import org.example.supportfirststudents.service.CommentService;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -58,6 +59,13 @@ public class CommentController {
     public ApiResponse<List<CommentResponse>> getCommentsByPostId(@PathVariable Long postId) {
         return ApiResponse.<List<CommentResponse>>builder()
                 .result(commentService.getCommentsByPostId(postId))
+                .build();
+    }
+
+    @GetMapping("/post/{postId}/tree")
+    public ApiResponse<List<CommentTreeResponse>> getCommentsTreeByPostId(@PathVariable Long postId) {
+        return ApiResponse.<List<CommentTreeResponse>>builder()
+                .result(commentService.getCommentsTreeByPostId(postId))
                 .build();
     }
 
