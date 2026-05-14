@@ -2,38 +2,46 @@ import React, { useState } from "react";
 import "../styles/StudentLogin.css";
 import logoPtit from "../assets/logoptit.jpg";
 import { Link, useNavigate } from "react-router-dom";
-import { clearAuth, login, saveAuth } from "../service/auth";
+import { register } from "../service/auth";
 import { useToast } from "./ToastProvider";
 
-export default function StudentLogin() {
+export default function StudentRegister() {
   const navigate = useNavigate();
   const toast = useToast();
+  const [fullName, setFullName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleLoginSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    if (password.length < 6) {
+      const msg = "Mật khẩu phải có ít nhất 6 ký tự.";
+      setError(msg);
+      toast.show({ type: "warning", title: "Dữ liệu không hợp lệ", message: msg });
+      return;
+    }
+    if (password !== confirmPassword) {
+      const msg = "Mật khẩu nhập lại không khớp.";
+      setError(msg);
+      toast.show({ type: "warning", title: "Dữ liệu không hợp lệ", message: msg });
+      return;
+    }
+
     setLoading(true);
     try {
-      const { token, role } = await login({ email, password });
-      if (role !== "Student") {
-        clearAuth();
-        const msg = "Tài khoản này không phải Sinh viên. Vui lòng đăng nhập ở trang Quản trị viên.";
-        setError(msg);
-        toast.show({ type: "warning", title: "Sai vai trò", message: msg });
-        return;
-      }
-      saveAuth({ token, role, email });
-      toast.show({ type: "success", title: "Đăng nhập thành công", message: "Chào mừng bạn!" });
-      navigate("/student-dashboard");
+      await register({ fullName, username, email, password });
+      toast.show({ type: "success", title: "Đăng ký thành công", message: "Bạn có thể đăng nhập ngay bây giờ." });
+      navigate("/login/student");
     } catch (err) {
-      clearAuth();
-      const msg = err?.message || "Đăng nhập thất bại.";
+      const msg = err?.message || "Đăng ký thất bại.";
       setError(msg);
-      toast.show({ type: "error", title: "Đăng nhập thất bại", message: msg });
+      toast.show({ type: "error", title: "Đăng ký thất bại", message: msg });
     } finally {
       setLoading(false);
     }
@@ -47,13 +55,34 @@ export default function StudentLogin() {
           <h2>Central Authentication Service</h2>
         </div>
 
-        <form className="cas-form" onSubmit={handleLoginSubmit}>
+        <form className="cas-form" onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="fullName">Họ và tên:</label>
+            <input
+              type="text"
+              id="fullName"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="username">Tên đăng nhập:</label>
+            <input
+              type="text"
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
+          </div>
+
           <div className="form-group">
             <label htmlFor="email">Email:</label>
             <input
               type="email"
               id="email"
-              name="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -65,9 +94,19 @@ export default function StudentLogin() {
             <input
               type="password"
               id="password"
-              name="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="confirmPassword">Nhập lại mật khẩu:</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               required
             />
           </div>
@@ -79,17 +118,13 @@ export default function StudentLogin() {
           ) : null}
 
           <button type="submit" className="cas-submit-btn" disabled={loading}>
-            {loading ? "ĐANG ĐĂNG NHẬP..." : "ĐĂNG NHẬP"}
+            {loading ? "ĐANG ĐĂNG KÝ..." : "ĐĂNG KÝ"}
           </button>
         </form>
 
         <div className="cas-footer">
-          <Link to="/forgot-password" className="forgot-pw">
-            Bạn quên mật khẩu?
-          </Link>
-          <span style={{ margin: "0 8px", opacity: 0.6 }}>|</span>
-          <Link to="/register" className="forgot-pw">
-            Tạo tài khoản
+          <Link to="/login/student" className="forgot-pw">
+            Quay lại đăng nhập
           </Link>
         </div>
       </div>

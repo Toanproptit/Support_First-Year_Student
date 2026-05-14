@@ -1,0 +1,86 @@
+/* Club.css */
+
+.club-page-container {
+    background-color: #ffffff;
+    font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Hiển thị dạng Grid, chia cột responsive */
+.club-grid-container {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 2rem; /* Khoảng cách giữa các card */
+    padding-left: 80px;
+    padding-right: 80px;
+    padding-top: 80px;
+}
+
+/* Tablet: 2 cột */
+@media (min-width: 768px) {
+    .club-grid-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Desktop: 4 cột giống như trong hình */
+@media (min-width: 1024px) {
+    .club-grid-container {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* Thiết kế cho từng thẻ (Card) */
+.club-card {
+    border: 1px solid #e5e7eb; /* Viền xám nhạt */
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    /* Trong hình các góc khá vuông vức, không bo tròn nhiều */
+    border-radius: 2px; 
+    transition: box-shadow 0.3s ease;
+    padding: 24px 12px !important;
+}
+
+.club-card:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Viền bao quanh logo giống trong hình */
+.club-logo {
+    border: 1px solid #e5e7eb;
+    padding: 2px; /* Tạo khoảng trắng nhỏ giữa ảnh và viền */
+    background-color: #fff;
+}
+
+/* Tiêu đề câu lạc bộ (Tên CLB) */
+.club-card h3 {
+    font-size: 1.25rem; /* 20px */
+    font-weight: 700; /* In đậm */
+    color: #1e3a8a; /* Màu xanh navy đậm giống hình */
+    line-height: 1.4;
+    margin-bottom: 0.75rem;
+}
+
+/* Tinh chỉnh đường kẻ ngang */
+.club-card hr {
+    border: 0;
+    border-top: 1px solid #f1f5f9; /* Đường kẻ thật mờ */
+    margin: 1.25rem 0;
+}
+
+/* Link Facebook ở dưới cùng */
+.club-link {
+    color: #d9534f; /* Màu đỏ cam */
+    font-size: 0.875rem; /* 14px */
+    text-decoration: none;
+    word-break: break-all; /* Tự động xuống dòng khi link quá dài (như trong hình) */
+    display: inline-block;
+    line-height: 1.5;
+    transition: color 0.2s ease;
+}
+
+.club-link:hover {
+    color: #c9302c; /* Đậm hơn khi hover */
+    text-decoration: underline;
+}

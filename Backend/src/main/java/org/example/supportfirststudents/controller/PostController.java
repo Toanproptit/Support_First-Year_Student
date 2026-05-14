@@ -1,9 +1,7 @@
 package org.example.supportfirststudents.controller;
 
-import jakarta.validation.Valid;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
+import java.util.List;
+
 import org.example.supportfirststudents.dto.request.CreatePost;
 import org.example.supportfirststudents.dto.request.UpdatePost;
 import org.example.supportfirststudents.dto.response.ApiResponse;
@@ -11,9 +9,20 @@ import org.example.supportfirststudents.dto.response.PageResponse;
 import org.example.supportfirststudents.dto.response.PostResponse;
 import org.example.supportfirststudents.service.PostService;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import jakarta.validation.Valid;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @RestController
 @RequestMapping("/posts")
@@ -105,7 +114,7 @@ public class PostController {
         return ApiResponse.<PageResponse<PostResponse>>builder()
                 .result(postService.getPostsByUserIdPaged(userId, page, size))
                 .build();
-    }
+    }   
 
     @GetMapping("/user/{userId}/count")
     public ApiResponse<Long> countPostsByUserId(@PathVariable Long userId) {

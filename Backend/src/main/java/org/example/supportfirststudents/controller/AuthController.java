@@ -35,4 +35,6 @@ public class AuthController {
                 .result(authService.login(loginRequest))
                 .build();
     }
+
+
 }

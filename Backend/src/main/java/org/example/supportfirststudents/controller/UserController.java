@@ -15,11 +15,20 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/users")
-@PreAuthorize("hasAnyRole('Admin')")
 public class UserController {
     private final UserService userService;
 
+    @PreAuthorize("hasAnyRole('Admin','Student')")
+    @GetMapping("/me")
+    public ApiResponse<UserResponse> getMe() {
+        return ApiResponse.<UserResponse>builder()
+                .code(200)
+                .message("Success")
+                .result(userService.getMe())
+                .build();
+    }
 
+    @PreAuthorize("hasAnyRole('Admin')")
     @GetMapping
     public ApiResponse<PageResponse<UserResponse>> getUser(@RequestParam(defaultValue = "0") int page,
                                                            @RequestParam(defaultValue = "10") int size)
@@ -32,6 +41,7 @@ public class UserController {
     }
 
 
+    @PreAuthorize("hasAnyRole('Admin')")
     @PostMapping
     public ApiResponse<UserResponse> createUser(@RequestBody CreateUser request){
         return ApiResponse.<UserResponse>builder()
@@ -42,6 +52,7 @@ public class UserController {
     }
 
 
+    @PreAuthorize("hasAnyRole('Admin')")
     @PutMapping("/{id}")
     public ApiResponse<UserResponse> updateUser(@PathVariable Long id , @RequestBody UpdateUser request){
         return ApiResponse.<UserResponse>builder()
@@ -52,6 +63,7 @@ public class UserController {
     }
 
 
+    @PreAuthorize("hasAnyRole('Admin')")
     @DeleteMapping("/{id}")
     public ApiResponse<Void> deleteUser(@PathVariable Long id){
         userService.delete(id);

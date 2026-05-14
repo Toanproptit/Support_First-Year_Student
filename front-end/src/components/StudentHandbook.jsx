@@ -9,8 +9,8 @@ export default function StudentHandbook() {
         { id: 2, title: "Học phí - học bổng", desc: "Thông tin về Học phí - học bổng" },
         { id: 3, title: "Hướng dẫn học vụ", desc: "Thông tin về Hướng dẫn học vụ" },
         // THÊM 2 THẺ MỚI VÀO ĐÂY:
-        { id: 7, title: "Thông tin CLB", desc: "Thông tin hoạt động của các Câu lạc bộ, Đội, Nhóm" },
-        { id: 8, title: "Ký túc xá", desc: "Thông tin về quy định và đăng ký Ký túc xá" }
+        { id: 4, title: "Thông tin CLB", desc: "Thông tin hoạt động của các Câu lạc bộ, Đội, Nhóm" },
+        { id: 5, title: "Ký túc xá", desc: "Thông tin về quy định và đăng ký Ký túc xá" }
     ];
 
     return (

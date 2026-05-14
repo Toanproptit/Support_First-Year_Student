@@ -41,6 +41,7 @@ public class AuthService {
             throw new AppException(ErrorCode.USERNAME_EXISTED);
         }
         User saved = new User();
+        saved.setFullName(register.getFullName());
         saved.setPassword(passwordEncoder.encode(register.getPassword()));
         saved.setUserName(register.getUsername());
         saved.setEmail(register.getEmail());

@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "../../styles/AdminPages.css";
 import "../../styles/PostManagement.css";
 import Pagination from "./Pagination";
+import { approvePost, deletePost, getAllPosts, getPendingPosts, rejectPost } from "../../service/posts";
 
 const PAGE_SIZE = 4;
 
-const mockPosts = [
+const mockPosts = []; /*
   { id: 1, author: "Nguyễn Văn A",   avatar: "N", avatarColor: "#c8102e", content: "Mọi người cho mình hỏi lịch đăng ký tín chỉ học kỳ 2 xem ở đâu vậy ạ? Mình tìm trên web trường không thấy 🥺", likes: 15, comments: 3, postedAt: "2 giờ trước",   status: "Bình thường", reported: false },
   { id: 2, author: "Trần Thị Bình",  avatar: "T", avatarColor: "#10b981", content: "Ai biết phòng học môn Giải tích 2 tuần này chuyển sang phòng nào không ạ? Trong QLDT không thấy cập nhật.", likes: 8,  comments: 5, postedAt: "5 giờ trước",   status: "Bình thường", reported: false },
   { id: 3, author: "Lê Văn C",       avatar: "L", avatarColor: "#f59e0b", content: "Trang tín chỉ ptit dạo này hay sập lắm, mọi người có cách nào đăng ký không bị lỗi không ạ? =))", likes: 22, comments: 10, postedAt: "1 ngày trước",  status: "Bình thường", reported: false },
@@ -15,9 +16,32 @@ const mockPosts = [
   { id: 7, author: "Đỗ Thanh Mai",   avatar: "Đ", avatarColor: "#f97316", content: "Học bổng khuyến khích học tập học kỳ này có nộp hồ sơ không hay tự động xét ạ?", likes: 19, comments: 8, postedAt: "5 ngày trước",  status: "Bình thường", reported: false },
   { id: 8, author: "Ẩn danh",        avatar: "?", avatarColor: "#94a3b8", content: "Bài viết có nội dung không phù hợp (đã bị báo cáo)...",                                                        likes: 1,  comments: 0, postedAt: "6 ngày trước",  status: "Bị báo cáo",  reported: true  },
   { id: 9, author: "Bùi Thị Oanh",   avatar: "B", avatarColor: "#ec4899", content: "Các bạn ơi lịch thi lại học phần Vật lý đã ra chưa ạ? Mình tìm mãi không thấy trên cổng thông tin.", likes: 9,  comments: 3, postedAt: "7 ngày trước",  status: "Bình thường", reported: false },
-];
+*/
 
-const STATUS_FILTERS = ["Tất cả", "Bình thường", "Bị báo cáo"];
+const STATUS_FILTERS = ["Tất cả", "PENDING", "APPROVED", "REJECTED"];
+
+function hashColor(input) {
+  const str = String(input || "");
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  const hue = Math.abs(hash) % 360;
+  return `hsl(${hue} 70% 45%)`;
+}
+
+function mapPostToUi(p) {
+  const author = p?.userName || "Unknown";
+  return {
+    id: p?.id,
+    author,
+    avatar: author?.[0]?.toUpperCase?.() || "?",
+    avatarColor: hashColor(author),
+    content: `${p?.title ? p.title + "\n" : ""}${p?.content || ""}`,
+    likes: 0,
+    comments: p?.commentCount ?? 0,
+    postedAt: p?.createdAt ? new Date(p.createdAt).toLocaleString("vi-VN") : "",
+    status: p?.status || "UNKNOWN",
+  };
+}
 
 export default function PostManagement() {
   const [search, setSearch]           = useState("");
@@ -25,13 +49,38 @@ export default function PostManagement() {
   const [posts, setPosts]             = useState(mockPosts);
   const [expandedId, setExpandedId]   = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading]         = useState(false);
 
-  const filtered = posts.filter((p) => {
-    const matchSearch = p.content.toLowerCase().includes(search.toLowerCase()) ||
-      p.author.toLowerCase().includes(search.toLowerCase());
-    const matchFilter = filter === "Tất cả" || p.status === filter;
-    return matchSearch && matchFilter;
-  });
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        setLoading(true);
+        const res = filter === "PENDING" ? await getPendingPosts() : await getAllPosts();
+        if (cancelled) return;
+        setPosts((res || []).map(mapPostToUi));
+      } catch (e) {
+        alert(e?.message || "Không tải được danh sách bài viết.");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [filter]);
+
+  const filtered = useMemo(() => {
+    const q = (search || "").toLowerCase();
+    return (posts || []).filter((p) => {
+      const matchSearch =
+        (p.content || "").toLowerCase().includes(q) ||
+        (p.author || "").toLowerCase().includes(q);
+      const matchFilter = filter === "Tất cả" || p.status === filter;
+      return matchSearch && matchFilter;
+    });
+  }, [posts, search, filter]);
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paginated  = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
@@ -39,16 +88,32 @@ export default function PostManagement() {
   const handleFilter = (f) => { setFilter(f); setCurrentPage(1); };
   const handleSearch = (v) => { setSearch(v); setCurrentPage(1); };
 
-  const handleDelete = (id) => {
-    if (window.confirm("Bạn có chắc muốn xoá bài viết này không?")) {
-      setPosts((prev) => prev.filter((p) => p.id !== id));
+  const handleDelete = async (id) => {
+    if (!window.confirm("Bạn có chắc muốn xoá bài viết này không?")) return;
+    try {
+      await deletePost(id);
+      setPosts((prev) => (prev || []).filter((p) => p.id !== id));
+    } catch (e) {
+      alert(e?.message || "Xóa bài viết thất bại.");
     }
   };
 
-  const handleResolveReport = (id) => {
-    setPosts((prev) =>
-      prev.map((p) => p.id === id ? { ...p, status: "Bình thường", reported: false } : p)
-    );
+  const handleApprove = async (id) => {
+    try {
+      const updated = await approvePost(id);
+      setPosts((prev) => (prev || []).map((p) => (p.id === id ? mapPostToUi(updated) : p)));
+    } catch (e) {
+      alert(e?.message || "Duyệt bài thất bại.");
+    }
+  };
+
+  const handleReject = async (id) => {
+    try {
+      const updated = await rejectPost(id);
+      setPosts((prev) => (prev || []).map((p) => (p.id === id ? mapPostToUi(updated) : p)));
+    } catch (e) {
+      alert(e?.message || "Từ chối bài thất bại.");
+    }
   };
 
   return (
@@ -64,8 +129,8 @@ export default function PostManagement() {
             <span className="qs-label">Tổng bài</span>
           </div>
           <div className="quick-stat reported">
-            <span className="qs-value">{posts.filter((p) => p.reported).length}</span>
-            <span className="qs-label">Báo cáo</span>
+            <span className="qs-value">{posts.filter((p) => p.status === "PENDING").length}</span>
+            <span className="qs-label">Chờ duyệt</span>
           </div>
         </div>
       </div>
@@ -86,8 +151,8 @@ export default function PostManagement() {
               onClick={() => handleFilter(f)}
             >
               {f}
-              {f === "Bị báo cáo" && posts.filter((p) => p.reported).length > 0 && (
-                <span className="report-badge">{posts.filter((p) => p.reported).length}</span>
+              {f === "PENDING" && posts.filter((p) => p.status === "PENDING").length > 0 && (
+                <span className="report-badge">{posts.filter((p) => p.status === "PENDING").length}</span>
               )}
             </button>
           ))}
@@ -96,11 +161,14 @@ export default function PostManagement() {
       </div>
 
       <div className="post-list">
+        {loading && (
+          <div className="empty-state">Đang tải...</div>
+        )}
         {paginated.length === 0 && (
           <div className="empty-state">Không có bài viết nào phù hợp.</div>
         )}
         {paginated.map((post) => (
-          <div key={post.id} className={`post-card ${post.reported ? "post-reported" : ""}`}>
+          <div key={post.id} className="post-card">
             <div className="post-card-header">
               <div className="post-author-info">
                 <div className="post-avatar" style={{ background: post.avatarColor }}>
@@ -111,8 +179,8 @@ export default function PostManagement() {
                   <span className="post-time">{post.postedAt}</span>
                 </div>
               </div>
-              <span className={`badge ${post.reported ? "badge-red" : "badge-green"}`}>
-                {post.reported ? "⚠️ Bị báo cáo" : "✓ Bình thường"}
+              <span className={`badge ${post.status === "PENDING" ? "badge-red" : "badge-green"}`}>
+                {post.status}
               </span>
             </div>
 
@@ -135,10 +203,15 @@ export default function PostManagement() {
             </div>
 
             <div className="post-actions">
-              {post.reported && (
-                <button className="btn-resolve" onClick={() => handleResolveReport(post.id)}>
-                  ✓ Duyệt bỏ báo cáo
-                </button>
+              {post.status === "PENDING" && (
+                <>
+                  <button className="btn-resolve" onClick={() => handleApprove(post.id)}>
+                    ✓ Duyệt
+                  </button>
+                  <button className="btn-resolve" onClick={() => handleReject(post.id)}>
+                    ✕ Từ chối
+                  </button>
+                </>
               )}
               <button className="btn-delete" onClick={() => handleDelete(post.id)}>
                 🗑 Xoá bài

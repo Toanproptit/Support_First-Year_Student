@@ -24,5 +24,7 @@ public class PostResponse {
     Long userId;
     String userName;
     Integer commentCount;
+    Integer likeCount;
+    Boolean likedByMe;
     List<CategoryResponse> categories;
 }

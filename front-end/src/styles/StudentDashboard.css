@@ -536,8 +536,9 @@
 /* CSS DIỄN ĐÀN STYLE FACEBOOK */
 /* ================================================= */
 .fb-forum-container {
-    max-width: 680px;
-    /* Giới hạn chiều rộng giống FB */
+    width: 100%;
+    max-width: 960px;
+    /* Rộng hơn để đọc thoải mái */
     margin: 0 auto;
 }
 
@@ -548,6 +549,228 @@
     padding: 12px 16px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
+}
+
+.fb-create-toolbar {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #eef0f3;
+}
+
+.fb-forum-topbar {
+    background: white;
+    border-radius: 12px;
+    padding: 12px 16px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    margin-bottom: 16px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.fb-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 240px;
+}
+
+.fb-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #65676b;
+}
+
+.fb-select {
+    height: 40px;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    padding: 0 12px;
+    outline: none;
+    font-size: 14px;
+}
+
+.fb-select:focus {
+    border-color: #c8102e;
+    box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.12);
+}
+
+.fb-input {
+    height: 40px;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    padding: 0 12px;
+    outline: none;
+    font-size: 14px;
+    width: 100%;
+}
+
+.fb-input:focus {
+    border-color: #c8102e;
+    box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.12);
+}
+
+.fb-textarea {
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    padding: 10px 12px;
+    outline: none;
+    font-size: 14px;
+    width: 100%;
+    resize: vertical;
+    min-height: 120px;
+}
+
+.fb-textarea:focus {
+    border-color: #c8102e;
+    box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.12);
+}
+
+.fb-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(17, 24, 39, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 9999;
+}
+
+.fb-modal {
+    width: 100%;
+    max-width: 720px;
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+}
+
+.fb-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid #eef0f3;
+}
+
+.fb-modal-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: #111827;
+}
+
+.fb-modal-subtitle {
+    margin-top: 2px;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.fb-modal-close {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 1;
+    color: #374151;
+}
+
+.fb-modal-close:hover {
+    background: #f3f4f6;
+}
+
+.fb-modal-body {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.fb-modal-actions {
+    padding: 12px 16px;
+    border-top: 1px solid #eef0f3;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.fb-btn-primary {
+    background: #c8102e;
+    color: white;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.fb-btn-primary:hover {
+    filter: brightness(0.95);
+}
+
+.fb-btn-secondary {
+    background: #f3f4f6;
+    color: #111827;
+    border: 1px solid #e5e7eb;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.fb-btn-secondary:hover {
+    background: #e5e7eb;
+}
+
+.fb-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    padding-bottom: 2px;
+}
+
+.fb-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid #e5e7eb;
+    background: #f8fafc;
+    cursor: pointer;
+    font-size: 13px;
+    color: #111827;
+}
+
+.fb-chip:hover {
+    background: #eef2ff;
+    border-color: #c7d2fe;
+}
+
+.fb-chip-text {
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fb-chip-x {
+    font-weight: 900;
+    color: #6b7280;
 }
 
 .fb-create-input-row {
@@ -639,6 +862,22 @@
     color: #050505;
     margin-bottom: 12px;
     line-height: 1.4;
+}
+
+.fb-post-categories {
+    padding: 0 0 8px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.fb-post-category {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    color: #374151;
 }
 
 /* THỐNG KÊ (Stats) */

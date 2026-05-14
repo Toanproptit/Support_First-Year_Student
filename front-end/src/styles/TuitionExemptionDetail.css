@@ -1,0 +1,103 @@
+/* TuitionExemptionDetail.css */
+
+.article-page {
+    background-color: #f9f9fb;
+    min-height: 100vh;
+    padding: 40px 20px;
+    font-family: Arial, sans-serif;
+}
+
+.article-container {
+    max-width: 850px;
+    margin: 0 auto;
+    background-color: #ffffff;
+    padding: 45px 50px;
+    border-radius: 8px;
+    border: 1px solid #eaeaea;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+}
+
+.article-meta {
+    font-size: 14px;
+    color: #6b7280;
+    margin-bottom: 15px;
+}
+
+.article-title {
+    color: #002147;
+    font-size: 26px;
+    margin-top: 0;
+    margin-bottom: 25px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.intro-text {
+    font-size: 17px;
+    line-height: 1.7;
+    color: #333;
+    margin-bottom: 30px;
+}
+
+.section-heading {
+    color: #c8102e;
+    font-size: 19px;
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+.custom-list {
+    margin-bottom: 35px;
+    padding-left: 20px;
+}
+
+.custom-list li {
+    margin-bottom: 12px;
+    list-style-type: disc;
+    color: #444;
+}
+
+/* NÚT ĐIỀU HƯỚNG CHÍNH */
+.cta-wrapper {
+    text-align: center;
+    margin: 40px 0;
+}
+
+.btn-redirect {
+    display: inline-block;
+    background-color: #c8102e;
+    color: #ffffff !important;
+    padding: 16px 32px;
+    border-radius: 8px;
+    font-weight: 700;
+    text-decoration: none !important;
+    transition: background 0.2s;
+    box-shadow: 0 4px 12px rgba(200, 16, 46, 0.2);
+}
+
+.btn-redirect:hover {
+    background-color: #a00d25;
+    transform: translateY(-1px);
+}
+
+/* FOOTER NAV */
+.article-bottom-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 50px;
+    padding-top: 25px;
+    border-top: 1px solid #eaeaea;
+}
+
+.btn-back {
+    color: #c8102e;
+    text-decoration: none !important;
+    font-weight: 600;
+}
+
+.link-all {
+    color: #c8102e;
+    text-decoration: none !important;
+    font-size: 15px;
+}

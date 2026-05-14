@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Header from "./components/Header";
 import LoginSelection from "./components/LoginSelection";
 import StudentLogin from "./components/StudentLogin";
+import StudentRegister from "./components/StudentRegister";
 import ForgotPassword from "./components/ForgotPassword";
 import AdminLogin from "./components/AdminLogin";
 import StudentHandbook from "./components/StudentHandbook";
@@ -15,15 +16,24 @@ import StudyLocations from "./components/StudyLocations";
 import ClassSchedule from "./components/ClassSchedule";
 import StudentInfoSystems from "./components/StudentInfoSystems";
 import AwardsAndCommendations from "./components/AwardsAndCommendations";
+import TuitionAndScholarshipList from "./components/TuitionAndScholarshipList";
+import TuitionFeeDetail from "./components/TuitionFeeDetail";
+import TuitionExemptionDetail from "./components/TuitionExemptionDetail";
 // Admin
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./components/admin/AdminDashboard";
 import UserManagement from "./components/admin/UserManagement";
 import PostManagement from "./components/admin/PostManagement";
+import CategoryManagement from "./components/admin/CategoryManagement";
 import HandbookManagement from "./components/admin/HandbookManagement";
 import FacultyManagement from "./components/admin/FacultyManagement";
 import MajorManagement from "./components/admin/MajorManagement";
 import ActivityManagement from "./components/admin/ActivityManagement";
+import TermManagement from "./components/admin/TermManagement";
+import CourseSectionManagement from "./components/admin/CourseSectionManagement";
+import Club from "./components/Club";
+import Dormitory from "./components/Dormitory";
+import RequireAuth from "./components/RequireAuth";
 
 // Layout chung cho các trang public (có Header)
 function PublicLayout({ children }) {
@@ -38,33 +48,55 @@ function PublicLayout({ children }) {
 export default function App() {
   return (
     <Routes>
-      {/* ===== Tuyến công khai (có Header) ===== */}
       <Route path="/" element={<PublicLayout><LoginSelection /></PublicLayout>} />
       <Route path="/login/student" element={<PublicLayout><StudentLogin /></PublicLayout>} />
       <Route path="/login/admin" element={<PublicLayout><AdminLogin /></PublicLayout>} />
+      <Route path="/register" element={<PublicLayout><StudentRegister /></PublicLayout>} />
       <Route path="/forgot-password" element={<PublicLayout><ForgotPassword /></PublicLayout>} />
       <Route path="/cam-nang" element={<PublicLayout><StudentHandbook /></PublicLayout>} />
-      <Route path="/student-dashboard" element={<PublicLayout><StudentDashboard /></PublicLayout>} />
+      <Route
+        path="/student-dashboard"
+        element={
+          <RequireAuth role="Student">
+            <PublicLayout>
+              <StudentDashboard />
+            </PublicLayout>
+          </RequireAuth>
+        }
+      />
       <Route path="/cam-nang/1" element={<PublicLayout><TrainingPrograms /></PublicLayout>} />
-      <Route path="/chuong-trinh/:id" element={<ProgramDetail />} />
-      <Route path="/cam-nang/2" element={<ScholarshipDetail />} />
+      <Route path="/cam-nang/2/bai-viet/1" element={<TuitionFeeDetail />} />
+      <Route path="/cam-nang/2/bai-viet/2" element={<ScholarshipDetail />} />
+      <Route path="/cam-nang/2/bai-viet/3" element={<TuitionExemptionDetail />} />
+      <Route path="/cam-nang/2" element={<TuitionAndScholarshipList />} />
       <Route path="/cam-nang/3" element={<AcademicGuideList />} />
       <Route path="/cam-nang/3/bai-viet/1" element={<StudyLocations />} />
       <Route path="/cam-nang/3/bai-viet/2" element={<ClassSchedule />} />
       <Route path="/cam-nang/3/bai-viet/3" element={<StudentInfoSystems />} />
       <Route path="/cam-nang/3/bai-viet/4" element={<AwardsAndCommendations />} />
-
-
+      <Route path="/cam-nang/4" element={<Club/>} />
+      <Route path="/cam-nang/5" element={<Dormitory/>} />
+       
       {/* ===== Tuyến Admin (có Sidebar, KHÔNG có Header chung) ===== */}
-      <Route path="/admin" element={<AdminLayout />}>
+      <Route
+        path="/admin"
+        element={
+          <RequireAuth role="Admin">
+            <AdminLayout />
+          </RequireAuth>
+        }
+      >
         <Route index element={<Navigate to="/admin/dashboard" replace />} />
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="users" element={<UserManagement />} />
         <Route path="posts" element={<PostManagement />} />
+        <Route path="categories" element={<CategoryManagement />} />
         <Route path="handbook" element={<HandbookManagement />} />
         <Route path="faculties" element={<FacultyManagement />} />
         <Route path="majors" element={<MajorManagement />} />
         <Route path="activities" element={<ActivityManagement />} />
+        <Route path="terms" element={<TermManagement />} />
+        <Route path="course-sections" element={<CourseSectionManagement />} />
       </Route>
     </Routes>
   );

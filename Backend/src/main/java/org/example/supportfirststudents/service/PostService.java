@@ -14,12 +14,14 @@ import org.example.supportfirststudents.entity.PostCategory;
 import org.example.supportfirststudents.entity.User;
 import org.example.supportfirststudents.enums.ErrorCode;
 import org.example.supportfirststudents.enums.Role;
+import org.example.supportfirststudents.enums.ReactionType;
 import org.example.supportfirststudents.enums.Status;
 import org.example.supportfirststudents.exception.AppException;
 import org.example.supportfirststudents.mapper.PostMapper;
 import org.example.supportfirststudents.repository.CategoryRepository;
 import org.example.supportfirststudents.repository.PostCategoryRepository;
 import org.example.supportfirststudents.repository.PostRepository;
+import org.example.supportfirststudents.repository.ReactionRepository;
 import org.example.supportfirststudents.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,8 +32,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 @Slf4j
@@ -43,6 +47,7 @@ public class PostService {
     final CategoryRepository categoryRepository;
     final PostRepository postRepository;
     final UserRepository userRepository;
+    final ReactionRepository reactionRepository;
     final PostMapper postMapper;
 
     @Transactional
@@ -70,7 +75,7 @@ public class PostService {
 
 
         Post savedPost = postRepository.save(post);
-        return postMapper.toPostResponse(savedPost);
+        return enrichReactions(postMapper.toPostResponse(savedPost), savedPost);
     }
 
     public PostResponse getPostById(Long id) {
@@ -78,7 +83,7 @@ public class PostService {
         if (!canReadPost(post)) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
-        return postMapper.toPostResponse(post);
+        return enrichReactions(postMapper.toPostResponse(post), post);
     }
 
     public List<PostResponse> getAllPosts() {
@@ -86,10 +91,7 @@ public class PostService {
                 ? postRepository.findAllWithCategories()
                 : postRepository.findAllWithCategoriesByStatus(Status.APPROVED);
 
-        return posts
-                .stream()
-                .map(postMapper::toPostResponse)
-                .collect(Collectors.toList());
+        return enrichReactions(posts);
     }
 
     public PageResponse<PostResponse> getAllPostsPaged(int page, int size) {
@@ -105,7 +107,7 @@ public class PostService {
                 .toList();
 
         return PageResponse.<PostResponse>builder()
-                .results(content)
+                .results(enrichReactions(content, postPage.getContent()))
                 .page(pageable.getPageNumber())
                 .size(pageable.getPageSize())
                 .totalElements(postPage.getTotalElements())
@@ -119,10 +121,8 @@ public class PostService {
         if (!isAdminCaller()) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
-        return postRepository.findAllWithCategoriesByStatus(Status.PENDING)
-                .stream()
-                .map(postMapper::toPostResponse)
-                .collect(Collectors.toList());
+        List<Post> posts = postRepository.findAllWithCategoriesByStatus(Status.PENDING);
+        return enrichReactions(posts);
     }
 
     public PageResponse<PostResponse> getPendingPostsPaged(int page, int size) {
@@ -139,7 +139,7 @@ public class PostService {
                 .toList();
 
         return PageResponse.<PostResponse>builder()
-                .results(content)
+                .results(enrichReactions(content, postPage.getContent()))
                 .page(pageable.getPageNumber())
                 .size(pageable.getPageSize())
                 .totalElements(postPage.getTotalElements())
@@ -156,7 +156,8 @@ public class PostService {
         }
         Post post = findPostById(id);
         post.setStatus(Status.APPROVED);
-        return postMapper.toPostResponse(postRepository.save(post));
+        Post saved = postRepository.save(post);
+        return enrichReactions(postMapper.toPostResponse(saved), saved);
     }
 
     @Transactional
@@ -166,7 +167,8 @@ public class PostService {
         }
         Post post = findPostById(id);
         post.setStatus(Status.REJECTED);
-        return postMapper.toPostResponse(postRepository.save(post));
+        Post saved = postRepository.save(post);
+        return enrichReactions(postMapper.toPostResponse(saved), saved);
     }
 
     public List<PostResponse> getPostsByUserId(Long userId) {
@@ -177,10 +179,8 @@ public class PostService {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
-        return postRepository.findByUserId(userId)
-                .stream()
-                .map(postMapper::toPostResponse)
-                .collect(Collectors.toList());
+        List<Post> posts = postRepository.findByUserId(userId);
+        return enrichReactions(posts);
     }
 
     public PageResponse<PostResponse> getPostsByUserIdPaged(Long userId, int page, int size) {
@@ -199,7 +199,7 @@ public class PostService {
                 .toList();
 
         return PageResponse.<PostResponse>builder()
-                .results(content)
+                .results(enrichReactions(content, postPage.getContent()))
                 .page(pageable.getPageNumber())
                 .size(pageable.getPageSize())
                 .totalElements(postPage.getTotalElements())
@@ -222,7 +222,7 @@ public class PostService {
             post.setContent(request.getContent());
         }
         Post updatedPost = postRepository.save(post);
-        return postMapper.toPostResponse(updatedPost);
+        return enrichReactions(postMapper.toPostResponse(updatedPost), updatedPost);
     }
 
     @Transactional
@@ -242,6 +242,72 @@ public class PostService {
 
     public Long countPostsByUserId(Long userId) {
         return postRepository.countByUserId(userId);
+    }
+
+    private List<PostResponse> enrichReactions(List<Post> posts) {
+        List<PostResponse> responses = posts.stream().map(postMapper::toPostResponse).toList();
+        return enrichReactions(responses, posts);
+    }
+
+    private List<PostResponse> enrichReactions(List<PostResponse> responses, List<Post> posts) {
+        if (responses == null || responses.isEmpty() || posts == null || posts.isEmpty()) {
+            return responses;
+        }
+
+        List<Long> postIds = posts.stream().map(Post::getId).toList();
+        Map<Long, Integer> likeCountByPostId = loadLikeCounts(postIds);
+        Set<Long> likedPostIds = loadLikedPostIdsByCaller(postIds);
+
+        for (PostResponse response : responses) {
+            if (response == null || response.getId() == null) continue;
+            Long postId = response.getId();
+            response.setLikeCount(likeCountByPostId.getOrDefault(postId, 0));
+            response.setLikedByMe(likedPostIds.contains(postId));
+        }
+
+        return responses;
+    }
+
+    private PostResponse enrichReactions(PostResponse response, Post post) {
+        if (response == null || post == null || post.getId() == null) {
+            return response;
+        }
+        Map<Long, Integer> likeCounts = loadLikeCounts(List.of(post.getId()));
+        Set<Long> likedPostIds = loadLikedPostIdsByCaller(List.of(post.getId()));
+        response.setLikeCount(likeCounts.getOrDefault(post.getId(), 0));
+        response.setLikedByMe(likedPostIds.contains(post.getId()));
+        return response;
+    }
+
+    private Map<Long, Integer> loadLikeCounts(List<Long> postIds) {
+        if (postIds == null || postIds.isEmpty()) {
+            return Map.of();
+        }
+
+        Map<Long, Integer> result = new HashMap<>();
+        List<Object[]> rows = reactionRepository.countByPostIdsAndType(postIds, ReactionType.LIKE);
+        if (rows == null) return result;
+        for (Object[] row : rows) {
+            if (row == null || row.length < 2) continue;
+            Long postId = (Long) row[0];
+            Long count = (Long) row[1];
+            if (postId != null && count != null) {
+                result.put(postId, Math.toIntExact(count));
+            }
+        }
+        return result;
+    }
+
+    private Set<Long> loadLikedPostIdsByCaller(List<Long> postIds) {
+        if (postIds == null || postIds.isEmpty()) {
+            return Set.of();
+        }
+        User caller = getCallerUser();
+        if (caller == null || caller.getId() == null) {
+            return Set.of();
+        }
+        List<Long> likedIds = reactionRepository.findPostIdsByUserAndType(caller.getId(), postIds, ReactionType.LIKE);
+        return likedIds == null ? Set.of() : Set.copyOf(likedIds);
     }
 
 

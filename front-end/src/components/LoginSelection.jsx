@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import FeaturedFeature from "./FeaturedFeature";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { getRoleFromToken } from "../utils/jwt";
 
 const studentDesc =
     "Truy cập thông tin học tập, đăng ký môn học, xem điểm số và các dịch vụ dành cho sinh viên";
@@ -8,6 +9,16 @@ const adminDesc =
     "Quản lý hệ thống, quản lý sinh viên, chương trình đào tạo và các chức năng quản trị";
 
 export default function LoginSelection() {
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+        const role = localStorage.getItem("role") || getRoleFromToken(token);
+        if (role === "Admin") navigate("/admin/dashboard", { replace: true });
+        if (role === "Student") navigate("/student-dashboard", { replace: true });
+    }, [navigate]);
+
     return (
         <section className="login-selection">
             {/* Tách tiêu đề thành 2 dòng để xuống dòng y hệt mẫu */}
