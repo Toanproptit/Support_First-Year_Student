@@ -1,4 +1,28 @@
 /* StudentHandbook.css */
+/* =========================================
+   NÚT QUAY LẠI TRANG CHỦ
+========================================= */
+.hb-back-home {
+    margin-bottom: 25px;
+}
+
+.hb-back-home-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #c8102e;
+    /* Đỏ PTIT */
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: color 0.2s ease;
+}
+
+.hb-back-home-link:hover {
+    color: #a00a24;
+    /* Đỏ đậm hơn khi hover */
+    text-decoration: underline;
+}
 
 .handbook-page {
     background-color: #f8f9fa;

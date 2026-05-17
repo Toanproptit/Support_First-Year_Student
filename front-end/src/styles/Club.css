@@ -1,18 +1,14 @@
 /* Club.css */
 
-.club-page-container {
-    background-color: #ffffff;
-    font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-}
-
-/* Hiển thị dạng Grid, chia cột responsive */
+/* =========================================
+   LƯỚI CLB (GRID)
+========================================= */
 .club-grid-container {
     display: grid;
     grid-template-columns: repeat(1, 1fr);
-    gap: 2rem; /* Khoảng cách giữa các card */
-    padding-left: 80px;
-    padding-right: 80px;
-    padding-top: 80px;
+    gap: 25px;
+    margin-top: 20px;
+    margin-bottom: 40px;
 }
 
 /* Tablet: 2 cột */
@@ -22,65 +18,99 @@
     }
 }
 
-/* Desktop: 4 cột giống như trong hình */
+/* Desktop: 4 cột */
 @media (min-width: 1024px) {
     .club-grid-container {
         grid-template-columns: repeat(4, 1fr);
     }
 }
 
-/* Thiết kế cho từng thẻ (Card) */
+/* =========================================
+   THIẾT KẾ THẺ CLB (CARD)
+========================================= */
 .club-card {
-    border: 1px solid #e5e7eb; /* Viền xám nhạt */
     background-color: #ffffff;
+    border: 1px solid #eaeaea;
+    /* Viền xám nhạt đồng bộ form */
+    border-radius: 8px;
+    /* Bo góc 8px giống trang Detail */
+    padding: 25px 20px;
     display: flex;
     flex-direction: column;
     height: 100%;
-    /* Trong hình các góc khá vuông vức, không bo tròn nhiều */
-    border-radius: 2px; 
-    transition: box-shadow 0.3s ease;
-    padding: 24px 12px !important;
+
+    /* Chống giật cục khi hover */
+    transition: all 0.3s ease;
 }
 
 .club-card:hover {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transform: translateY(-6px);
+    /* Nổi lên nhẹ nhàng */
+    border-color: #c8102e;
+    /* Viền đỏ PTIT */
+    box-shadow: 0 10px 20px rgba(200, 16, 46, 0.06);
 }
 
-/* Viền bao quanh logo giống trong hình */
+/* =========================================
+   CHI TIẾT TRONG THẺ
+========================================= */
+.club-logo-wrap {
+    margin-bottom: 20px;
+}
+
 .club-logo {
-    border: 1px solid #e5e7eb;
-    padding: 2px; /* Tạo khoảng trắng nhỏ giữa ảnh và viền */
-    background-color: #fff;
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #f4f5f7;
 }
 
-/* Tiêu đề câu lạc bộ (Tên CLB) */
-.club-card h3 {
-    font-size: 1.25rem; /* 20px */
-    font-weight: 700; /* In đậm */
-    color: #1e3a8a; /* Màu xanh navy đậm giống hình */
+.club-info {
+    flex: 1;
+}
+
+.club-info h3 {
+    font-size: 17px;
+    font-weight: 700;
+    color: #002147;
     line-height: 1.4;
-    margin-bottom: 0.75rem;
+    margin: 0 0 10px 0;
 }
 
-/* Tinh chỉnh đường kẻ ngang */
-.club-card hr {
+.club-leader {
+    font-size: 14px;
+    color: #555;
+    margin: 0;
+}
+
+.club-leader strong {
+    color: #333;
+}
+
+/* Đường kẻ ngang */
+.club-divider {
     border: 0;
-    border-top: 1px solid #f1f5f9; /* Đường kẻ thật mờ */
-    margin: 1.25rem 0;
+    border-top: 1px dashed #eaeaea;
+    margin: 20px 0;
 }
 
-/* Link Facebook ở dưới cùng */
+/* Nút Link Facebook */
+.club-footer {
+    margin-top: auto;
+}
+
 .club-link {
-    color: #d9534f; /* Màu đỏ cam */
-    font-size: 0.875rem; /* 14px */
+    color: #c8102e;
+    /* Đỏ PTIT */
+    font-size: 14px;
+    font-weight: 600;
     text-decoration: none;
-    word-break: break-all; /* Tự động xuống dòng khi link quá dài (như trong hình) */
-    display: inline-block;
-    line-height: 1.5;
+    word-break: break-all;
     transition: color 0.2s ease;
 }
 
 .club-link:hover {
-    color: #c9302c; /* Đậm hơn khi hover */
+    color: #a00a24;
     text-decoration: underline;
 }

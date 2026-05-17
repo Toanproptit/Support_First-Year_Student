@@ -1,9 +1,17 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import '../styles/Dormitory.css'; // Đảm bảo đường dẫn import đúng
 
 export default function Dormitory() {
     return (
         <div className="dormitory-container">
+            {/* Thanh điều hướng (Breadcrumb) theo phong cách ẩn màu xám, hover chuyển đỏ */}
+            <div className="dorm-breadcrumb">
+                <Link to="/cam-nang" className="dorm-breadcrumb-link">Cẩm nang sinh viên</Link>
+                <span className="dorm-breadcrumb-separator"> &gt; </span>
+                <span className="dorm-breadcrumb-current">Ký túc xá</span>
+            </div>
+
             <h1 className="dormitory-title">Ký túc xá</h1>
             <p className="dormitory-intro">
                 Học viện Công nghệ Bưu chính Viễn thông xin thông báo về việc bố trí sinh viên khóa 2025 ở nội trú tại các Ký túc xá (KTX) của Học viện, cụ thể như sau:
@@ -88,6 +96,14 @@ export default function Dormitory() {
 
             <div className="note-box">
                 <p><strong>* Ghi chú:</strong> Sau khi kết thúc thời gian tiếp nhận, Học viện sẽ công khai danh sách sinh viên khóa 2025 được bố trí ở nội trú trên website Học viện.</p>
+            </div>
+            <div className="dorm-bottom-nav">
+                <Link to="/cam-nang" className="dorm-btn-back">
+                    <span>&larr;</span> Quay lại danh sách
+                </Link>
+                <Link to="/cam-nang" className="dorm-link-all">
+                    Xem tất cả cẩm nang
+                </Link>
             </div>
         </div>
     );

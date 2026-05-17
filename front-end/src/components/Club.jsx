@@ -1,5 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { Link } from "react-router-dom";
 import "../styles/Club.css";
+// Tận dụng lại CSS form chuẩn của bạn cho phần Breadcrumb và Nút quay lại
+import "../styles/ScholarshipDetail.css";
 
 const clubs = [
     {
@@ -63,53 +66,68 @@ const clubs = [
         name: "Liên Chi Đoàn Khoa CNTT1",
         leader: "Nguyễn Mạnh Dũng",
         link: "https://www.facebook.com/CNTT1",
-        logo: "https://ui-avatars.com/api/?name=EMA&background=000000&color=fff&rounded=true&bold=true"
+        logo: "https://ui-avatars.com/api/?name=LCD&background=16a34a&color=fff&rounded=true&bold=true"
     }
 ];
 
 export default function Club() {
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
     return (
-        <div className="club-page-container">
-            <div className="container mx-auto px-4 py-12">
-                <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-12 text-[#1e293b]">
-                    Danh sách Câu lạc bộ, Đội, Nhóm
-                </h2>
-                <div className="club-grid-container">
-                    {clubs.map((club) => (
-                        <div key={club.id} className="club-card py-6 px-4">
-                            {/* Logo Section */}
-                            <div className="mb-5">
-                                <img
-                                    src={club.logo}
-                                    alt={club.name}
-                                    className="club-logo w-16 h-16 rounded-full object-cover"
-                                />
-                            </div>
+        <div className="article-page">
+            {/* Mình nới rộng max-width một chút để hiển thị đẹp 4 cột */}
+            <div className="article-container" style={{ maxWidth: '1200px' }}>
 
-                            {/* Content Section */}
-                            <div className="flex-1">
-                                <h3 className="mb-2">{club.name}</h3>
-                                <p className="text-gray-500 text-[14px]">
-                                    <span className="font-medium text-gray-700">Chủ nhiệm:</span> {club.leader}
-                                </p>
-                            </div>
-
-                            <hr className="my-5" />
-
-                            {/* Footer Section */}
-                            <div className="mt-auto">
-                                <a
-                                    href={club.link}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="club-link"
-                                >
-                                    {club.link.replace("https://www.facebook.com/", "fb.com/")}
-                                </a>
-                            </div>
-                        </div>
-                    ))}
+                {/* 1. ĐIỀU HƯỚNG TRÊN CÙNG (Form chuẩn) */}
+                <div className="article-meta">
+                    <Link to="/cam-nang">Cẩm nang sinh viên</Link> &gt; <span>Câu lạc bộ, Đội, Nhóm</span>
                 </div>
+
+                {/* 2. TIÊU ĐỀ CHÍNH */}
+                <h1 className="article-title">Danh sách Câu lạc bộ, Đội, Nhóm</h1>
+
+                <div className="article-content">
+                    {/* 3. LƯỚI DANH SÁCH CLB */}
+                    <div className="club-grid-container">
+                        {clubs.map((club) => (
+                            <div key={club.id} className="club-card">
+
+                                <div className="club-logo-wrap">
+                                    <img src={club.logo} alt={club.name} className="club-logo" />
+                                </div>
+
+                                <div className="club-info">
+                                    <h3>{club.name}</h3>
+                                    <p className="club-leader">
+                                        <strong>Chủ nhiệm:</strong> {club.leader}
+                                    </p>
+                                </div>
+
+                                <hr className="club-divider" />
+
+                                <div className="club-footer">
+                                    <a href={club.link} target="_blank" rel="noopener noreferrer" className="club-link">
+                                        {club.link.replace("https://www.facebook.com/", "fb.com/")}
+                                    </a>
+                                </div>
+
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* 4. ĐIỀU HƯỚNG DƯỚI CÙNG (Form chuẩn) */}
+                    <div className="article-bottom-nav">
+                        <Link to="/cam-nang" className="btn-back" onClick={() => window.scrollTo(0, 0)}>
+                            <span>&larr;</span> Quay lại danh sách
+                        </Link>
+                        <Link to="/cam-nang" className="link-all" onClick={() => window.scrollTo(0, 0)}>
+                            Xem tất cả cẩm nang
+                        </Link>
+                    </div>
+                </div>
+
             </div>
         </div>
     );

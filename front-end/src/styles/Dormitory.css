@@ -7,6 +7,37 @@
     line-height: 1.6;
 }
 
+/* =========================================
+   STYLE THANH ĐIỀU HƯỚNG (BREADCRUMB)
+========================================= */
+.dorm-breadcrumb {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 20px;
+}
+
+.dorm-breadcrumb-link {
+    color: #555;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.dorm-breadcrumb-link:hover {
+    color: #d32f2f;
+    /* Chuyển màu đỏ đặc trưng khi hover */
+    text-decoration: underline;
+}
+
+.dorm-breadcrumb-separator {
+    color: #ccc;
+    margin: 0 6px;
+}
+
+.dorm-breadcrumb-current {
+    color: #555;
+}
+
 .dormitory-title {
     text-align: center;
     color: #d32f2f;
@@ -42,13 +73,13 @@
     border: 1px solid #ddd;
     border-radius: 8px;
     padding: 15px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     transition: transform 0.2s;
 }
 
 .dorm-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 }
 
 .dorm-card h4 {
@@ -96,4 +127,64 @@
 .contact-highlight {
     font-weight: bold;
     color: #d32f2f;
+}
+
+/* =========================================
+   STYLE ĐIỀU HƯỚNG DƯỚI CÙNG (BOTTOM NAV)
+========================================= */
+.dorm-bottom-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+    /* Đường kẻ ngang mờ */
+}
+
+.dorm-btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    color: #d32f2f;
+    /* Sử dụng màu đỏ chủ đạo */
+    padding: 10px 18px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14.5px;
+    transition: all 0.2s ease;
+}
+
+.dorm-btn-back:hover {
+    background-color: #f1f1f1;
+    border-color: #bbb;
+    transform: translateY(-2px);
+    /* Hiệu ứng nẩy nhẹ nhàng của riêng nút */
+}
+
+.dorm-link-all {
+    color: #d32f2f;
+    /* Đồng bộ màu sắc */
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14.5px;
+    transition: color 0.2s ease;
+}
+
+.dorm-link-all:hover {
+    color: #b71c1c;
+    /* Tông đỏ đậm hơn một chút khi hover */
+    text-decoration: underline;
+}
+
+/* Responsive cho thanh điều hướng dưới cùng trên Mobile */
+@media (max-width: 480px) {
+    .dorm-bottom-nav {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
 }

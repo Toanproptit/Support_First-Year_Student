@@ -1,7 +1,7 @@
 /* ScholarshipDetail.css */
 
 .article-page {
-    background-color: #f9f9f9;
+    background-color: #f9f9fb;
     min-height: 100vh;
     padding: 40px 20px;
     font-family: Arial, sans-serif;
@@ -13,31 +13,23 @@
     background-color: #ffffff;
     padding: 40px 50px;
     border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    border: 1px solid #eaeaea;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
 }
 
 .article-meta {
     font-size: 14px;
-    color: #6c757d;
+    color: #6b7280;
     margin-bottom: 15px;
 }
 
-.article-meta a {
-    color: #6c757d;
-    text-decoration: none;
-}
-
-.article-meta a:hover {
-    text-decoration: underline;
-}
-
-.read-time {
-    margin-left: 5px;
+.article-meta .dot {
+    margin: 0 5px;
 }
 
 .article-title {
     color: #c8102e;
-    /* MÀU ĐỎ PTIT CHỦ ĐẠO */
+    /* MÀU ĐỎ PTIT */
     font-size: 28px;
     margin-top: 0;
     margin-bottom: 25px;
@@ -50,125 +42,88 @@
     color: #212529;
 }
 
+.section-heading {
+    color: #c8102e;
+    font-size: 19px;
+    margin-top: 35px;
+    margin-bottom: 15px;
+    font-weight: 700;
+    border: none;
+    /* Đã xóa đường kẻ hồng bị lỗi trong ảnh của bạn */
+}
+
 .article-content p {
     margin-bottom: 15px;
 }
 
-.section-heading {
-    color: #c8102e;
-    /* MÀU ĐỎ PTIT CHỦ ĐẠO cho tiêu đề phụ */
-    font-size: 18px;
-    margin-top: 30px;
-    margin-bottom: 15px;
-    font-weight: 600;
+.custom-list {
+    margin-top: 5px;
+    margin-bottom: 25px;
+    padding-left: 20px;
 }
 
-.article-content ul,
-.article-content ol {
-    margin-bottom: 20px;
-    padding-left: 25px;
+.custom-list li {
+    margin-bottom: 12px;
+    list-style-type: disc;
+    line-height: 1.6;
 }
 
-.article-content li {
-    margin-bottom: 8px;
-}
-
-/* Kiểu cho liên kết trong nội dung */
-.article-content a {
-    color: #c8102e;
-    /* MÀU ĐỎ PTIT CHỦ ĐẠO cho liên kết */
-    text-decoration: underline;
-}
-
-.article-content a:hover {
-    color: #a00d25;
-    /* Màu đỏ sẫm hơn khi di chuột */
-}
-
-/* --- BẢNG MỨC HỌC BỔNG --- */
+/* =======================================================
+   THIẾT KẾ BẢNG MỨC HỌC BỔNG XỊN XÒ
+   ======================================================= */
 .table-responsive {
     overflow-x: auto;
-    margin-bottom: 20px;
-    margin-top: 10px;
+    margin-bottom: 30px;
+    margin-top: 15px;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    /* Viền xám bao quanh bảng */
 }
 
 .scholarship-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 15px;
+    text-align: left;
 }
 
 .scholarship-table th,
 .scholarship-table td {
-    border: 1px solid #dee2e6;
-    padding: 12px 15px;
-    text-align: left;
+    padding: 14px 20px;
+    border-bottom: 1px solid #eaeaea;
 }
 
 .scholarship-table th {
     background-color: #f8f9fa;
-    font-weight: bold;
-    color: #212529;
+    /* Nền xám nhạt cho header */
+    font-weight: 700;
+    color: #111;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.scholarship-table tr:last-child td {
+    border-bottom: none;
+    /* Xóa viền dưới của dòng cuối cùng */
 }
 
 .scholarship-table tr:hover {
-    background-color: #f8f9fa;
+    background-color: #fbfbfb;
+    /* Đổi màu siêu nhẹ khi hover */
 }
 
-/* =======================================================
-   THANH ĐIỀU HƯỚNG DƯỚI CÙNG (BOTTOM NAV)
-   ======================================================= */
-.article-bottom-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 50px;
-    padding-top: 25px;
-    border-top: 1px solid #eaeaea;
+.fw-bold {
+    font-weight: 700;
+    color: #111;
 }
 
-.btn-back {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    background-color: #f4f5f7;
-    /* Nền xám nhạt */
-    color: #334155;
-    padding: 10px 20px;
-    border-radius: 6px;
-    text-decoration: none;
-    font-size: 15px;
-    font-weight: 500;
-    transition: background-color 0.2s;
-}
-
-.btn-back span {
-    font-size: 18px;
-    /* Cho mũi tên to ra một chút */
-    line-height: 1;
-}
-
-.btn-back:hover {
-    background-color: #e2e8f0;
-    color: #334155;
-}
-
-.link-all {
+.highlight-red {
     color: #c8102e;
-    /* Chữ màu ĐỎ PTIT chủ đạo */
-    text-decoration: none;
-    font-size: 15px;
-    font-weight: 500;
-}
-
-.link-all:hover {
-    text-decoration: underline;
-    color: #a00d25;
-    /* Đỏ sẫm khi hover */
+    /* Làm nổi bật số % tiền học bổng */
+    font-size: 16px;
 }
 
 /* =======================================================
-   THANH ĐIỀU HƯỚNG DƯỚI CÙNG (BOTTOM NAV)
+   THANH ĐIỀU HƯỚNG DƯỚI CÙNG
    ======================================================= */
 .article-bottom-nav {
     display: flex;
@@ -179,18 +134,15 @@
     border-top: 1px solid #eaeaea;
 }
 
-/* Thêm !important để chống bị vạ lây gạch chân từ bài viết */
 .article-bottom-nav .btn-back {
     display: inline-flex;
     align-items: center;
     gap: 10px;
     background-color: #f4f5f7;
     color: #c8102e;
-    /* Chữ đỏ PTIT */
     padding: 10px 20px;
     border-radius: 6px;
     text-decoration: none !important;
-    /* Ép xóa gạch chân */
     font-size: 15px;
     font-weight: 500;
     transition: background-color 0.2s;
@@ -208,13 +160,11 @@
 .article-bottom-nav .link-all {
     color: #c8102e;
     text-decoration: none !important;
-    /* Ép xóa gạch chân */
     font-size: 15px;
     font-weight: 500;
 }
 
 .article-bottom-nav .link-all:hover {
     text-decoration: underline !important;
-    /* Chỉ gạch chân khi di chuột vào */
     color: #a00d25;
 }
