@@ -1,0 +1,82 @@
+/* Student Activities tab: extra styles for cancel + detail modals */
+
+.act-cancel-modal { max-width: 520px; }
+
+/* Header (used by detail + cancel modals) */
+.act-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-bottom: 1px solid #f1f5f9;
+}
+.act-modal-header h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #111;
+  flex: 1;
+}
+.act-btn-close {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #374151;
+  transition: background 0.15s, border-color 0.15s;
+}
+.act-btn-close:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+/* Detail modal content */
+.act-modal-body .act-meta {
+  margin: 0 0 8px;
+  font-size: 13.5px;
+  color: #475569;
+}
+.act-desc {
+  margin: 10px 0 0;
+  font-size: 13.5px;
+  color: #6b7280;
+  line-height: 1.6;
+}
+
+/* Cancel request modal */
+.act-cancel-activity {
+  margin: 0;
+  font-size: 13.5px;
+  color: #334155;
+}
+.act-cancel-label {
+  display: block;
+  font-weight: 700;
+  font-size: 13px;
+  color: #334155;
+  margin-bottom: 6px;
+}
+.act-cancel-textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 92px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  outline: none;
+  font-size: 13.5px;
+  color: #0f172a;
+  background: #fff;
+  box-sizing: border-box;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.act-cancel-textarea:focus {
+  border-color: #c8102e;
+  box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.12);
+}
+

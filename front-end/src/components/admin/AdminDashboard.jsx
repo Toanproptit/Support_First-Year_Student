@@ -6,6 +6,7 @@ const stats = [
   { label: "Bài viết", value: "84", icon: "📝", color: "#10b981" },
   { label: "Mục cẩm nang", value: "32", icon: "📚", color: "#f59e0b" },
   { label: "Phản hồi mới", value: "17", icon: "💬", color: "#c8102e" },
+  
 ];
 
 export default function AdminDashboard() {

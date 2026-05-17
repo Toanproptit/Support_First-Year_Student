@@ -3,7 +3,6 @@ package org.example.supportfirststudents.dto.response;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import org.example.supportfirststudents.enums.Role;
 
@@ -13,6 +12,8 @@ import org.example.supportfirststudents.enums.Role;
 public class UserResponse {
     Long id ;
     String fullName;
+    String userName;
     String email;
-    Role Role;
+    String majorCode;
+    Role role;
 }

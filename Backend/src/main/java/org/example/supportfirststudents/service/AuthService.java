@@ -52,9 +52,16 @@ public class AuthService {
     public AuthResponse login (LoginRequest request){
         User u = userRepository.findByEmail(request.getEmail()).orElseThrow(() ->
                 new AppException(ErrorCode.EMAIL_NOT_FOUND));
-        if (!passwordEncoder.matches(request.getPassword(), u.getPassword())) {
-            throw new AppException(ErrorCode.PASSWORD_INVALID);
+        boolean matches = passwordEncoder.matches(request.getPassword(), u.getPassword());
+        if (!matches) {
+            // Hỗ trợ dữ liệu cũ: một số user được tạo từ /users đang lưu plain-text password
+            if (u.getPassword() != null && u.getPassword().equals(request.getPassword())) {
+                u.setPassword(passwordEncoder.encode(request.getPassword()));
+                userRepository.save(u);
+                matches = true;
+            }
         }
+        if (!matches) throw new AppException(ErrorCode.PASSWORD_INVALID);
         var token = generateToken(u);
         return AuthResponse.builder()
                 .token(token)

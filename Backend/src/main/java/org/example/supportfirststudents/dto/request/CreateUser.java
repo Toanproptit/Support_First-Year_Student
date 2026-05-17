@@ -27,4 +27,6 @@ public class CreateUser {
     String email;
 
     Role role;
+
+    String majorCode;
 }

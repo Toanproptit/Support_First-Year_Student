@@ -1,16 +1,9 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "../../styles/AdminPages.css";
 import Pagination from "./Pagination";
+import { createTerm, deleteTerm, getAllTerms, updateTerm } from "../../service/terms";
 
 const PAGE_SIZE = 8;
-
-const initialTerms = [
-  { code: "2025-1", name: "Học kỳ 1 - Năm học 2025-2026", startDate: "2025-08-18", endDate: "2025-12-28" },
-  { code: "2025-2", name: "Học kỳ 2 - Năm học 2025-2026", startDate: "2026-01-12", endDate: "2026-05-24" },
-  { code: "2026-S", name: "Học kỳ hè 2026", startDate: "2026-06-08", endDate: "2026-08-02" },
-  { code: "2024-2", name: "Học kỳ 2 - Năm học 2024-2025", startDate: "2025-01-13", endDate: "2025-05-25" },
-  { code: "2024-1", name: "Học kỳ 1 - Năm học 2024-2025", startDate: "2024-08-19", endDate: "2024-12-29" },
-];
 
 function normalizeCode(value) {
   return (value || "").trim().toUpperCase();
@@ -19,6 +12,10 @@ function normalizeCode(value) {
 function formatDate(value) {
   if (!value) return "-";
   return value;
+}
+
+function getErrorMessage(err, fallback) {
+  return err?.response?.data?.message || err?.message || fallback;
 }
 
 function getTermStatus(term) {
@@ -35,9 +32,10 @@ function getTermStatus(term) {
 }
 
 export default function TermManagement() {
-  const [terms, setTerms] = useState(initialTerms);
+  const [terms, setTerms] = useState([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(false);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTerm, setEditingTerm] = useState(null);
@@ -45,12 +43,35 @@ export default function TermManagement() {
 
   const [deleteTarget, setDeleteTarget] = useState(null);
 
+  const refresh = async () => {
+    const list = await getAllTerms();
+    setTerms(list || []);
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        setLoading(true);
+        const list = await getAllTerms();
+        if (cancelled) return;
+        setTerms(list || []);
+      } catch (e) {
+        alert(getErrorMessage(e, "Không tải được danh sách kỳ học."));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return terms;
-    return terms.filter(
-      (t) => t.code.toLowerCase().includes(q) || t.name.toLowerCase().includes(q)
-    );
+    return (terms || []).filter((t) => t.code.toLowerCase().includes(q) || t.name.toLowerCase().includes(q));
   }, [terms, search]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
@@ -80,44 +101,48 @@ export default function TermManagement() {
 
   const closeModal = () => setIsModalOpen(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const code = normalizeCode(formData.code);
     const name = (formData.name || "").trim();
     if (!code || !name) return;
-
     if (formData.startDate && formData.endDate && formData.startDate > formData.endDate) return;
 
-    if (editingTerm) {
-      setTerms((prev) =>
-        prev.map((t) =>
-          t.code === editingTerm.code
-            ? { ...t, name, startDate: formData.startDate || "", endDate: formData.endDate || "" }
-            : t
-        )
-      );
-    } else {
-      if (terms.some((t) => normalizeCode(t.code) === code)) return;
-      const newTerm = {
-        code,
-        name,
-        startDate: formData.startDate || "",
-        endDate: formData.endDate || "",
-      };
-      setTerms((prev) => [newTerm, ...prev]);
-      setCurrentPage(1);
+    try {
+      if (editingTerm) {
+        await updateTerm(editingTerm.code, {
+          name,
+          startDate: formData.startDate || "",
+          endDate: formData.endDate || "",
+        });
+      } else {
+        await createTerm({
+          code,
+          name,
+          startDate: formData.startDate || "",
+          endDate: formData.endDate || "",
+        });
+        setCurrentPage(1);
+      }
+      await refresh();
+      closeModal();
+    } catch (err) {
+      alert(getErrorMessage(err, "Lưu kỳ học thất bại."));
     }
-
-    closeModal();
   };
 
   const confirmDelete = (term) => setDeleteTarget(term);
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!deleteTarget) return;
-    setTerms((prev) => prev.filter((t) => t.code !== deleteTarget.code));
-    setDeleteTarget(null);
-    setCurrentPage(1);
+    try {
+      await deleteTerm(deleteTarget.code);
+      setDeleteTarget(null);
+      setCurrentPage(1);
+      await refresh();
+    } catch (err) {
+      alert(getErrorMessage(err, "Xoá kỳ học thất bại."));
+    }
   };
 
   return (
@@ -125,7 +150,7 @@ export default function TermManagement() {
       <div className="page-header">
         <div>
           <h2 className="page-title">Quản lý Kỳ học</h2>
-          <p className="page-subtitle">Tạo / sửa / xoá kỳ học (mock data, chưa kết nối BE)</p>
+          <p className="page-subtitle">Tạo / sửa / xoá kỳ học</p>
         </div>
         <button className="btn-primary" onClick={openAddModal}>
           + Thêm kỳ học
@@ -139,39 +164,47 @@ export default function TermManagement() {
           value={search}
           onChange={(e) => handleSearch(e.target.value)}
         />
-        <div className="result-count">
-          {filtered.length} kết quả • Trang {currentPage}/{totalPages}
-        </div>
+        <div className="result-count">{filtered.length} kết quả</div>
       </div>
 
       <div className="table-card">
         <table className="data-table">
           <thead>
             <tr>
-              <th>Mã kỳ</th>
+              <th>#</th>
+              <th>Mã</th>
               <th>Tên kỳ học</th>
               <th>Bắt đầu</th>
               <th>Kết thúc</th>
               <th>Trạng thái</th>
-              <th>Thao tác</th>
+              <th>Hành động</th>
             </tr>
           </thead>
           <tbody>
-            {paginated.length === 0 ? (
+            {loading ? (
               <tr>
-                <td colSpan="6" style={{ padding: 18, color: "#64748b" }}>
-                  Không có dữ liệu.
+                <td colSpan={7} className="empty-state">
+                  Đang tải...
+                </td>
+              </tr>
+            ) : paginated.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="empty-state">
+                  Không có kỳ học nào.
                 </td>
               </tr>
             ) : (
-              paginated.map((term) => {
+              paginated.map((term, idx) => {
                 const status = getTermStatus(term);
                 return (
                   <tr key={term.code}>
+                    <td>{(currentPage - 1) * PAGE_SIZE + idx + 1}</td>
                     <td>
                       <code>{term.code}</code>
                     </td>
-                    <td style={{ fontWeight: 700, color: "#0f172a" }}>{term.name}</td>
+                    <td>
+                      <strong>{term.name}</strong>
+                    </td>
                     <td>{formatDate(term.startDate)}</td>
                     <td>{formatDate(term.endDate)}</td>
                     <td>
@@ -195,9 +228,7 @@ export default function TermManagement() {
         </table>
       </div>
 
-      <div style={{ marginTop: 16 }}>
-        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
-      </div>
+      <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
 
       {isModalOpen && (
         <div className="modal-overlay" onClick={closeModal}>
@@ -276,9 +307,6 @@ export default function TermManagement() {
             <div className="modal-body">
               <div>
                 Bạn chắc chắn muốn xoá kỳ học <code>{deleteTarget.code}</code>?
-              </div>
-              <div style={{ color: "#64748b", fontSize: "0.92rem" }}>
-                Thao tác này hiện chỉ xoá khỏi mock data trên UI.
               </div>
             </div>
             <div className="modal-footer">

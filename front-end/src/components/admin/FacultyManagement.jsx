@@ -1,123 +1,144 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "../../styles/AdminPages.css";
 import "../../styles/FacultyManagement.css";
 import Pagination from "./Pagination";
+import {
+  createFaculty,
+  deleteFaculty,
+  getAllFaculties,
+  getMajorsByFaculty,
+  updateFaculty,
+} from "../../service/faculties";
 
 const PAGE_SIZE = 6;
 
-const initialFaculties = [
-  {
-    id: 1,
-    name: "Khoa Công nghệ Thông tin",
-    code: "CNTT",
-    description: "Đào tạo kỹ sư CNTT, lập trình viên, chuyên gia bảo mật...",
-    majors: [
-      { id: 1, name: "Kỹ thuật Phần mềm", code: "KTPM" },
-      { id: 2, name: "Khoa học Máy tính", code: "KHMT" },
-      { id: 3, name: "An toàn Thông tin", code: "ATTT" },
-    ],
-  },
-  {
-    id: 2,
-    name: "Khoa Điện tử Viễn thông",
-    code: "DTVT",
-    description: "Đào tạo kỹ sư điện tử, viễn thông, IoT...",
-    majors: [
-      { id: 4, name: "Kỹ thuật Điện tử", code: "KTDT" },
-      { id: 5, name: "Kỹ thuật Viễn thông", code: "KTVT" },
-    ],
-  },
-  {
-    id: 3,
-    name: "Khoa Quản trị Kinh doanh",
-    code: "QTKD",
-    description: "Đào tạo cử nhân quản trị, kinh doanh, marketing...",
-    majors: [
-      { id: 6, name: "Quản trị Kinh doanh", code: "QTKD" },
-      { id: 7, name: "Marketing", code: "MKT" },
-    ],
-  },
-  {
-    id: 4,
-    name: "Khoa Kế toán",
-    code: "KT",
-    description: "Đào tạo cử nhân kế toán, kiểm toán, tài chính...",
-    majors: [
-      { id: 8, name: "Kế toán Doanh nghiệp", code: "KTDN" },
-    ],
-  },
-  {
-    id: 5,
-    name: "Khoa Cơ bản",
-    code: "CB",
-    description: "Giảng dạy các môn học đại cương cho toàn trường",
-    majors: [],
-  },
-];
+function normalizeCode(value) {
+  return (value || "").trim().toUpperCase();
+}
+
+function getErrorMessage(err, fallback) {
+  return err?.response?.data?.message || err?.message || fallback;
+}
 
 export default function FacultyManagement() {
-  const [faculties, setFaculties] = useState(initialFaculties);
+  const [faculties, setFaculties] = useState([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [expandedId, setExpandedId] = useState(null);
+  const [expandedCode, setExpandedCode] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  // Modal state
+  const [majorsByFaculty, setMajorsByFaculty] = useState({});
+  const [majorsLoading, setMajorsLoading] = useState({});
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingFaculty, setEditingFaculty] = useState(null);
-  const [formData, setFormData] = useState({ name: "", code: "", description: "" });
+  const [formData, setFormData] = useState({ name: "", code: "" });
 
-  // Confirm delete
   const [deleteTarget, setDeleteTarget] = useState(null);
 
-  const filtered = faculties.filter(
-    (f) =>
-      f.name.toLowerCase().includes(search.toLowerCase()) ||
-      f.code.toLowerCase().includes(search.toLowerCase())
-  );
+  const refresh = async () => {
+    const list = await getAllFaculties();
+    setFaculties(list || []);
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        setLoading(true);
+        const list = await getAllFaculties();
+        if (cancelled) return;
+        setFaculties(list || []);
+      } catch (e) {
+        alert(getErrorMessage(e, "Không tải được danh sách khoa."));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const filtered = useMemo(() => {
+    const q = (search || "").trim().toLowerCase();
+    if (!q) return faculties;
+    return (faculties || []).filter(
+      (f) =>
+        (f?.name || "").toLowerCase().includes(q) ||
+        (f?.code || "").toLowerCase().includes(q)
+    );
+  }, [faculties, search]);
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
-  const paginated = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const paginated = filtered.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
 
   const handleSearch = (val) => {
     setSearch(val);
     setCurrentPage(1);
-    setExpandedId(null);
+    setExpandedCode(null);
   };
 
-  const toggleExpand = (id) => {
-    setExpandedId((prev) => (prev === id ? null : id));
+  const loadMajors = async (facultyCode) => {
+    if (!facultyCode) return;
+    if (majorsByFaculty[facultyCode]) return;
+    if (majorsLoading[facultyCode]) return;
+
+    try {
+      setMajorsLoading((p) => ({ ...p, [facultyCode]: true }));
+      const majors = await getMajorsByFaculty(facultyCode);
+      setMajorsByFaculty((p) => ({ ...p, [facultyCode]: majors || [] }));
+    } catch (e) {
+      alert(getErrorMessage(e, "Không tải được danh sách ngành theo khoa."));
+    } finally {
+      setMajorsLoading((p) => ({ ...p, [facultyCode]: false }));
+    }
+  };
+
+  const toggleExpand = (code) => {
+    setExpandedCode((prev) => {
+      const next = prev === code ? null : code;
+      if (next) loadMajors(next);
+      return next;
+    });
   };
 
   const openAddModal = () => {
     setEditingFaculty(null);
-    setFormData({ name: "", code: "", description: "" });
+    setFormData({ name: "", code: "" });
     setIsModalOpen(true);
   };
 
   const openEditModal = (faculty) => {
     setEditingFaculty(faculty);
-    setFormData({ name: faculty.name, code: faculty.code, description: faculty.description });
+    setFormData({ name: faculty?.name || "", code: faculty?.code || "" });
     setIsModalOpen(true);
   };
 
   const closeModal = () => setIsModalOpen(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name.trim() || !formData.code.trim()) return;
+    const name = (formData.name || "").trim();
+    const code = normalizeCode(formData.code);
+    if (!name || !code) return;
 
-    if (editingFaculty) {
-      setFaculties((prev) =>
-        prev.map((f) =>
-          f.id === editingFaculty.id ? { ...f, ...formData } : f
-        )
-      );
-    } else {
-      const newId = faculties.length > 0 ? Math.max(...faculties.map((f) => f.id)) + 1 : 1;
-      setFaculties((prev) => [{ id: newId, ...formData, majors: [] }, ...prev]);
-      setCurrentPage(1);
+    try {
+      if (editingFaculty) {
+        await updateFaculty(editingFaculty.code, { name });
+      } else {
+        await createFaculty({ code, name });
+        setCurrentPage(1);
+      }
+      await refresh();
+      closeModal();
+    } catch (err) {
+      alert(getErrorMessage(err, "Lưu khoa thất bại."));
     }
-    closeModal();
   };
 
   const handleChange = (e) => {
@@ -126,16 +147,21 @@ export default function FacultyManagement() {
 
   const confirmDelete = (faculty) => setDeleteTarget(faculty);
 
-  const handleDelete = () => {
-    setFaculties((prev) => prev.filter((f) => f.id !== deleteTarget.id));
-    if (expandedId === deleteTarget.id) setExpandedId(null);
-    setDeleteTarget(null);
-    if (paginated.length === 1 && currentPage > 1) setCurrentPage(currentPage - 1);
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    try {
+      await deleteFaculty(deleteTarget.code);
+      setDeleteTarget(null);
+      if (expandedCode === deleteTarget.code) setExpandedCode(null);
+      await refresh();
+      if (paginated.length === 1 && currentPage > 1) setCurrentPage(currentPage - 1);
+    } catch (err) {
+      alert(getErrorMessage(err, "Xoá khoa thất bại."));
+    }
   };
 
   return (
     <div className="admin-page">
-      {/* Header */}
       <div className="page-header">
         <div>
           <h2 className="page-title">Quản lý Khoa</h2>
@@ -149,79 +175,57 @@ export default function FacultyManagement() {
         </button>
       </div>
 
-      {/* Toolbar */}
-      <div className="table-toolbar faculty-toolbar">
+      <div className="table-toolbar">
         <input
           className="search-input"
           type="text"
-          placeholder="Tìm theo tên khoa hoặc mã khoa..."
+          placeholder="Tìm kiếm theo tên hoặc mã khoa..."
           value={search}
           onChange={(e) => handleSearch(e.target.value)}
         />
         <span className="result-count">{filtered.length} kết quả</span>
       </div>
 
-      {/* Stats row */}
-      <div className="faculty-stats-row">
-        <div className="faculty-stat-chip">
-          <span className="chip-icon">🏛️</span>
-          <span>{faculties.length} Khoa</span>
-        </div>
-        <div className="faculty-stat-chip">
-          <span className="chip-icon">📚</span>
-          <span>
-            {faculties.reduce((acc, f) => acc + f.majors.length, 0)} Ngành
-          </span>
-        </div>
-      </div>
-
-      {/* Table */}
       <div className="table-card">
         <table className="data-table">
           <thead>
             <tr>
-              <th style={{ width: 40 }}></th>
               <th>#</th>
-              <th>Tên khoa</th>
               <th>Mã khoa</th>
-              <th>Số ngành</th>
-              <th>Mô tả</th>
+              <th>Tên khoa</th>
+              <th>Ngành</th>
               <th>Hành động</th>
             </tr>
           </thead>
           <tbody>
-            {paginated.length === 0 ? (
+            {loading ? (
               <tr>
-                <td colSpan={7} className="empty-row">
-                  Không tìm thấy khoa nào.
+                <td colSpan={5} className="empty-state">
+                  Đang tải...
+                </td>
+              </tr>
+            ) : paginated.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="empty-state">
+                  Không có khoa nào.
                 </td>
               </tr>
             ) : (
               paginated.map((faculty, idx) => (
-                <React.Fragment key={faculty.id}>
-                  <tr className={expandedId === faculty.id ? "row-expanded" : ""}>
-                    <td>
-                      <button
-                        className={`expand-btn ${expandedId === faculty.id ? "open" : ""}`}
-                        onClick={() => toggleExpand(faculty.id)}
-                        title={expandedId === faculty.id ? "Thu gọn" : "Xem ngành"}
-                      >
-                        {expandedId === faculty.id ? "▾" : "▸"}
-                      </button>
-                    </td>
+                <React.Fragment key={faculty.code}>
+                  <tr>
                     <td>{(currentPage - 1) * PAGE_SIZE + idx + 1}</td>
                     <td>
-                      <strong className="faculty-name">{faculty.name}</strong>
+                      <code>{faculty.code}</code>
                     </td>
                     <td>
-                      <code className="faculty-code-badge">{faculty.code}</code>
+                      <strong>{faculty.name}</strong>
                     </td>
                     <td>
-                      <span className={`badge ${faculty.majors.length > 0 ? "badge-blue" : "badge-yellow"}`}>
-                        {faculty.majors.length} ngành
-                      </span>
+                      <button className="btn-expand" onClick={() => toggleExpand(faculty.code)}>
+                        {expandedCode === faculty.code ? "Thu gọn" : "Xem ngành"}
+                      </button>
                     </td>
-                    <td className="desc-cell">{faculty.description || "—"}</td>
                     <td>
                       <div className="action-btns">
                         <button className="btn-edit" onClick={() => openEditModal(faculty)}>
@@ -234,25 +238,23 @@ export default function FacultyManagement() {
                     </td>
                   </tr>
 
-                  {/* Expanded majors row */}
-                  {expandedId === faculty.id && (
+                  {expandedCode === faculty.code && (
                     <tr className="expanded-row">
-                      <td colSpan={7}>
-                        <div className="majors-expand-panel">
-                          <div className="majors-expand-header">
-                            <span>📚 Danh sách ngành thuộc <strong>{faculty.name}</strong></span>
-                          </div>
-                          {faculty.majors.length === 0 ? (
-                            <p className="no-majors-text">Khoa này chưa có ngành nào.</p>
-                          ) : (
-                            <div className="major-chips-grid">
-                              {faculty.majors.map((m) => (
-                                <div className="major-chip" key={m.id}>
-                                  <span className="major-chip-code">{m.code}</span>
-                                  <span className="major-chip-name">{m.name}</span>
-                                </div>
+                      <td colSpan={5}>
+                        <div className="expanded-content">
+                          <h4>Danh sách ngành thuộc khoa</h4>
+                          {majorsLoading[faculty.code] ? (
+                            <div className="empty-state">Đang tải...</div>
+                          ) : (majorsByFaculty[faculty.code] || []).length > 0 ? (
+                            <ul className="major-list">
+                              {(majorsByFaculty[faculty.code] || []).map((major) => (
+                                <li key={major.code}>
+                                  <strong>{major.name}</strong> <code>{major.code}</code>
+                                </li>
                               ))}
-                            </div>
+                            </ul>
+                          ) : (
+                            <p className="no-major">Chưa có ngành nào.</p>
                           )}
                         </div>
                       </td>
@@ -266,14 +268,9 @@ export default function FacultyManagement() {
       </div>
 
       {totalPages > 0 && (
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-        />
+        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
       )}
 
-      {/* Add/Edit Modal */}
       {isModalOpen && (
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -286,41 +283,36 @@ export default function FacultyManagement() {
             <form onSubmit={handleSubmit}>
               <div className="modal-body">
                 <div className="form-group">
-                  <label>Tên khoa <span className="required">*</span></label>
+                  <label>
+                    Tên khoa <span className="required">*</span>
+                  </label>
                   <input
                     type="text"
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
                     required
-                    placeholder="Vd: Khoa Công nghệ Thông tin"
+                    placeholder="VD: Khoa Công nghệ Thông tin"
                   />
                 </div>
                 <div className="form-group">
-                  <label>Mã khoa <span className="required">*</span></label>
+                  <label>
+                    Mã khoa <span className="required">*</span>
+                  </label>
                   <input
                     type="text"
                     name="code"
                     value={formData.code}
                     onChange={handleChange}
+                    disabled={!!editingFaculty}
                     required
-                    placeholder="Vd: CNTT"
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Mô tả</label>
-                  <textarea
-                    name="description"
-                    value={formData.description}
-                    onChange={handleChange}
-                    placeholder="Mô tả ngắn về khoa..."
-                    rows={3}
+                    placeholder="VD: CNTT"
                   />
                 </div>
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn-secondary" onClick={closeModal}>
-                  Hủy
+                  Huỷ
                 </button>
                 <button type="submit" className="btn-primary">
                   {editingFaculty ? "Lưu thay đổi" : "Thêm khoa"}
@@ -331,7 +323,6 @@ export default function FacultyManagement() {
         </div>
       )}
 
-      {/* Delete Confirm Modal */}
       {deleteTarget && (
         <div className="modal-overlay" onClick={() => setDeleteTarget(null)}>
           <div className="modal-content modal-confirm" onClick={(e) => e.stopPropagation()}>
@@ -343,18 +334,13 @@ export default function FacultyManagement() {
             </div>
             <div className="modal-body">
               <p className="confirm-text">
-                Bạn có chắc muốn xoá khoa{" "}
-                <strong>"{deleteTarget.name}"</strong>?
+                Bạn có chắc muốn xoá khoa <strong>"{deleteTarget.name}"</strong>?
               </p>
-              {deleteTarget.majors.length > 0 && (
-                <div className="confirm-warning">
-                  ⚠️ Khoa này có <strong>{deleteTarget.majors.length} ngành</strong> đang thuộc về nó. Tất cả ngành cũng sẽ bị xoá!
-                </div>
-              )}
+              <div className="confirm-warning">Nếu khoa đang có ngành, backend sẽ không cho phép xoá.</div>
             </div>
             <div className="modal-footer">
               <button className="btn-secondary" onClick={() => setDeleteTarget(null)}>
-                Hủy
+                Huỷ
               </button>
               <button className="btn-delete-confirm" onClick={handleDelete}>
                 Xoá khoa
@@ -366,3 +352,4 @@ export default function FacultyManagement() {
     </div>
   );
 }
+

@@ -15,6 +15,11 @@ public class ParticipationMapper {
                 .activityId(participation.getActivity() != null ? participation.getActivity().getId() : null)
                 .joinDate(participation.getJoinDate())
                 .role(participation.getRole())
+                .status(participation.getStatus())
+                .cancelRequestReason(participation.getCancelRequestReason())
+                .cancelRequestedAt(participation.getCancelRequestedAt())
+                .cancelReviewedAt(participation.getCancelReviewedAt())
+                .cancelReviewNote(participation.getCancelReviewNote())
                 .build();
     }
 }

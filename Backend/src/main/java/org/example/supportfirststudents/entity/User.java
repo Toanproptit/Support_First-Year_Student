@@ -1,6 +1,7 @@
 package org.example.supportfirststudents.entity;
 
 import jakarta.persistence.*;
+import org.example.supportfirststudents.entity.Major;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.example.supportfirststudents.enums.Role;
@@ -28,6 +29,10 @@ public class   User {
 
     @Enumerated(EnumType.STRING)
     Role role;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "major_code")
+    Major major;
 
     @OneToMany(
             mappedBy = "user",

@@ -4,6 +4,7 @@ package org.example.supportfirststudents.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.example.supportfirststudents.enums.ParticipationStatus;
 
 import java.time.LocalDateTime;
 
@@ -30,9 +31,23 @@ public class Participation {
     LocalDateTime joinDate;
     String role;
 
+    @Enumerated(EnumType.STRING)
+    ParticipationStatus status;
+
+    String cancelRequestReason;
+    LocalDateTime cancelRequestedAt;
+    Long cancelRequestedBy;
+
+    LocalDateTime cancelReviewedAt;
+    Long cancelReviewedBy;
+    String cancelReviewNote;
+
     @PrePersist
     public void prePersist() {
         joinDate = LocalDateTime.now();
+        if (status == null) {
+            status = ParticipationStatus.ACTIVE;
+        }
     }
 
 }

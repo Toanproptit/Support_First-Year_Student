@@ -28,7 +28,8 @@ function mapPostToUi(p) {
     author,
     avatar: author?.[0]?.toUpperCase?.() || "?",
     avatarColor: hashColor(author),
-    content: `${p?.title ? p.title + "\n" : ""}${p?.content || ""}`,
+    title: p?.title || "",
+    content: p?.content || "",
     likes: totalReactions,
     reactionCounts,
     comments: p?.commentCount ?? 0,
@@ -79,6 +80,7 @@ export default function PostManagement() {
     const q = (search || "").toLowerCase();
     return (posts || []).filter((p) => {
       const matchSearch =
+        (p.title || "").toLowerCase().includes(q) ||
         (p.content || "").toLowerCase().includes(q) ||
         (p.author || "").toLowerCase().includes(q);
       const matchFilter = filter === "Tất cả" || p.status === filter;
@@ -188,6 +190,7 @@ export default function PostManagement() {
               </span>
             </div>
 
+            {post.title ? <div className="post-title">{post.title}</div> : null}
             <div className="post-content">
               {expandedId === post.id
                 ? post.content
@@ -203,7 +206,7 @@ export default function PostManagement() {
 
             <div className="post-stats">
               <span className="stat-item" title={reactionSummary(post.reactionCounts)}>
-                🔥 {post.likes} thích
+                🔥 {post.likes} react
               </span>
               <span className="stat-item">💬 {post.comments} bình luận</span>
             </div>

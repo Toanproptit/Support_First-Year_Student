@@ -10,7 +10,15 @@ import java.util.stream.Collectors;
 @Component
 public class UserMapper {
     public UserResponse toUserResponse(User user) {
-        return new UserResponse(user.getId(), user.getFullName() , user.getEmail() ,user.getRole() );
+        String majorCode = user.getMajor() == null ? null : user.getMajor().getCode();
+        return new UserResponse(
+                user.getId(),
+                user.getFullName(),
+                user.getUserName(),
+                user.getEmail(),
+                majorCode,
+                user.getRole()
+        );
     }
 
     public List<UserResponse> toUserResponse(List<User> users) {

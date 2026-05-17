@@ -1,6 +1,5 @@
 package org.example.supportfirststudents.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -9,16 +8,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-
-public class CreateFeedback {
-    @NotBlank
-    String subject;
-
-    @NotBlank
-    String title;
-
-    @NotBlank
-    String content;
-
-    Long userId;
+public class CancelParticipationRequest {
+    String reason;
 }
+

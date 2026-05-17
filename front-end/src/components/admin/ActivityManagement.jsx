@@ -1,20 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "../../styles/AdminPages.css";
 import "../../styles/ActivityManagement.css";
 import Pagination from "./Pagination";
+import { createActivity, deleteActivity, getAllActivities, updateActivity } from "../../service/activities";
+import { approveCancelParticipation, createParticipation, deleteParticipation, rejectCancelParticipation, setParticipationLead, unsetParticipationLead } from "../../service/participations";
+import { getUsersPaged } from "../../service/users";
+import { useToast } from "../ToastProvider";
 
 const PAGE_SIZE = 6;
-
-const ALL_STAFF = [
-  { id: 1, name: "Nguyễn Văn An", email: "an.nv@ptit.edu.vn", department: "CNTT" },
-  { id: 2, name: "Trần Thị Bình", email: "binh.tt@ptit.edu.vn", department: "DTVT" },
-  { id: 3, name: "Lê Minh Cường", email: "cuong.lm@ptit.edu.vn", department: "QTKD" },
-  { id: 4, name: "Phạm Thu Hà", email: "ha.pt@ptit.edu.vn", department: "CNTT" },
-  { id: 5, name: "Hoàng Đức Long", email: "long.hd@ptit.edu.vn", department: "KT" },
-  { id: 6, name: "Đỗ Thanh Mai", email: "mai.dt@ptit.edu.vn", department: "DTVT" },
-  { id: 7, name: "Vũ Quốc Nam", email: "nam.vq@ptit.edu.vn", department: "CNTT" },
-  { id: 8, name: "Bùi Thị Oanh", email: "oanh.bt@ptit.edu.vn", department: "QTKD" },
-];
 
 const STATUS_CONFIG = {
   upcoming: { label: "Sắp diễn ra", className: "badge-blue" },
@@ -23,58 +16,7 @@ const STATUS_CONFIG = {
   cancelled: { label: "Đã hủy", className: "badge-red" },
 };
 
-const initialActivities = [
-  {
-    id: 1,
-    name: "Ngày hội Tân sinh viên 2025",
-    location: "Sân vận động PTIT",
-    startTime: "2025-09-15T08:00",
-    endTime: "2025-09-15T17:00",
-    status: "completed",
-    description: "Hoạt động chào đón tân sinh viên nhập học năm 2025 với nhiều trò chơi và hoạt động vui vẻ.",
-    participantIds: [1, 2, 4, 7],
-  },
-  {
-    id: 2,
-    name: "Hội thảo Hướng nghiệp CNTT",
-    location: "Hội trường A1",
-    startTime: "2025-10-20T13:30",
-    endTime: "2025-10-20T17:00",
-    status: "completed",
-    description: "Kết nối sinh viên với doanh nghiệp, định hướng nghề nghiệp ngành CNTT.",
-    participantIds: [1, 3, 5],
-  },
-  {
-    id: 3,
-    name: "Giải thể thao Xuân 2026",
-    location: "Nhà thi đấu PTIT",
-    startTime: "2026-01-10T07:30",
-    endTime: "2026-01-12T17:00",
-    status: "ongoing",
-    description: "Giải đấu thể thao truyền thống mừng xuân mới với nhiều bộ môn hấp dẫn.",
-    participantIds: [2, 4, 6, 8],
-  },
-  {
-    id: 4,
-    name: "Workshop Kỹ năng mềm",
-    location: "Phòng học B301",
-    startTime: "2026-05-15T09:00",
-    endTime: "2026-05-15T12:00",
-    status: "upcoming",
-    description: "Rèn luyện kỹ năng giao tiếp, thuyết trình và làm việc nhóm cho sinh viên.",
-    participantIds: [3, 5, 7],
-  },
-  {
-    id: 5,
-    name: "Hiến máu nhân đạo",
-    location: "Sảnh tòa nhà C",
-    startTime: "2026-06-01T07:00",
-    endTime: "2026-06-01T11:30",
-    status: "upcoming",
-    description: "Chương trình hiến máu tình nguyện vì cộng đồng.",
-    participantIds: [1, 6, 8],
-  },
-];
+const initialActivities = [];
 
 function formatDateTime(dt) {
   if (!dt) return "—";
@@ -88,11 +30,52 @@ function getInitials(name) {
 
 const AVATAR_COLORS = ["#c8102e", "#2563eb", "#16a34a", "#b45309", "#6d28d9", "#be185d", "#0891b2", "#ea580c"];
 
+function toDatetimeLocal(dt) {
+  if (!dt) return "";
+  const d = new Date(dt);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function toUiActivity(a) {
+  const participations = Array.isArray(a?.participations) ? a.participations : [];
+  const qRaw = a?.studentQuantity;
+  const q = qRaw == null ? null : Number(qRaw);
+  return {
+    id: a?.id,
+    name: a?.name || "",
+    location: a?.address || "",
+    startTime: toDatetimeLocal(a?.startDate),
+    endTime: toDatetimeLocal(a?.endDate),
+    status: String(a?.status || "UPCOMING").toLowerCase(),
+    description: a?.description || "",
+    studentQuantity: Number.isFinite(q) && q > 0 ? q : null,
+    participations,
+    participantIds: participations.map((p) => p?.userId).filter((v) => v != null),
+    participantCount: a?.participantCount ?? participations.length,
+  };
+}
+
+function toApiStatus(status) {
+  return String(status || "UPCOMING").toUpperCase();
+}
+
+function toApiDate(dtLocal) {
+  if (!dtLocal) return null;
+  const t = new Date(dtLocal).getTime();
+  return Number.isNaN(t) ? null : t;
+}
+
 export default function ActivityManagement() {
-  const [activities, setActivities] = useState(initialActivities);
+  const [activities, setActivities] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const [capacityNotice, setCapacityNotice] = useState("");
+  const toast = useToast();
 
   // Views: "list" | "detail"
   const [view, setView] = useState("list");
@@ -103,9 +86,60 @@ export default function ActivityManagement() {
   const [editingActivity, setEditingActivity] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [isAddParticipantOpen, setIsAddParticipantOpen] = useState(false);
+  const [cancelReviewModal, setCancelReviewModal] = useState({
+    open: false,
+    action: "approve", // "approve" | "reject"
+    participationId: null,
+    studentName: "",
+    reason: "",
+    note: "",
+  });
 
-  const emptyForm = { name: "", location: "", startTime: "", endTime: "", status: "upcoming", description: "" };
+  const emptyForm = { name: "", location: "", startTime: "", endTime: "", status: "upcoming", description: "", studentQuantity: "" };
   const [formData, setFormData] = useState(emptyForm);
+
+  const usersById = useMemo(() => {
+    const map = new Map();
+    (users || []).forEach((u) => {
+      if (u?.id != null) map.set(u.id, u);
+    });
+    return map;
+  }, [users]);
+
+  const refreshActivities = async () => {
+    const res = await getAllActivities();
+    const mapped = (res || []).map(toUiActivity);
+    setActivities(mapped);
+    return mapped;
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        setLoading(true);
+        const [acts, usersPage] = await Promise.all([getAllActivities(), getUsersPaged({ page: 0, size: 100 })]);
+        if (cancelled) return;
+        setActivities((acts || []).map(toUiActivity));
+        setUsers(usersPage?.results ?? []);
+      } catch (e) {
+        if (!cancelled) {
+          setActivities(initialActivities);
+          toast.show({
+            type: "error",
+            title: "Tải thất bại",
+            message: e?.response?.data?.message || e?.message || "Không tải được danh sách hoạt động.",
+          });
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [toast]);
 
   // --- Filtering ---
   const filtered = activities.filter(a => {
@@ -129,48 +163,278 @@ export default function ActivityManagement() {
   const backToList = () => { setView("list"); setSelectedActivity(null); };
 
   const openAdd = () => { setEditingActivity(null); setFormData(emptyForm); setIsFormOpen(true); };
-  const openEdit = (a) => { setEditingActivity(a); setFormData({ name: a.name, location: a.location, startTime: a.startTime, endTime: a.endTime, status: a.status, description: a.description }); setIsFormOpen(true); };
+  const openEdit = (a) => {
+    setEditingActivity(a);
+    setFormData({
+      name: a.name,
+      location: a.location,
+      startTime: a.startTime,
+      endTime: a.endTime,
+      status: a.status,
+      description: a.description,
+      studentQuantity: a.studentQuantity ?? "",
+    });
+    setIsFormOpen(true);
+  };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name.trim()) return;
-    if (editingActivity) {
-      setActivities(prev => prev.map(a => a.id === editingActivity.id ? { ...a, ...formData } : a));
-      if (selectedActivity?.id === editingActivity.id) setSelectedActivity(prev => ({ ...prev, ...formData }));
-    } else {
-      const newId = Math.max(...activities.map(a => a.id)) + 1;
-      setActivities(prev => [{ id: newId, ...formData, participantIds: [] }, ...prev]);
-      setCurrentPage(1);
+
+    const payload = {
+      name: formData.name,
+      startDate: toApiDate(formData.startTime),
+      endDate: toApiDate(formData.endTime),
+      address: formData.location,
+      status: toApiStatus(formData.status),
+      description: formData.description,
+      studentQuantity: formData.studentQuantity === "" || formData.studentQuantity == null
+        ? null
+        : Number(formData.studentQuantity),
+    };
+
+    try {
+      setLoading(true);
+      if (editingActivity) {
+        const updated = await updateActivity(editingActivity.id, payload);
+        const ui = toUiActivity(updated);
+        setActivities((prev) => (prev || []).map((a) => (a.id === editingActivity.id ? ui : a)));
+        if (selectedActivity?.id === editingActivity.id) setSelectedActivity(ui);
+      } else {
+        const created = await createActivity(payload);
+        const ui = toUiActivity(created);
+        setActivities((prev) => [ui, ...(prev || [])]);
+        setCurrentPage(1);
+      }
+      setIsFormOpen(false);
+    } catch (e2) {
+      toast.show({
+        type: "error",
+        title: "Lưu thất bại",
+        message: e2?.response?.data?.message || e2?.message || "Lưu hoạt động thất bại.",
+      });
+    } finally {
+      setLoading(false);
     }
-    setIsFormOpen(false);
   };
 
-  const handleDelete = () => {
-    setActivities(prev => prev.filter(a => a.id !== deleteTarget.id));
-    if (view === "detail") backToList();
-    setDeleteTarget(null);
+  const handleDelete = async () => {
+    if (!deleteTarget?.id) return;
+    try {
+      setLoading(true);
+      await deleteActivity(deleteTarget.id);
+      setActivities((prev) => (prev || []).filter((a) => a.id !== deleteTarget.id));
+      if (view === "detail") backToList();
+      setDeleteTarget(null);
+    } catch (e) {
+      toast.show({
+        type: "error",
+        title: "Xoá thất bại",
+        message: e?.response?.data?.message || e?.message || "Xoá hoạt động thất bại.",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const removeParticipant = (staffId) => {
-    setActivities(prev => prev.map(a =>
-      a.id === selectedActivity.id ? { ...a, participantIds: a.participantIds.filter(id => id !== staffId) } : a
-    ));
-    setSelectedActivity(prev => ({ ...prev, participantIds: prev.participantIds.filter(id => id !== staffId) }));
+  const removeParticipant = async (userId) => {
+    if (!selectedActivity?.id || userId == null) return;
+    const activityId = selectedActivity.id;
+
+    const nextSelected = {
+      ...selectedActivity,
+      participantIds: (selectedActivity.participantIds || []).filter((id) => id !== userId),
+      participations: (selectedActivity.participations || []).filter((p) => p?.userId !== userId),
+      participantCount: Math.max(0, Number(selectedActivity.participantCount ?? (selectedActivity.participantIds || []).length) - 1),
+    };
+
+    setSelectedActivity(nextSelected);
+    setActivities((prev) => (prev || []).map((a) => (a.id === activityId ? nextSelected : a)));
+    setCapacityNotice("");
+
+    try {
+      setLoading(true);
+      await deleteParticipation({ userId, activityId });
+    } catch (e) {
+      toast.show({
+        type: "error",
+        title: "Xoá thất bại",
+        message: e?.response?.data?.message || e?.message || "Xoá người tham gia thất bại.",
+      });
+      const mapped = await refreshActivities();
+      setSelectedActivity((prev) => (prev?.id ? mapped.find((a) => a.id === prev.id) ?? prev : prev));
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const addParticipant = (staffId) => {
-    setActivities(prev => prev.map(a =>
-      a.id === selectedActivity.id ? { ...a, participantIds: [...a.participantIds, staffId] } : a
-    ));
-    setSelectedActivity(prev => ({ ...prev, participantIds: [...prev.participantIds, staffId] }));
+  const addParticipant = async (userId) => {
+    if (!selectedActivity?.id || userId == null) return;
+    const activityId = selectedActivity.id;
+
+    const limit = selectedActivity.studentQuantity;
+    const current = (selectedActivity.participantIds || []).length;
+    if (limit != null && current >= limit) {
+      const msg = `Hoạt động đã đạt giới hạn (${current}/${limit} SV).`;
+      setCapacityNotice(msg);
+      toast.show({ type: "warning", title: "Đã đủ số lượng", message: msg });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const created = await createParticipation({ userId, activityId, role: "PARTICIPANT" });
+      const nextSelected = {
+        ...selectedActivity,
+        participantIds: Array.from(new Set([...(selectedActivity.participantIds || []), userId])),
+        participations: [...(selectedActivity.participations || []), created].filter(Boolean),
+        participantCount: Number(selectedActivity.participantCount ?? (selectedActivity.participantIds || []).length) + 1,
+      };
+      setSelectedActivity(nextSelected);
+      setActivities((prev) => (prev || []).map((a) => (a.id === activityId ? nextSelected : a)));
+
+      const limit = nextSelected.studentQuantity;
+      const current = (nextSelected.participantIds || []).length;
+      if (limit != null && current >= limit) {
+        setCapacityNotice(`Hoạt động đã đạt giới hạn (${current}/${limit} SV).`);
+      }
+
+      toast.show({ type: "success", title: "Thành công", message: "Thêm sinh viên thành công." });
+    } catch (e) {
+      toast.show({
+        type: "error",
+        title: "Thêm thất bại",
+        message: e?.response?.data?.message || e?.message || "Thêm người tham gia thất bại.",
+      });
+      await refreshActivities();
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const notJoined = ALL_STAFF.filter(s => !selectedActivity?.participantIds.includes(s.id));
+  const notJoined = (users || []).filter((u) => u?.id != null && !(selectedActivity?.participantIds || []).includes(u.id));
+  const isSelectedAtCapacity = selectedActivity?.studentQuantity != null
+    && (selectedActivity?.participantIds || []).length >= selectedActivity.studentQuantity;
+
+  useEffect(() => {
+    if (!selectedActivity) {
+      setCapacityNotice("");
+      return;
+    }
+    const limit = selectedActivity.studentQuantity;
+    const current = (selectedActivity.participantIds || []).length;
+    if (limit != null && current >= limit) {
+      setCapacityNotice(`Hoạt động đã đạt giới hạn (${current}/${limit} SV).`);
+    } else {
+      setCapacityNotice("");
+    }
+  }, [selectedActivity]);
+
+  const toggleLead = async (participationId, nextIsLead) => {
+    if (!participationId) return;
+    try {
+      setLoading(true);
+      const updated = nextIsLead ? await setParticipationLead(participationId) : await unsetParticipationLead(participationId);
+      const role = updated?.role || (nextIsLead ? "LEAD" : "PARTICIPANT");
+
+      const nextSelected = {
+        ...selectedActivity,
+        participations: (selectedActivity.participations || []).map((p) =>
+          p?.id === participationId ? { ...p, role } : p
+        ),
+      };
+      setSelectedActivity(nextSelected);
+      setActivities((prev) => (prev || []).map((a) => (a.id === nextSelected.id ? nextSelected : a)));
+    } catch (e) {
+      toast.show({
+        type: "error",
+        title: "Cập nhật thất bại",
+        message: e?.response?.data?.message || e?.message || "Cập nhật vai trò thất bại.",
+      });
+      await refreshActivities();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const openCancelReviewModal = ({ action, participationId, studentName, reason } = {}) => {
+    if (!participationId) return;
+    setCancelReviewModal({
+      open: true,
+      action: action === "reject" ? "reject" : "approve",
+      participationId,
+      studentName: studentName || "",
+      reason: reason || "",
+      note: "",
+    });
+  };
+
+  const closeCancelReviewModal = () => {
+    setCancelReviewModal({
+      open: false,
+      action: "approve",
+      participationId: null,
+      studentName: "",
+      reason: "",
+      note: "",
+    });
+  };
+
+  const submitCancelReview = async () => {
+    const { participationId, action, note } = cancelReviewModal || {};
+    if (!participationId) return;
+
+    try {
+      setLoading(true);
+      if (action === "reject") {
+        await rejectCancelParticipation(participationId, { note });
+        toast.show({ type: "success", title: "Thành công", message: "Đã từ chối yêu cầu hủy." });
+      } else {
+        await approveCancelParticipation(participationId, { note });
+        toast.show({ type: "success", title: "Thành công", message: "Đã duyệt hủy đăng ký." });
+      }
+      closeCancelReviewModal();
+      const mapped = await refreshActivities();
+      setSelectedActivity((prev) => (prev?.id ? mapped.find((a) => a.id === prev.id) ?? prev : prev));
+    } catch (e) {
+      toast.show({
+        type: "error",
+        title: "Thất bại",
+        message: e?.response?.data?.message || e?.message || "Không thể xử lý yêu cầu.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // ===================== DETAIL VIEW =====================
   if (view === "detail" && selectedActivity) {
-    const participants = ALL_STAFF.filter(s => selectedActivity.participantIds.includes(s.id));
-    const cfg = STATUS_CONFIG[selectedActivity.status];
+    const participants = (selectedActivity.participations || []).map((p) => {
+      const u = usersById.get(p?.userId);
+      return {
+        id: p?.userId,
+        participationId: p?.id,
+        name: u?.fullName || p?.userName || `User ${p?.userId}`,
+        email: u?.email || "",
+        role: u?.role ?? u?.Role,
+        participationRole: p?.role || "PARTICIPANT",
+        participationStatus: String(p?.status || "ACTIVE").toUpperCase(),
+        cancelReason: p?.cancelRequestReason,
+      };
+    });
+    const cfg = STATUS_CONFIG[selectedActivity.status] || STATUS_CONFIG.upcoming;
+
+    const openAddParticipantModal = () => {
+      if (isSelectedAtCapacity) {
+        const limit = selectedActivity.studentQuantity;
+        const current = (selectedActivity.participantIds || []).length;
+        const msg = `Hoạt động đã đạt giới hạn (${current}/${limit} SV).`;
+        setCapacityNotice(msg);
+        toast.show({ type: "warning", title: "Đã đủ số lượng", message: msg });
+        return;
+      }
+      setIsAddParticipantOpen(true);
+    };
     return (
       <div className="admin-page">
         {/* Back button */}
@@ -203,8 +467,17 @@ export default function ActivityManagement() {
                   <div><span className="meta-label">Kết thúc</span><span className="meta-value">{formatDateTime(selectedActivity.endTime)}</span></div>
                 </div>
                 <div className="detail-meta-item">
+                  <span className="meta-icon">🎓</span>
+                  <div><span className="meta-label">Số lượng SV</span><span className="meta-value">{selectedActivity.studentQuantity ?? "Không giới hạn"}</span></div>
+                </div>
+                <div className="detail-meta-item">
                   <span className="meta-icon">👥</span>
-                  <div><span className="meta-label">Tham gia</span><span className="meta-value">{participants.length} nhân viên</span></div>
+                  <div>
+                    <span className="meta-label">Tham gia</span>
+                    <span className="meta-value">
+                      {selectedActivity.studentQuantity ? `${participants.length}/${selectedActivity.studentQuantity} SV` : `${participants.length} SV`}
+                    </span>
+                  </div>
                 </div>
               </div>
               {selectedActivity.description && (
@@ -224,20 +497,27 @@ export default function ActivityManagement() {
           <div className="detail-participants-card">
             <div className="participants-header">
               <div>
-                <h3 className="participants-title">Nhân viên tham gia</h3>
-                <p className="participants-subtitle">{participants.length} / {ALL_STAFF.length} nhân viên</p>
+                <h3 className="participants-title">Student tham gia</h3>
+                <p className="participants-subtitle">{participants.length} / {users.length || participants.length} Student</p>
               </div>
-              <button className="btn-primary btn-sm" onClick={() => setIsAddParticipantOpen(true)}>
-                + Thêm
-              </button>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
+                {capacityNotice && (
+                  <div style={{ color: "#b91c1c", fontSize: 12, fontWeight: 600 }}>
+                    {capacityNotice}
+                  </div>
+                )}
+                <button className="btn-primary btn-sm" onClick={openAddParticipantModal}>
+                  + Thêm
+                </button>
+              </div>
             </div>
 
             {participants.length === 0 ? (
               <div className="no-participants">
                 <span className="no-participants-icon">👤</span>
-                <p>Chưa có nhân viên nào tham gia</p>
-                <button className="btn-primary btn-sm" onClick={() => setIsAddParticipantOpen(true)}>
-                  Thêm nhân viên
+                <p>Chưa có Student nào tham gia</p>
+                <button className="btn-primary btn-sm" onClick={openAddParticipantModal}>
+                  Thêm Student
                 </button>
               </div>
             ) : (
@@ -250,8 +530,43 @@ export default function ActivityManagement() {
                     <div className="participant-info">
                       <strong>{s.name}</strong>
                       <span>{s.email}</span>
-                      <code>{s.department}</code>
+                      <code>{s.participationRole || s.role || "PARTICIPANT"}</code>
+                      {s.participationStatus === "CANCEL_REQUESTED" ? (
+                        <span style={{ color: "#b91c1c", fontWeight: 600, fontSize: 12 }}>
+                          Đang chờ duyệt hủy{ s.cancelReason ? `: ${s.cancelReason}` : "" }
+                        </span>
+                      ) : null}
                     </div>
+                    {s.participationStatus === "CANCEL_REQUESTED" && s.participationId ? (
+                      <>
+                        <button
+                          className="btn-edit btn-xs"
+                          disabled={loading}
+                          onClick={() => openCancelReviewModal({ action: "approve", participationId: s.participationId, studentName: s.name, reason: s.cancelReason })}
+                          title="Duyệt hủy đăng ký"
+                        >
+                          Duyệt hủy
+                        </button>
+                        <button
+                          className="btn-delete btn-xs"
+                          disabled={loading}
+                          onClick={() => openCancelReviewModal({ action: "reject", participationId: s.participationId, studentName: s.name, reason: s.cancelReason })}
+                          title="Từ chối yêu cầu hủy"
+                        >
+                          Từ chối
+                        </button>
+                      </>
+                    ) : null}
+                    {s.participationId ? (
+                      <button
+                        className="btn-edit btn-xs"
+                        disabled={loading}
+                        onClick={() => toggleLead(s.participationId, (s.participationRole || "").toUpperCase() !== "LEAD")}
+                        title="Đổi vai trò LEAD/PARTICIPANT"
+                      >
+                        {(s.participationRole || "").toUpperCase() === "LEAD" ? "Bỏ LEAD" : "Đặt LEAD"}
+                      </button>
+                    ) : null}
                     <button
                       className="btn-remove-participant"
                       title="Xoá khỏi danh sách"
@@ -271,27 +586,33 @@ export default function ActivityManagement() {
           <div className="modal-overlay" onClick={() => setIsAddParticipantOpen(false)}>
             <div className="modal-content" onClick={e => e.stopPropagation()}>
               <div className="modal-header">
-                <h3>➕ Thêm nhân viên tham gia</h3>
+                <h3>➕ Thêm Student tham gia</h3>
                 <button className="btn-close" onClick={() => setIsAddParticipantOpen(false)}>&times;</button>
               </div>
               <div className="modal-body" style={{ padding: "12px 24px" }}>
+                {isSelectedAtCapacity && capacityNotice && (
+                  <p style={{ color: "#b91c1c", textAlign: "center", padding: "12px 0", fontWeight: 600 }}>
+                    {capacityNotice}
+                  </p>
+                )}
                 {notJoined.length === 0 ? (
                   <p style={{ color: "#64748b", textAlign: "center", padding: "24px 0" }}>
-                    Tất cả nhân viên đã tham gia hoạt động này.
+                    Tất cả Student đã tham gia hoạt động này.
                   </p>
                 ) : (
                   <div className="add-participant-list">
                     {notJoined.map((s, i) => (
                       <div className="add-participant-item" key={s.id}>
                         <div className="participant-avatar small" style={{ background: AVATAR_COLORS[i % AVATAR_COLORS.length] }}>
-                          {getInitials(s.name)}
+                          {getInitials(s.fullName || s.name || "")}
                         </div>
                         <div className="participant-info">
-                          <strong>{s.name}</strong>
-                          <span>{s.department}</span>
+                          <strong>{s.fullName || s.name}</strong>
+                          <span>{s.role ?? s.Role}</span>
                         </div>
                         <button
                           className="btn-add-participant"
+                          disabled={isSelectedAtCapacity}
                           onClick={() => { addParticipant(s.id); }}
                         >
                           + Thêm
@@ -303,6 +624,48 @@ export default function ActivityManagement() {
               </div>
               <div className="modal-footer">
                 <button className="btn-secondary" onClick={() => setIsAddParticipantOpen(false)}>Đóng</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Cancel Review Modal */}
+        {cancelReviewModal.open && (
+          <div className="modal-overlay" onClick={closeCancelReviewModal}>
+            <div className="modal-content cancel-review-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <div className="cancel-review-header">
+                  <span className={`cancel-review-badge ${cancelReviewModal.action === "reject" ? "cancel-review-reject" : "cancel-review-approve"}`}>
+                    {cancelReviewModal.action === "reject" ? "Từ chối" : "Duyệt hủy"}
+                  </span>
+                  <h3>{cancelReviewModal.action === "reject" ? "Từ chối yêu cầu hủy" : "Duyệt hủy đăng ký"}</h3>
+                </div>
+                <button className="btn-close" onClick={closeCancelReviewModal}>&times;</button>
+              </div>
+              <div className="modal-body cancel-review-body">
+                <div className="cancel-review-meta">
+                  <div><span className="cancel-review-label">Sinh viên:</span> <strong>{cancelReviewModal.studentName || "—"}</strong></div>
+                  <div><span className="cancel-review-label">Lý do SV:</span> <span>{cancelReviewModal.reason || "—"}</span></div>
+                </div>
+                <div className="form-group">
+                  <label>{cancelReviewModal.action === "reject" ? "Lý do từ chối (tuỳ chọn)" : "Ghi chú duyệt (tuỳ chọn)"}</label>
+                  <textarea
+                    rows={4}
+                    value={cancelReviewModal.note}
+                    onChange={(e) => setCancelReviewModal((prev) => ({ ...prev, note: e.target.value }))}
+                    placeholder="Nhập ghi chú..."
+                  />
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button className="btn-secondary" disabled={loading} onClick={closeCancelReviewModal}>Đóng</button>
+                <button
+                  className={cancelReviewModal.action === "reject" ? "btn-delete-confirm" : "btn-primary"}
+                  disabled={loading}
+                  onClick={submitCancelReview}
+                >
+                  Xác nhận
+                </button>
               </div>
             </div>
           </div>
@@ -353,7 +716,7 @@ export default function ActivityManagement() {
             <option key={key} value={key}>{cfg.label}</option>
           ))}
         </select>
-        <span className="result-count">{filtered.length} kết quả</span>
+        <span className="result-count">{loading ? "Đang tải..." : `${filtered.length} kết quả`}</span>
       </div>
 
       {/* Activity Cards Grid */}
@@ -365,8 +728,11 @@ export default function ActivityManagement() {
       ) : (
         <div className="activity-grid">
           {paginated.map((activity) => {
-            const cfg = STATUS_CONFIG[activity.status];
-            const participants = ALL_STAFF.filter(s => activity.participantIds.includes(s.id));
+            const cfg = STATUS_CONFIG[activity.status] || STATUS_CONFIG.upcoming;
+            const participants = (activity.participations || []).map((p) => {
+              const u = usersById.get(p?.userId);
+              return { id: p?.userId, name: u?.fullName || p?.userName || `User ${p?.userId}` };
+            });
             return (
               <div className="activity-card" key={activity.id}>
                 <div className="activity-card-top">
@@ -381,6 +747,7 @@ export default function ActivityManagement() {
                   <span>📍 {activity.location}</span>
                   <span>🕐 {formatDateTime(activity.startTime)}</span>
                   <span>🕔 {formatDateTime(activity.endTime)}</span>
+                  <span>👥 Số lượng SV: {activity.studentQuantity ?? "Không giới hạn"}</span>
                 </div>
                 {activity.description && (
                   <p className="activity-card-desc">{activity.description}</p>
@@ -401,7 +768,11 @@ export default function ActivityManagement() {
                       <div className="mini-avatar mini-avatar-more">+{participants.length - 4}</div>
                     )}
                     <span className="participant-count-label">
-                      {participants.length === 0 ? "Chưa có ai" : `${participants.length} nhân viên`}
+                      {participants.length === 0
+                        ? "Chưa có ai"
+                        : activity.studentQuantity
+                          ? `${participants.length}/${activity.studentQuantity} SV`
+                          : `${participants.length} SV`}
                     </span>
                   </div>
                   <button className="btn-detail" onClick={() => openDetail(activity)}>
@@ -465,6 +836,10 @@ function ActivityFormModal({ formData, setFormData, editing, onSubmit, onClose }
                   ))}
                 </select>
               </div>
+            </div>
+            <div className="form-group">
+              <label>Số lượng sinh viên (để trống = không giới hạn)</label>
+              <input type="number" min="1" step="1" name="studentQuantity" value={formData.studentQuantity} onChange={handleChange} placeholder="Vd: 100" />
             </div>
             <div className="form-group">
               <label>Mô tả</label>

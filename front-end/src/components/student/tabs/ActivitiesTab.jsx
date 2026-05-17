@@ -1,88 +1,22 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { getAllActivities } from "../../../service/activities";
+import { createParticipation, getParticipationsByUserId, requestCancelParticipation } from "../../../service/participations";
+import { getMe } from "../../../service/me";
+import { useToast } from "../../ToastProvider";
+import "../../../styles/ActivitiesTab.css";
 
 export default function ActivitiesTab() {
-  const [activities] = useState([
-    {
-      id: 1,
-      name: "Ngày hội Tân sinh viên 2025",
-      location: "Sân vận động PTIT",
-      startTime: "2025-09-15T08:00",
-      endTime: "2025-09-15T17:00",
-      status: "completed",
-      description:
-        "Hoạt động chào đón tân sinh viên nhập học năm 2025 với nhiều trò chơi và hoạt động vui vẻ, giao lưu.",
-      organizer: "Đoàn Thanh niên PTIT",
-      slots: 200,
-      registeredCount: 187,
-    },
-    {
-      id: 2,
-      name: "Hội thảo Hướng nghiệp CNTT",
-      location: "Hội trường A1",
-      startTime: "2025-10-20T13:30",
-      endTime: "2025-10-20T17:00",
-      status: "completed",
-      description: "Kết nối sinh viên với doanh nghiệp công nghệ hàng đầu, định hướng nghề nghiệp ngành CNTT.",
-      organizer: "Khoa CNTT",
-      slots: 150,
-      registeredCount: 143,
-    },
-    {
-      id: 3,
-      name: "Giải thể thao Xuân 2026",
-      location: "Nhà thi đấu PTIT",
-      startTime: "2026-01-10T07:30",
-      endTime: "2026-01-12T17:00",
-      status: "ongoing",
-      description: "Giải đấu thể thao truyền thống mừng xuân mới với nhiều bộ môn: bóng đá, cầu lông, bóng bàn.",
-      organizer: "Ban Thể thao - Văn hoá",
-      slots: 300,
-      registeredCount: 256,
-    },
-    {
-      id: 4,
-      name: "Workshop Kỹ năng mềm",
-      location: "Phòng học B301",
-      startTime: "2026-05-20T09:00",
-      endTime: "2026-05-20T12:00",
-      status: "upcoming",
-      description: "Rèn luyện kỹ năng giao tiếp, thuyết trình và làm việc nhóm hiệu quả cho sinh viên năm nhất.",
-      organizer: "Phòng Công tác Sinh viên",
-      slots: 60,
-      registeredCount: 34,
-    },
-    {
-      id: 5,
-      name: "Hiến máu nhân đạo",
-      location: "Sảnh tòa nhà C",
-      startTime: "2026-06-01T07:00",
-      endTime: "2026-06-01T11:30",
-      status: "upcoming",
-      description:
-        "Chương trình hiến máu tình nguyện vì cộng đồng, mỗi giọt máu cho đi là một cuộc đời ở lại.",
-      organizer: "Hội Chữ thập đỏ PTIT",
-      slots: 100,
-      registeredCount: 61,
-    },
-    {
-      id: 6,
-      name: "Cuộc thi Lập trình ACM/ICPC",
-      location: "Phòng máy tính D101",
-      startTime: "2026-06-15T08:00",
-      endTime: "2026-06-15T17:00",
-      status: "upcoming",
-      description: "Cuộc thi lập trình thuật toán cấp trường, tuyển chọn đội thi vòng khu vực ACM/ICPC.",
-      organizer: "CLB Lập trình PTIT",
-      slots: 80,
-      registeredCount: 42,
-    },
-  ]);
+  const [activities, setActivities] = useState([]);
 
-  const [registeredIds, setRegisteredIds] = useState([3]);
+  const [registeredIds, setRegisteredIds] = useState([]);
+  const [myParticipationsByActivityId, setMyParticipationsByActivityId] = useState({});
+  const [me, setMe] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [activityFilter, setActivityFilter] = useState("all");
   const [activitySearch, setActivitySearch] = useState("");
   const [selectedActivity, setSelectedActivity] = useState(null);
-  const [activityToast, setActivityToast] = useState(null);
+  const [cancelModal, setCancelModal] = useState({ open: false, activity: null, reason: "" });
+  const toast = useToast();
 
   const STATUS_CFG = {
     upcoming: { label: "Sắp diễn ra", cls: "act-badge-blue" },
@@ -91,31 +25,130 @@ export default function ActivitiesTab() {
     cancelled: { label: "Đã hủy", cls: "act-badge-red" },
   };
 
-  const showToast = (msg, type = "info") => {
-    setActivityToast({ msg, type });
-    setTimeout(() => setActivityToast(null), 2200);
+  const toUiActivity = (a) => {
+    const participations = Array.isArray(a?.participations) ? a.participations : [];
+    return {
+      id: a?.id,
+      name: a?.name || "",
+      location: a?.address || "",
+      startTime: a?.startDate,
+      endTime: a?.endDate,
+      status: String(a?.status || "UPCOMING").toLowerCase(),
+      description: a?.description || "",
+      registeredCount: a?.participantCount ?? participations.length,
+    };
   };
 
-  const handleRegister = (activity) => {
+  const refresh = async (userId) => {
+    const acts = await getAllActivities();
+    setActivities((acts || []).map(toUiActivity));
+    if (userId != null) {
+      const parts = await getParticipationsByUserId(userId);
+      const map = {};
+      (parts || []).forEach((p) => {
+        if (p?.activityId != null) map[p.activityId] = p;
+      });
+      setMyParticipationsByActivityId(map);
+
+      const activeIds = (parts || [])
+        .filter((p) => String(p?.status || "ACTIVE").toUpperCase() !== "CANCELLED")
+        .map((p) => p?.activityId)
+        .filter((v) => v != null);
+      setRegisteredIds(activeIds);
+    } else {
+      setRegisteredIds([]);
+      setMyParticipationsByActivityId({});
+    }
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        setLoading(true);
+        const meRes = await getMe();
+        if (cancelled) return;
+        setMe(meRes);
+        await refresh(meRes?.id);
+      } catch (e) {
+        if (!cancelled) {
+          showToast(e?.response?.data?.message || e?.message || "Không tải được danh sách hoạt động.", "error");
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    load();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const showToast = (message, type = "info") => {
+    const title =
+      type === "success" ? "Thành công" :
+        type === "error" ? "Thất bại" :
+          type === "warning" ? "Cảnh báo" : "Thông báo";
+    toast.show({ type, title, message, durationMs: 2200 });
+  };
+
+  const handleRegister = async (activity) => {
     if (activity.status !== "upcoming") return;
-    if (registeredIds.includes(activity.id)) return;
-    if (activity.registeredCount >= activity.slots) {
-      showToast("Hoạt động đã hết chỗ!", "error");
+    if (!me?.id) return;
+
+    try {
+      setLoading(true);
+      const created = await createParticipation({ userId: me.id, activityId: activity.id, role: "PARTICIPANT" });
+      setMyParticipationsByActivityId((prev) => ({ ...(prev || {}), [activity.id]: created }));
+      setRegisteredIds((prev) => [...prev, activity.id]);
+      setActivities((prev) =>
+        (prev || []).map((a) => (a.id === activity.id ? { ...a, registeredCount: Number(a.registeredCount || 0) + 1 } : a))
+      );
+      if (selectedActivity?.id === activity.id) {
+        setSelectedActivity((prev) => ({ ...prev, registeredCount: Number(prev.registeredCount || 0) + 1 }));
+      }
+      showToast(`Đăng ký "${activity.name}" thành công.`, "success");
+    } catch (e) {
+      showToast(e?.response?.data?.message || e?.message || "Đăng ký thất bại.", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const openCancelModal = (activity) => {
+    if (activity.status !== "upcoming") return;
+    if (!me?.id) return;
+
+    const p = myParticipationsByActivityId?.[activity.id];
+    const participationId = p?.id;
+    const st = String(p?.status || "ACTIVE").toUpperCase();
+    if (!participationId) return;
+    if (st === "CANCEL_REQUESTED") {
+      showToast("Bạn đã gửi yêu cầu hủy. Vui lòng chờ Admin duyệt.", "info");
       return;
     }
-    setRegisteredIds((prev) => [...prev, activity.id]);
-    showToast(`Đăng ký "${activity.name}" thành công! 🎉`);
-    if (selectedActivity?.id === activity.id) {
-      setSelectedActivity((prev) => ({ ...prev, registeredCount: prev.registeredCount + 1 }));
-    }
+
+    setCancelModal({ open: true, activity, reason: "" });
   };
 
-  const handleUnregister = (activity) => {
-    if (activity.status !== "upcoming") return;
-    setRegisteredIds((prev) => prev.filter((id) => id !== activity.id));
-    showToast(`Đã hủy đăng ký "${activity.name}".`, "info");
-    if (selectedActivity?.id === activity.id) {
-      setSelectedActivity((prev) => ({ ...prev, registeredCount: prev.registeredCount - 1 }));
+  const submitCancelRequest = async () => {
+    const activity = cancelModal.activity;
+    if (!activity?.id) return;
+    const p = myParticipationsByActivityId?.[activity.id];
+    const participationId = p?.id;
+    if (!participationId) return;
+
+    try {
+      setLoading(true);
+      const updated = await requestCancelParticipation(participationId, { reason: cancelModal.reason });
+      setMyParticipationsByActivityId((prev) => ({ ...(prev || {}), [activity.id]: updated || p }));
+      showToast("Đã gửi yêu cầu hủy đăng ký. Chờ Admin duyệt.", "info");
+      setCancelModal({ open: false, activity: null, reason: "" });
+    } catch (e) {
+      showToast(e?.response?.data?.message || e?.message || "Gửi yêu cầu hủy thất bại.", "error");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -141,13 +174,46 @@ export default function ActivitiesTab() {
 
   return (
     <div className="act-page">
-      {activityToast && <div className={`act-toast act-toast-${activityToast.type}`}>{activityToast.msg}</div>}
+      {cancelModal.open && (
+        <div className="act-modal-overlay" onClick={() => setCancelModal({ open: false, activity: null, reason: "" })}>
+          <div className="act-modal act-cancel-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="act-modal-header">
+              <span className="act-badge act-badge-gray">Yêu cầu hủy</span>
+              <h3>Hủy đăng ký</h3>
+              <button className="act-btn-close" onClick={() => setCancelModal({ open: false, activity: null, reason: "" })}>
+                ✖
+              </button>
+            </div>
+            <div className="act-modal-body">
+              <p className="act-cancel-activity">
+                Hoạt động: <strong>{cancelModal.activity?.name}</strong>
+              </p>
+              <label className="act-cancel-label">Lý do (tuỳ chọn)</label>
+              <textarea
+                rows={4}
+                value={cancelModal.reason}
+                onChange={(e) => setCancelModal((prev) => ({ ...prev, reason: e.target.value }))}
+                placeholder="Nhập lý do muốn hủy đăng ký..."
+                className="act-cancel-textarea"
+              />
+            </div>
+            <div className="act-modal-actions">
+              <button className="act-btn-close-modal" disabled={loading} onClick={() => setCancelModal({ open: false, activity: null, reason: "" })}>
+                Đóng
+              </button>
+              <button className="act-btn-unregister" disabled={loading} onClick={submitCancelRequest}>
+                Gửi yêu cầu
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="act-stats-row">
         <div className="act-stat-chip">
           <span>🎯</span>
           <span>
-            <strong>{activities.length}</strong> hoạt động
+            <strong>{loading ? "…" : activities.length}</strong> hoạt động
           </span>
         </div>
         <div className="act-stat-chip">
@@ -188,15 +254,16 @@ export default function ActivitiesTab() {
       <div className="act-grid">
         {filteredActivities.map((act) => {
           const isReg = registeredIds.includes(act.id);
+          const myStatus = String(myParticipationsByActivityId?.[act.id]?.status || (isReg ? "ACTIVE" : "")).toUpperCase();
+          const isCancelRequested = myStatus === "CANCEL_REQUESTED";
           const cfg = STATUS_CFG[act.status] || STATUS_CFG.upcoming;
-          const full = act.registeredCount >= act.slots;
 
           return (
             <div key={act.id} className="act-card" onClick={() => setSelectedActivity(act)} role="button" tabIndex={0}>
               <div className="act-card-top">
                 <span className={`act-badge ${cfg.cls}`}>{cfg.label}</span>
                 <span className="act-slots">
-                  {act.registeredCount}/{act.slots}
+                  {act.registeredCount} người tham gia
                 </span>
               </div>
               <h3 className="act-title">{act.name}</h3>
@@ -205,16 +272,22 @@ export default function ActivitiesTab() {
               <div className="act-actions">
                 {act.status === "upcoming" ? (
                   isReg ? (
-                    <button className="act-btn-unregister" onClick={(e) => { e.stopPropagation(); handleUnregister(act); }}>
-                      Hủy đăng ký
-                    </button>
+                    isCancelRequested ? (
+                      <button className="act-btn-unregister" disabled>
+                        Đang chờ duyệt hủy
+                      </button>
+                    ) : (
+                      <button className="act-btn-unregister" disabled={loading} onClick={(e) => { e.stopPropagation(); openCancelModal(act); }}>
+                        Yêu cầu hủy
+                      </button>
+                    )
                   ) : (
                     <button
                       className="act-btn-register"
-                      disabled={full}
+                      disabled={loading}
                       onClick={(e) => { e.stopPropagation(); handleRegister(act); }}
                     >
-                      {full ? "Đã hết chỗ" : "Đăng ký"}
+                      Đăng ký
                     </button>
                   )
                 ) : (
@@ -229,8 +302,9 @@ export default function ActivitiesTab() {
       {selectedActivity && (() => {
         const act = selectedActivity;
         const isReg = registeredIds.includes(act.id);
+        const myStatus = String(myParticipationsByActivityId?.[act.id]?.status || (isReg ? "ACTIVE" : "")).toUpperCase();
+        const isCancelRequested = myStatus === "CANCEL_REQUESTED";
         const cfg = STATUS_CFG[act.status] || STATUS_CFG.upcoming;
-        const full = act.registeredCount >= act.slots;
 
         return (
           <div className="act-modal-overlay" onClick={() => setSelectedActivity(null)}>
@@ -245,18 +319,24 @@ export default function ActivitiesTab() {
               <div className="act-modal-body">
                 <p className="act-meta">📍 {act.location}</p>
                 <p className="act-meta">🕒 {formatActivityDate(act.startTime)} - {formatActivityDate(act.endTime)}</p>
-                <p className="act-meta">👤 {act.organizer}</p>
+                <p className="act-meta">👥 {act.registeredCount} người tham gia</p>
                 <p className="act-desc">{act.description}</p>
               </div>
               <div className="act-modal-actions">
                 {act.status === "upcoming" && (
                   isReg ? (
-                    <button className="act-btn-unregister" onClick={() => { handleUnregister(act); setSelectedActivity(null); }}>
-                      Hủy đăng ký tham gia
-                    </button>
+                    isCancelRequested ? (
+                      <button className="act-btn-unregister" disabled>
+                        Đang chờ duyệt hủy
+                      </button>
+                    ) : (
+                      <button className="act-btn-unregister" disabled={loading} onClick={() => { openCancelModal(act); setSelectedActivity(null); }}>
+                        Yêu cầu hủy đăng ký
+                      </button>
+                    )
                   ) : (
-                    <button className="act-btn-register act-btn-lg" disabled={full} onClick={() => handleRegister(act)}>
-                      {full ? "Đã hết chỗ" : "🎯 Đăng ký tham gia"}
+                    <button className="act-btn-register act-btn-lg" disabled={loading} onClick={() => handleRegister(act)}>
+                      🎯 Đăng ký tham gia
                     </button>
                   )
                 )}
@@ -271,4 +351,3 @@ export default function ActivitiesTab() {
     </div>
   );
 }
-

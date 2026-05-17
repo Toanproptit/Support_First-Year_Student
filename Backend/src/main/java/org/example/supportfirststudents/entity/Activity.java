@@ -33,6 +33,9 @@ public class Activity {
 
     String description;
 
+    @Column(name = "student_quantity")
+    Integer studentQuantity;
+
     @OneToMany(mappedBy = "activity" , cascade = CascadeType.ALL , fetch = FetchType.LAZY )
     private List<Participation> participations = new ArrayList<>();
 

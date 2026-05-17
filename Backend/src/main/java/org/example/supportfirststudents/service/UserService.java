@@ -12,12 +12,14 @@ import org.example.supportfirststudents.enums.ErrorCode;
 import org.example.supportfirststudents.enums.Role;
 import org.example.supportfirststudents.exception.AppException;
 import org.example.supportfirststudents.mapper.UserMapper;
+import org.example.supportfirststudents.repository.MajorRepository;
 import org.example.supportfirststudents.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,6 +30,8 @@ import java.util.List;
 public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final MajorRepository majorRepository;
+    private final PasswordEncoder passwordEncoder;
 
 
     @Transactional
@@ -44,14 +48,13 @@ public class UserService {
         User user = new User();
         user.setFullName(request.getFullName());
         user.setUserName(request.getUsername());
-        user.setPassword(request.getPassword());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setEmail(request.getEmail());
-        if(request.getRole() == null){
-            user.setRole(Role.Student);
-        }
-        else {
-            user.setRole(request.getRole());
-        }
+
+        Role role = request.getRole() == null ? Role.Student : request.getRole();
+        user.setRole(role);
+        applyMajorForStudent(user, role, request.getMajorCode());
+
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
@@ -103,14 +106,13 @@ public class UserService {
 
         oldUser.setFullName(request.getFullName());
         oldUser.setUserName(request.getUsername());
-        oldUser.setPassword(request.getPassword());
+        oldUser.setPassword(passwordEncoder.encode(request.getPassword()));
         oldUser.setEmail(request.getEmail());
-        if(request.getRole() == null){
-            oldUser.setRole(Role.Student);
-        }
-        else {
-            oldUser.setRole(request.getRole());
-        }
+
+        Role role = request.getRole() == null ? Role.Student : request.getRole();
+        oldUser.setRole(role);
+        applyMajorForStudent(oldUser, role, request.getMajorCode());
+
         return userMapper.toUserResponse(userRepository.save(oldUser));
     }
 
@@ -134,6 +136,24 @@ public class UserService {
 
     private User getUser(Long id){
         return userRepository.findById(id).orElseThrow(()-> new AppException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    private void applyMajorForStudent(User user, Role role, String majorCode) {
+        if (role != Role.Student) {
+            user.setMajor(null);
+            return;
+        }
+
+        String normalized = normalizeCode(majorCode);
+        if (normalized == null || normalized.isBlank()) {
+            throw new AppException(ErrorCode.MAJOR_CODE_REQUIRED);
+        }
+        user.setMajor(majorRepository.findById(normalized)
+                .orElseThrow(() -> new AppException(ErrorCode.MAJOR_NOT_FOUND)));
+    }
+
+    private String normalizeCode(String value) {
+        return value == null ? null : value.trim().toUpperCase();
     }
 
 

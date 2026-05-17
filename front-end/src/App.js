@@ -34,6 +34,7 @@ import CourseSectionManagement from "./components/admin/CourseSectionManagement"
 import Club from "./components/Club";
 import Dormitory from "./components/Dormitory";
 import RequireAuth from "./components/RequireAuth";
+import AdminFeedBack from "./components/admin/AdminFeedBack";
 
 // Layout chung cho các trang public (có Header)
 function PublicLayout({ children }) {
@@ -97,6 +98,7 @@ export default function App() {
         <Route path="activities" element={<ActivityManagement />} />
         <Route path="terms" element={<TermManagement />} />
         <Route path="course-sections" element={<CourseSectionManagement />} />
+        <Route path="feedback" element={<AdminFeedBack/>}/>
       </Route>
     </Routes>
   );

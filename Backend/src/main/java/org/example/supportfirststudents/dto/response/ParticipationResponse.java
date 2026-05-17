@@ -2,6 +2,7 @@ package org.example.supportfirststudents.dto.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.example.supportfirststudents.enums.ParticipationStatus;
 
 import java.time.LocalDateTime;
 
@@ -18,4 +19,9 @@ public class ParticipationResponse {
     Long activityId;
     LocalDateTime joinDate;
     String role;
+    ParticipationStatus status;
+    String cancelRequestReason;
+    LocalDateTime cancelRequestedAt;
+    LocalDateTime cancelReviewedAt;
+    String cancelReviewNote;
 }

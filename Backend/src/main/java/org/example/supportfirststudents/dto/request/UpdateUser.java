@@ -25,4 +25,7 @@ public class UpdateUser {
     @Email(message = "email invalid")
     String email;
 
-    Role role;}
+    Role role;
+
+    String majorCode;
+}

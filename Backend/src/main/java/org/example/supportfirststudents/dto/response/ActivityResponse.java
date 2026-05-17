@@ -22,6 +22,7 @@ public class ActivityResponse {
     ActivityStatus status;
     String description;
 
+    Integer studentQuantity;
     Integer participantCount;
     List<ParticipationResponse> participations;
 }

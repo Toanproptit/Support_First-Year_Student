@@ -395,6 +395,36 @@
 /* Modal wide */
 .modal-wide { max-width: 640px !important; }
 
+/* Cancel review modal */
+.cancel-review-modal { max-width: 560px; }
+.cancel-review-header { display: flex; flex-direction: column; gap: 6px; }
+.cancel-review-badge {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+.cancel-review-approve { background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; }
+.cancel-review-reject { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+.cancel-review-body { gap: 14px; }
+.cancel-review-meta {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #334155;
+  font-size: 0.92rem;
+}
+.cancel-review-label { color: #64748b; font-weight: 600; }
+
 /* Form grid */
 .form-row-2 {
   display: grid;
