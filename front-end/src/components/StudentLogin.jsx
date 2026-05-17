@@ -92,7 +92,6 @@ export default function StudentLogin() {
           <Link to="/forgot-password" className="forgot-pw">
             Bạn quên mật khẩu?
           </Link>
-          <span style={{ margin: "0 8px", opacity: 0.6 }}>|</span>
           <Link to="/register" className="forgot-pw">
             Tạo tài khoản
           </Link>

@@ -3,12 +3,11 @@ import { Link } from "react-router-dom";
 import "../styles/StudentHandbook.css";
 
 export default function StudentHandbook() {
-    // Dữ liệu của 8 thẻ cẩm nang (Đã thêm CLB và Ký túc xá)
+    // Dữ liệu của 8 thẻ cẩm nang
     const handbookData = [
         { id: 1, title: "Chương trình đào tạo", desc: "Thông tin về Chương trình đào tạo" },
         { id: 2, title: "Học phí - học bổng", desc: "Thông tin về Học phí - học bổng" },
         { id: 3, title: "Hướng dẫn học vụ", desc: "Thông tin về Hướng dẫn học vụ" },
-        // THÊM 2 THẺ MỚI VÀO ĐÂY:
         { id: 4, title: "Thông tin CLB", desc: "Thông tin hoạt động của các Câu lạc bộ, Đội, Nhóm" },
         { id: 5, title: "Ký túc xá", desc: "Thông tin về quy định và đăng ký Ký túc xá" }
     ];
@@ -16,6 +15,14 @@ export default function StudentHandbook() {
     return (
         <div className="handbook-page">
             <main className="handbook-container">
+
+                {/* THÊM NÚT QUAY LẠI TRANG CHỦ TẠI ĐÂY */}
+                <div className="hb-back-home">
+                    <Link to="/" className="hb-back-home-link">
+                        &larr; Trở về Home
+                    </Link>
+                </div>
+
                 <div className="handbook-header-title">
                     <h2>Nội Dung Chính</h2>
                     <p>

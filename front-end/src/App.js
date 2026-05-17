@@ -9,7 +9,6 @@ import AdminLogin from "./components/AdminLogin";
 import StudentHandbook from "./components/StudentHandbook";
 import StudentDashboard from "./components/StudentDashboard";
 import TrainingPrograms from "./components/TrainingPrograms";
-import ProgramDetail from "./components/ProgramDetail";
 import ScholarshipDetail from "./components/ScholarshipDetail";
 import AcademicGuideList from "./components/AcademicGuideList";
 import StudyLocations from "./components/StudyLocations";
@@ -74,9 +73,9 @@ export default function App() {
       <Route path="/cam-nang/3/bai-viet/2" element={<ClassSchedule />} />
       <Route path="/cam-nang/3/bai-viet/3" element={<StudentInfoSystems />} />
       <Route path="/cam-nang/3/bai-viet/4" element={<AwardsAndCommendations />} />
-      <Route path="/cam-nang/4" element={<Club/>} />
-      <Route path="/cam-nang/5" element={<Dormitory/>} />
-       
+      <Route path="/cam-nang/4" element={<Club />} />
+      <Route path="/cam-nang/5" element={<Dormitory />} />
+
       {/* ===== Tuyến Admin (có Sidebar, KHÔNG có Header chung) ===== */}
       <Route
         path="/admin"
