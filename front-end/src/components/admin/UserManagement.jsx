@@ -12,27 +12,28 @@ function getErrorMessage(err, fallback) {
 }
 
 export default function UserManagement() {
-  const [users, setUsers] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
   const [faculties, setFaculties] = useState([]);
   const [majors, setMajors] = useState([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [activeRole, setActiveRole] = useState("Student"); // Student | Teacher
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
-    mssv: "",
+    username: "",
     password: "",
+    role: "Student",
     majorCode: "",
   });
 
   const refresh = async () => {
     const all = await getAllUsers({ size: 100 });
-    const students = (all || []).filter((u) => String(u?.role || u?.Role || "") === "Student");
-    setUsers(students);
+    setAllUsers(all || []);
   };
 
   useEffect(() => {
@@ -42,8 +43,7 @@ export default function UserManagement() {
         setLoading(true);
         const [all, fList, mList] = await Promise.all([getAllUsers({ size: 100 }), getAllFaculties(), getAllMajors()]);
         if (cancelled) return;
-        const students = (all || []).filter((u) => String(u?.role || u?.Role || "") === "Student");
-        setUsers(students);
+        setAllUsers(all || []);
         setFaculties(fList || []);
         setMajors(mList || []);
       } catch (e) {
@@ -57,6 +57,11 @@ export default function UserManagement() {
       cancelled = true;
     };
   }, []);
+
+  const users = useMemo(() => {
+    const role = String(activeRole || "");
+    return (allUsers || []).filter((u) => String(u?.role || u?.Role || "") === role);
+  }, [allUsers, activeRole]);
 
   const facultyByCode = useMemo(() => {
     const map = new Map();
@@ -75,8 +80,8 @@ export default function UserManagement() {
     if (!q) return users;
     return (users || []).filter((u) => {
       const name = (u?.fullName || "").toLowerCase();
-      const mssv = String(u?.userName || u?.username || "");
-      return name.includes(q) || mssv.toLowerCase().includes(q);
+      const username = String(u?.userName || u?.username || "");
+      return name.includes(q) || username.toLowerCase().includes(q);
     });
   }, [users, search]);
 
@@ -89,13 +94,14 @@ export default function UserManagement() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Bạn có chắc muốn xoá sinh viên này khỏi hệ thống?")) return;
+    const label = activeRole === "Teacher" ? "giáo viên" : "sinh viên";
+    if (!window.confirm(`Bạn có chắc muốn xoá ${label} này khỏi hệ thống?`)) return;
     try {
       await deleteUser(id);
       await refresh();
       if (paginated.length === 1 && currentPage > 1) setCurrentPage(currentPage - 1);
     } catch (e) {
-      alert(getErrorMessage(e, "Xoá sinh viên thất bại."));
+      alert(getErrorMessage(e, "Xoá người dùng thất bại."));
     }
   };
 
@@ -104,8 +110,9 @@ export default function UserManagement() {
     setFormData({
       fullName: "",
       email: "",
-      mssv: "",
+      username: "",
       password: "",
+      role: activeRole,
       majorCode: "",
     });
     setIsModalOpen(true);
@@ -116,8 +123,9 @@ export default function UserManagement() {
     setFormData({
       fullName: user?.fullName || "",
       email: user?.email || "",
-      mssv: user?.userName || user?.username || "",
+      username: user?.userName || user?.username || "",
       password: "",
+      role: user?.role || user?.Role || activeRole,
       majorCode: user?.majorCode || "",
     });
     setIsModalOpen(true);
@@ -134,47 +142,82 @@ export default function UserManagement() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const fullName = (formData.fullName || "").trim();
-    const username = (formData.mssv || "").trim();
+    const username = (formData.username || "").trim();
     const email = (formData.email || "").trim();
     const password = (formData.password || "").trim();
+    const role = String(formData.role || "").trim() || activeRole;
     const majorCode = (formData.majorCode || "").trim();
-    if (!fullName || !username || !email || !password || !majorCode) return;
+    const majorCodeToSend = role === "Student" ? majorCode : null;
+    if (!fullName || !username || !email || !password) return;
+    if (role === "Student" && !majorCodeToSend) return;
 
     try {
       if (editingUser) {
-        await updateUser(editingUser.id, { fullName, username, email, password, role: "Student", majorCode });
+        await updateUser(editingUser.id, { fullName, username, email, password, role, majorCode: majorCodeToSend });
       } else {
-        await createUser({ fullName, username, email, password, role: "Student", majorCode });
+        await createUser({ fullName, username, email, password, role, majorCode: majorCodeToSend });
         setCurrentPage(1);
       }
       await refresh();
       closeModal();
     } catch (err) {
-      alert(getErrorMessage(err, "Lưu sinh viên thất bại."));
+      alert(getErrorMessage(err, "Lưu người dùng thất bại."));
     }
   };
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((prev) => {
+      const next = { ...(prev || {}), [name]: value };
+      if (name === "role" && value !== "Student") next.majorCode = "";
+      return next;
+    });
   };
+
+  const roleLabel = activeRole === "Teacher" ? "Giáo viên" : "Sinh viên";
+  const usernameLabel = activeRole === "Teacher" ? "Mã GV" : "Mã SV";
 
   return (
     <div className="admin-page">
       <div className="page-header">
         <div>
-          <h2 className="page-title">Quản lý Sinh viên</h2>
-          <p className="page-subtitle">Danh sách tài khoản sinh viên trong hệ thống</p>
+          <h2 className="page-title">Quản lý {roleLabel}</h2>
+          <p className="page-subtitle">Danh sách tài khoản {roleLabel.toLowerCase()} trong hệ thống</p>
         </div>
         <button className="btn-primary" onClick={openAddModal}>
-          + Thêm sinh viên
+          + Thêm {roleLabel.toLowerCase()}
         </button>
       </div>
 
       <div className="table-toolbar">
+        <div style={{ display: "flex", gap: 8 }}>
+          <button
+            type="button"
+            className={`btn-secondary ${activeRole === "Student" ? "active" : ""}`}
+            onClick={() => {
+              setActiveRole("Student");
+              setSearch("");
+              setCurrentPage(1);
+            }}
+          >
+            Sinh viên
+          </button>
+          <button
+            type="button"
+            className={`btn-secondary ${activeRole === "Teacher" ? "active" : ""}`}
+            onClick={() => {
+              setActiveRole("Teacher");
+              setSearch("");
+              setCurrentPage(1);
+            }}
+          >
+            Giáo viên
+          </button>
+        </div>
         <input
           className="search-input"
           type="text"
-          placeholder="Tìm kiếm theo tên hoặc MSSV..."
+          placeholder={`Tìm kiếm theo tên hoặc ${usernameLabel}...`}
           value={search}
           onChange={(e) => handleSearch(e.target.value)}
         />
@@ -187,7 +230,7 @@ export default function UserManagement() {
             <tr>
               <th>#</th>
               <th>Họ tên</th>
-              <th>MSSV</th>
+              <th>{usernameLabel}</th>
               <th>Email</th>
               <th>Khoa</th>
               <th>Ngành</th>
@@ -204,7 +247,7 @@ export default function UserManagement() {
             ) : paginated.length === 0 ? (
               <tr>
                 <td colSpan={7} className="empty-state">
-                  Không tìm thấy sinh viên nào.
+                  Không tìm thấy {roleLabel.toLowerCase()} nào.
                 </td>
               </tr>
             ) : (
@@ -247,7 +290,11 @@ export default function UserManagement() {
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal-content modal-wide" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>{editingUser ? "Sửa thông tin sinh viên" : "Thêm sinh viên mới"}</h3>
+              <h3>
+                {editingUser
+                  ? `Sửa thông tin ${formData.role === "Teacher" ? "giáo viên" : "sinh viên"}`
+                  : `Thêm ${formData.role === "Teacher" ? "giáo viên" : "sinh viên"} mới`}
+              </h3>
               <button className="btn-close" onClick={closeModal}>
                 &times;
               </button>
@@ -255,6 +302,14 @@ export default function UserManagement() {
 
             <form onSubmit={handleSubmit}>
               <div className="modal-body">
+                <div className="form-group">
+                  <label>Vai trò *</label>
+                  <select name="role" value={formData.role} onChange={handleChange} required>
+                    <option value="Student">Sinh viên</option>
+                    <option value="Teacher">Giáo viên</option>
+                  </select>
+                </div>
+
                 <div className="form-group">
                   <label>Họ tên *</label>
                   <input
@@ -268,8 +323,15 @@ export default function UserManagement() {
                 </div>
 
                 <div className="form-group">
-                  <label>MSSV (username) *</label>
-                  <input type="text" name="mssv" value={formData.mssv} onChange={handleChange} required placeholder="VD: B21DCCN001" />
+                  <label>{formData.role === "Teacher" ? "Mã GV (username) *" : "MSSV (username) *"}</label>
+                  <input
+                    type="text"
+                    name="username"
+                    value={formData.username}
+                    onChange={handleChange}
+                    required
+                    placeholder={formData.role === "Teacher" ? "VD: GV001" : "VD: B21DCCN001"}
+                  />
                 </div>
 
                 <div className="form-group">
@@ -296,22 +358,24 @@ export default function UserManagement() {
                   />
                 </div>
 
-                <div className="form-group">
-                  <label>Ngành *</label>
-                  <select name="majorCode" value={formData.majorCode} onChange={handleChange} required>
-                    <option value="">-- Chọn ngành --</option>
-                    {majorOptions.map((m) => {
-                      const f = m?.facultyCode ? facultyByCode.get(m.facultyCode) : null;
-                      const facultyLabel = f ? `[${f.code}] ${f.name}` : m?.facultyCode ? `[${m.facultyCode}]` : "";
-                      const label = `${facultyLabel} - [${m.code}] ${m.name}`;
-                      return (
-                        <option key={m.code} value={m.code}>
-                          {label}
-                        </option>
-                      );
-                    })}
-                  </select>
-                </div>
+                {formData.role === "Student" && (
+                  <div className="form-group">
+                    <label>Ngành *</label>
+                    <select name="majorCode" value={formData.majorCode} onChange={handleChange} required>
+                      <option value="">-- Chọn ngành --</option>
+                      {majorOptions.map((m) => {
+                        const f = m?.facultyCode ? facultyByCode.get(m.facultyCode) : null;
+                        const facultyLabel = f ? `[${f.code}] ${f.name}` : m?.facultyCode ? `[${m.facultyCode}]` : "";
+                        const label = `${facultyLabel} - [${m.code}] ${m.name}`;
+                        return (
+                          <option key={m.code} value={m.code}>
+                            {label}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
+                )}
 
                 {editingUser ? (
                   <div style={{ color: "#64748b", fontSize: "0.92rem" }}>
@@ -335,4 +399,3 @@ export default function UserManagement() {
     </div>
   );
 }
-

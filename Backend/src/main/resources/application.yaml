@@ -9,3 +9,7 @@ spring:
       ddl-auto: update
 
 signer_key: ${SIGNER_KEY}
+
+cloudinary_cloud_name: ${CLOUDINARY_CLOUD_NAME}
+cloudinary_api_key: ${CLOUDINARY_API_KEY}
+cloudinary_api_secret: ${CLOUDINARY_API_SECRET}

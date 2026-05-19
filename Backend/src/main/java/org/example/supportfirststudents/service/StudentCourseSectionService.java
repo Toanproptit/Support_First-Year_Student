@@ -5,12 +5,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.example.supportfirststudents.dto.request.RegisterCourseSection;
 import org.example.supportfirststudents.dto.response.CourseSectionResponse;
+import org.example.supportfirststudents.dto.response.UserResponse;
 import org.example.supportfirststudents.entity.CourseSection;
 import org.example.supportfirststudents.entity.StudentCourseSection;
 import org.example.supportfirststudents.entity.User;
 import org.example.supportfirststudents.enums.ErrorCode;
+import org.example.supportfirststudents.enums.Role;
 import org.example.supportfirststudents.exception.AppException;
 import org.example.supportfirststudents.mapper.CourseSectionMapper;
+import org.example.supportfirststudents.mapper.UserMapper;
 import org.example.supportfirststudents.repository.CourseSectionRepository;
 import org.example.supportfirststudents.repository.StudentCourseSectionRepository;
 import org.example.supportfirststudents.repository.UserRepository;
@@ -31,6 +34,7 @@ public class StudentCourseSectionService {
     CourseSectionRepository courseSectionRepository;
     UserRepository userRepository;
     CourseSectionMapper courseSectionMapper;
+    UserMapper userMapper;
 
     @Transactional
     public void register(RegisterCourseSection request) {
@@ -66,6 +70,34 @@ public class StudentCourseSectionService {
                 .map(StudentCourseSection::getCourseSection)
                 .map(courseSectionMapper::toCourseSectionResponse)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserResponse> getStudentsByCourseSection(String courseSectionCode) {
+        if (!isAdminCaller()) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+        String normalized = normalizeCode(courseSectionCode);
+        List<User> users = studentCourseSectionRepository.findByCourseSection_Code(normalized).stream()
+                .map(StudentCourseSection::getUser)
+                .filter(u -> u != null && u.getRole() == Role.Student)
+                .toList();
+        return userMapper.toUserResponse(users);
+    }
+
+    @Transactional
+    public void unregisterForAdmin(String courseSectionCode, Long userId) {
+        if (!isAdminCaller()) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+        if (userId == null) {
+            throw new AppException(ErrorCode.USER_ID_REQUIRED);
+        }
+        String normalized = normalizeCode(courseSectionCode);
+        // Validate course section exists to return proper error
+        courseSectionRepository.findById(normalized)
+                .orElseThrow(() -> new AppException(ErrorCode.COURSE_SECTION_NOT_FOUND));
+        studentCourseSectionRepository.deleteByUser_IdAndCourseSection_Code(userId, normalized);
     }
 
     private User resolveUserForRegister(Long userIdFromRequest) {
@@ -109,4 +141,3 @@ public class StudentCourseSectionService {
         return value == null ? null : value.trim().toUpperCase(Locale.ROOT);
     }
 }
-

@@ -1,70 +1,18 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "../../styles/AdminPages.css";
 import Pagination from "./Pagination";
+import { getAllCourseSections, createCourseSection, updateCourseSection, deleteCourseSection } from "../../service/courseSections";
+import { getAllTerms } from "../../service/terms";
+import { getAllMajors } from "../../service/majors";
+import { getAllSubjects } from "../../service/subjects";
+import { getAllUsers } from "../../service/users";
+import {
+  getStudentsByCourseSection,
+  registerCourseSection,
+  unregisterStudentFromCourseSection,
+} from "../../service/courseSectionRegistrations";
 
 const PAGE_SIZE = 8;
-
-// Mock masters
-const mockTerms = [
-  { code: "2025-1", name: "HK1 2025-2026" },
-  { code: "2025-2", name: "HK2 2025-2026" },
-  { code: "2026-S", name: "Hè 2026" },
-];
-
-const mockMajors = [
-  { code: "CNTT", name: "Công nghệ thông tin" },
-  { code: "ATTT", name: "An toàn thông tin" },
-  { code: "DTVT", name: "Điện tử viễn thông" },
-];
-
-const mockSubjects = [
-  { code: "INT101", name: "Nhập môn CNTT" },
-  { code: "PRJ101", name: "Lập trình cơ bản" },
-  { code: "DBI101", name: "Cơ sở dữ liệu" },
-  { code: "NET101", name: "Mạng máy tính" },
-];
-
-const mockTeachers = [
-  { id: 1, name: "Nguyễn Văn A" },
-  { id: 2, name: "Trần Thị B" },
-  { id: 3, name: "Phạm Văn C" },
-];
-
-const initialCourseSections = [
-  {
-    code: "INT101-01",
-    name: "INT101 - Lớp 01",
-    termCode: "2025-1",
-    majorCode: "CNTT",
-    subjectCode: "INT101",
-    teacherId: 1,
-    maxStudents: 60,
-    startDate: "2025-08-18",
-    endDate: "2025-12-20",
-  },
-  {
-    code: "PRJ101-02",
-    name: "PRJ101 - Lớp 02",
-    termCode: "2025-1",
-    majorCode: "CNTT",
-    subjectCode: "PRJ101",
-    teacherId: 2,
-    maxStudents: 55,
-    startDate: "2025-08-18",
-    endDate: "2025-12-20",
-  },
-  {
-    code: "DBI101-01",
-    name: "DBI101 - Lớp 01",
-    termCode: "2025-2",
-    majorCode: "ATTT",
-    subjectCode: "DBI101",
-    teacherId: 3,
-    maxStudents: 50,
-    startDate: "2026-01-12",
-    endDate: "2026-05-10",
-  },
-];
 
 function normalizeCode(value) {
   return (value || "").trim().toUpperCase();
@@ -74,18 +22,12 @@ function formatDate(value) {
   return value ? value : "-";
 }
 
-function getNameByCode(list, code) {
-  const found = list.find((x) => x.code === code);
-  return found ? found.name : code || "-";
-}
-
-function getTeacherName(id) {
-  const found = mockTeachers.find((t) => t.id === id);
-  return found ? found.name : id ? `#${id}` : "-";
+function getErrorMessage(err, fallback) {
+  return err?.response?.data?.message || err?.message || fallback;
 }
 
 function getStatus(cs) {
-  if (!cs.startDate || !cs.endDate) return { label: "Chưa cập nhật", className: "badge-yellow" };
+  if (!cs?.startDate || !cs?.endDate) return { label: "Chưa cập nhật", className: "badge-yellow" };
   const today = new Date();
   const start = new Date(cs.startDate);
   const end = new Date(cs.endDate);
@@ -95,16 +37,20 @@ function getStatus(cs) {
 }
 
 export default function CourseSectionManagement() {
-  const [courseSections, setCourseSections] = useState(initialCourseSections);
+  const [loading, setLoading] = useState(false);
+  const [courseSections, setCourseSections] = useState([]);
+  const [terms, setTerms] = useState([]);
+  const [majors, setMajors] = useState([]);
+  const [subjects, setSubjects] = useState([]);
+  const [users, setUsers] = useState([]);
+
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Filters (term-first UX)
-  const [termFilter, setTermFilter] = useState(mockTerms[0]?.code || "");
+  const [termFilter, setTermFilter] = useState("");
   const [majorFilter, setMajorFilter] = useState("");
   const [subjectFilter, setSubjectFilter] = useState("");
 
-  // Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [formData, setFormData] = useState({
@@ -121,28 +67,129 @@ export default function CourseSectionManagement() {
 
   const [deleteTarget, setDeleteTarget] = useState(null);
 
+  const [assignTarget, setAssignTarget] = useState(null);
+  const [assignLoading, setAssignLoading] = useState(false);
+  const [assignSearch, setAssignSearch] = useState("");
+  const [registeredStudents, setRegisteredStudents] = useState([]);
+
+  const termByCode = useMemo(() => {
+    const map = new Map();
+    (terms || []).forEach((t) => map.set(t.code, t));
+    return map;
+  }, [terms]);
+
+  const majorByCode = useMemo(() => {
+    const map = new Map();
+    (majors || []).forEach((m) => map.set(m.code, m));
+    return map;
+  }, [majors]);
+
+  const subjectByCode = useMemo(() => {
+    const map = new Map();
+    (subjects || []).forEach((s) => map.set(s.code, s));
+    return map;
+  }, [subjects]);
+
+  const userById = useMemo(() => {
+    const map = new Map();
+    (users || []).forEach((u) => map.set(u.id, u));
+    return map;
+  }, [users]);
+
+  const teachers = useMemo(() => {
+    return (users || []).filter((u) => String(u?.role || u?.Role || "") === "Teacher");
+  }, [users]);
+
+  const students = useMemo(() => {
+    return (users || []).filter((u) => String(u?.role || u?.Role || "") === "Student");
+  }, [users]);
+
+  const resetPaging = () => setCurrentPage(1);
+
+  const refreshCourseSections = async ({ termCode, majorCode, subjectCode } = {}) => {
+    const list = await getAllCourseSections({
+      termCode: termCode || undefined,
+      majorCode: majorCode || undefined,
+      subjectCode: subjectCode || undefined,
+    });
+    setCourseSections(list || []);
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadMasters() {
+      try {
+        setLoading(true);
+        const [tList, mList, sList, uList] = await Promise.all([
+          getAllTerms(),
+          getAllMajors(),
+          getAllSubjects(),
+          getAllUsers({ size: 100 }),
+        ]);
+        if (cancelled) return;
+        setTerms(tList || []);
+        setMajors(mList || []);
+        setSubjects(sList || []);
+        setUsers(uList || []);
+
+        const defaultTerm = (tList || [])[0]?.code || "";
+        setTermFilter((prev) => prev || defaultTerm);
+      } catch (e) {
+        alert(getErrorMessage(e, "Không tải được dữ liệu kỳ/ngành/môn/giảng viên."));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    loadMasters();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadCourseSections() {
+      try {
+        setLoading(true);
+        await refreshCourseSections({
+          termCode: termFilter || undefined,
+          majorCode: majorFilter || undefined,
+          subjectCode: subjectFilter || undefined,
+        });
+      } catch (e) {
+        if (!cancelled) alert(getErrorMessage(e, "Không tải được danh sách lớp tín chỉ."));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    loadCourseSections();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [termFilter, majorFilter, subjectFilter]);
+
   const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return courseSections.filter((cs) => {
+    const q = (search || "").trim().toLowerCase();
+    return (courseSections || []).filter((cs) => {
       if (termFilter && cs.termCode !== termFilter) return false;
       if (majorFilter && cs.majorCode !== majorFilter) return false;
       if (subjectFilter && cs.subjectCode !== subjectFilter) return false;
       if (!q) return true;
-      return (
-        cs.code.toLowerCase().includes(q) ||
-        (cs.name || "").toLowerCase().includes(q) ||
-        (cs.subjectCode || "").toLowerCase().includes(q)
-      );
+      const teacherName = String(cs?.teacherName || userById.get(cs.teacherId)?.fullName || "");
+      const haystack = `${cs.code} ${cs.name || ""} ${cs.subjectCode || ""} ${teacherName}`.toLowerCase();
+      return haystack.includes(q);
     });
-  }, [courseSections, majorFilter, search, subjectFilter, termFilter]);
+  }, [courseSections, majorFilter, search, subjectFilter, termFilter, userById]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const paginated = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
-  const resetPaging = () => setCurrentPage(1);
-
   const onChangeTerm = (value) => {
     setTermFilter(value);
+    setMajorFilter("");
+    setSubjectFilter("");
+    setSearch("");
     resetPaging();
   };
 
@@ -185,8 +232,8 @@ export default function CourseSectionManagement() {
       termCode: cs.termCode || "",
       majorCode: cs.majorCode || "",
       subjectCode: cs.subjectCode || "",
-      teacherId: cs.teacherId ?? "",
-      maxStudents: cs.maxStudents ?? "",
+      teacherId: cs.teacherId == null ? "" : String(cs.teacherId),
+      maxStudents: cs.maxStudents == null ? "" : String(cs.maxStudents),
       startDate: cs.startDate || "",
       endDate: cs.endDate || "",
     });
@@ -195,122 +242,200 @@ export default function CourseSectionManagement() {
 
   const closeModal = () => setIsModalOpen(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     const code = normalizeCode(formData.code);
     const name = (formData.name || "").trim();
-    const termCode = (formData.termCode || "").trim();
-    const majorCode = (formData.majorCode || "").trim();
-    const subjectCode = (formData.subjectCode || "").trim();
-
+    const termCode = normalizeCode(formData.termCode);
+    const majorCode = normalizeCode(formData.majorCode);
+    const subjectCode = normalizeCode(formData.subjectCode);
     if (!code || !termCode || !majorCode || !subjectCode) return;
     if (formData.startDate && formData.endDate && formData.startDate > formData.endDate) return;
 
     const teacherId = formData.teacherId === "" ? null : Number(formData.teacherId);
     const maxStudents = formData.maxStudents === "" ? null : Number(formData.maxStudents);
 
-    if (!editing) {
-      if (courseSections.some((x) => normalizeCode(x.code) === code)) return;
-      const newItem = {
-        code,
-        name: name || code,
-        termCode,
-        majorCode,
-        subjectCode,
-        teacherId,
-        maxStudents,
-        startDate: formData.startDate || "",
-        endDate: formData.endDate || "",
-      };
-      setCourseSections((prev) => [newItem, ...prev]);
-      setTermFilter(termCode);
-      setMajorFilter("");
-      setSubjectFilter("");
-      setSearch("");
-      resetPaging();
+    try {
+      if (!editing) {
+        await createCourseSection({
+          code,
+          name: name || null,
+          termCode,
+          majorCode,
+          subjectCode,
+          teacherId,
+          maxStudents,
+          startDate: formData.startDate || null,
+          endDate: formData.endDate || null,
+        });
+        setTermFilter(termCode);
+        setMajorFilter("");
+        setSubjectFilter("");
+        setSearch("");
+        resetPaging();
+      } else {
+        await updateCourseSection(editing.code, {
+          name: name || null,
+          termCode,
+          majorCode,
+          subjectCode,
+          teacherId,
+          maxStudents,
+          startDate: formData.startDate || null,
+          endDate: formData.endDate || null,
+        });
+      }
+
+      await refreshCourseSections({
+        termCode: termFilter || undefined,
+        majorCode: majorFilter || undefined,
+        subjectCode: subjectFilter || undefined,
+      });
       closeModal();
-      return;
+    } catch (err) {
+      alert(getErrorMessage(err, "Lưu lớp tín chỉ thất bại."));
     }
-
-    setCourseSections((prev) =>
-      prev.map((x) =>
-        x.code === editing.code
-          ? {
-              ...x,
-              name: name || x.name,
-              termCode,
-              majorCode,
-              subjectCode,
-              teacherId,
-              maxStudents,
-              startDate: formData.startDate || "",
-              endDate: formData.endDate || "",
-            }
-          : x
-      )
-    );
-    closeModal();
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!deleteTarget) return;
-    setCourseSections((prev) => prev.filter((x) => x.code !== deleteTarget.code));
-    setDeleteTarget(null);
-    resetPaging();
+    try {
+      await deleteCourseSection(deleteTarget.code);
+      setDeleteTarget(null);
+      await refreshCourseSections({
+        termCode: termFilter || undefined,
+        majorCode: majorFilter || undefined,
+        subjectCode: subjectFilter || undefined,
+      });
+      resetPaging();
+    } catch (err) {
+      alert(getErrorMessage(err, "Xoá lớp tín chỉ thất bại."));
+    }
   };
+
+  const termLabel = (code) => {
+    const t = termByCode.get(code);
+    return t ? `${t.code} — ${t.name || ""}` : code || "-";
+  };
+  const majorLabel = (code) => {
+    const m = majorByCode.get(code);
+    return m ? `${m.code} — ${m.name || ""}` : code || "-";
+  };
+  const subjectLabel = (code) => {
+    const s = subjectByCode.get(code);
+    return s ? `${s.code} — ${s.name || ""}` : code || "-";
+  };
+  const teacherLabel = (cs) => {
+    if (cs?.teacherName) return cs.teacherName;
+    const u = userById.get(cs?.teacherId);
+    return u ? u.fullName : cs?.teacherId ? `#${cs.teacherId}` : "-";
+  };
+
+  const registeredStudentIds = useMemo(() => {
+    const set = new Set();
+    (registeredStudents || []).forEach((u) => {
+      if (u?.id != null) set.add(u.id);
+    });
+    return set;
+  }, [registeredStudents]);
+
+  const openAssignModal = async (cs) => {
+    setAssignTarget(cs);
+    setAssignSearch("");
+    setRegisteredStudents([]);
+    setAssignLoading(true);
+    try {
+      const list = await getStudentsByCourseSection(cs.code);
+      setRegisteredStudents(list || []);
+    } catch (e) {
+      alert(getErrorMessage(e, "Không tải được danh sách sinh viên của lớp."));
+    } finally {
+      setAssignLoading(false);
+    }
+  };
+
+  const closeAssignModal = () => setAssignTarget(null);
+
+  const refreshAssigned = async () => {
+    if (!assignTarget?.code) return;
+    const list = await getStudentsByCourseSection(assignTarget.code);
+    setRegisteredStudents(list || []);
+  };
+
+  const handleAssign = async (user) => {
+    if (!assignTarget?.code || !user?.id) return;
+    try {
+      await registerCourseSection({ courseSectionCode: assignTarget.code, userId: user.id });
+      await refreshAssigned();
+    } catch (e) {
+      alert(getErrorMessage(e, "Thêm sinh viên vào lớp thất bại."));
+    }
+  };
+
+  const handleUnassign = async (user) => {
+    if (!assignTarget?.code || !user?.id) return;
+    try {
+      await unregisterStudentFromCourseSection(assignTarget.code, user.id);
+      await refreshAssigned();
+    } catch (e) {
+      alert(getErrorMessage(e, "Bỏ sinh viên khỏi lớp thất bại."));
+    }
+  };
+
+  const filteredStudentsForAssign = useMemo(() => {
+    const q = (assignSearch || "").trim().toLowerCase();
+    if (!q) return students || [];
+    return (students || []).filter((u) => {
+      const name = String(u?.fullName || "").toLowerCase();
+      const mssv = String(u?.userName || u?.username || "").toLowerCase();
+      const email = String(u?.email || "").toLowerCase();
+      return name.includes(q) || mssv.includes(q) || email.includes(q);
+    });
+  }, [assignSearch, students]);
 
   return (
     <div className="admin-page">
       <div className="page-header">
         <div>
           <h2 className="page-title">Quản lý Lớp tín chỉ</h2>
-          <p className="page-subtitle">Tạo / sửa / xoá lớp tín chỉ (mock data, chưa kết nối BE)</p>
+          <p className="page-subtitle">Tạo / sửa / xoá lớp tín chỉ</p>
         </div>
         <button className="btn-primary" onClick={openAddModal}>
           + Thêm lớp
         </button>
       </div>
 
-      <div
-        className="table-toolbar"
-        style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}
-      >
-        <select className="search-input" style={{ maxWidth: 220 }} value={termFilter} onChange={(e) => onChangeTerm(e.target.value)}>
-          {mockTerms.map((t) => (
+      <div className="table-toolbar" style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+        <select className="search-input" style={{ maxWidth: 240 }} value={termFilter} onChange={(e) => onChangeTerm(e.target.value)}>
+          {(terms || []).map((t) => (
             <option key={t.code} value={t.code}>
               {t.code} — {t.name}
             </option>
           ))}
         </select>
 
-        <select className="search-input" style={{ maxWidth: 220 }} value={majorFilter} onChange={(e) => onChangeMajor(e.target.value)}>
+        <select className="search-input" style={{ maxWidth: 240 }} value={majorFilter} onChange={(e) => onChangeMajor(e.target.value)}>
           <option value="">Tất cả ngành</option>
-          {mockMajors.map((m) => (
+          {(majors || []).map((m) => (
             <option key={m.code} value={m.code}>
               {m.code} — {m.name}
             </option>
           ))}
         </select>
 
-        <select className="search-input" style={{ maxWidth: 260 }} value={subjectFilter} onChange={(e) => onChangeSubject(e.target.value)}>
+        <select className="search-input" style={{ maxWidth: 280 }} value={subjectFilter} onChange={(e) => onChangeSubject(e.target.value)}>
           <option value="">Tất cả môn</option>
-          {mockSubjects.map((s) => (
+          {(subjects || []).map((s) => (
             <option key={s.code} value={s.code}>
               {s.code} — {s.name}
             </option>
           ))}
         </select>
 
-        <input
-          className="search-input"
-          placeholder="Tìm theo mã lớp / tên / mã môn..."
-          value={search}
-          onChange={(e) => onSearch(e.target.value)}
-        />
+        <input className="search-input" placeholder="Tìm theo mã lớp / tên / mã môn / giảng viên..." value={search} onChange={(e) => onSearch(e.target.value)} />
 
-        <div className="result-count">
-          {filtered.length} kết quả • Trang {currentPage}/{totalPages}
-        </div>
+        <div className="result-count">{filtered.length} kết quả • Trang {currentPage}/{totalPages}</div>
       </div>
 
       <div className="table-card">
@@ -329,7 +454,13 @@ export default function CourseSectionManagement() {
             </tr>
           </thead>
           <tbody>
-            {paginated.length === 0 ? (
+            {loading ? (
+              <tr>
+                <td colSpan="9" style={{ padding: 18, color: "#64748b" }}>
+                  Đang tải...
+                </td>
+              </tr>
+            ) : paginated.length === 0 ? (
               <tr>
                 <td colSpan="9" style={{ padding: 18, color: "#64748b" }}>
                   Không có dữ liệu.
@@ -344,10 +475,10 @@ export default function CourseSectionManagement() {
                       <code>{cs.code}</code>
                     </td>
                     <td style={{ fontWeight: 700, color: "#0f172a" }}>{cs.name || "-"}</td>
-                    <td><code>{cs.termCode}</code></td>
-                    <td>{getNameByCode(mockMajors, cs.majorCode)}</td>
-                    <td>{getNameByCode(mockSubjects, cs.subjectCode)}</td>
-                    <td>{getTeacherName(cs.teacherId)}</td>
+                    <td>{termLabel(cs.termCode)}</td>
+                    <td>{majorLabel(cs.majorCode)}</td>
+                    <td>{subjectLabel(cs.subjectCode)}</td>
+                    <td>{teacherLabel(cs)}</td>
                     <td>
                       {formatDate(cs.startDate)} → {formatDate(cs.endDate)}
                     </td>
@@ -358,6 +489,9 @@ export default function CourseSectionManagement() {
                       <div className="action-btns">
                         <button className="btn-edit" onClick={() => openEditModal(cs)}>
                           Sửa
+                        </button>
+                        <button className="btn-edit" onClick={() => openAssignModal(cs)}>
+                          Sinh viên
                         </button>
                         <button className="btn-delete" onClick={() => setDeleteTarget(cs)}>
                           Xoá
@@ -378,7 +512,7 @@ export default function CourseSectionManagement() {
 
       {isModalOpen && (
         <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content modal-wide" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>{editing ? "Cập nhật lớp tín chỉ" : "Thêm lớp tín chỉ"}</h3>
               <button className="btn-close" onClick={closeModal}>
@@ -396,6 +530,7 @@ export default function CourseSectionManagement() {
                     value={formData.code}
                     disabled={!!editing}
                     onChange={(e) => setFormData((p) => ({ ...p, code: e.target.value }))}
+                    required
                   />
                 </div>
 
@@ -410,9 +545,10 @@ export default function CourseSectionManagement() {
                 </div>
 
                 <div className="form-group">
-                  <label>Kỳ học *</label>
-                  <select value={formData.termCode} onChange={(e) => setFormData((p) => ({ ...p, termCode: e.target.value }))}>
-                    {mockTerms.map((t) => (
+                  <label>Kỳ *</label>
+                  <select value={formData.termCode} onChange={(e) => setFormData((p) => ({ ...p, termCode: e.target.value }))} required>
+                    <option value="">-- Chọn kỳ --</option>
+                    {(terms || []).map((t) => (
                       <option key={t.code} value={t.code}>
                         {t.code} — {t.name}
                       </option>
@@ -422,9 +558,9 @@ export default function CourseSectionManagement() {
 
                 <div className="form-group">
                   <label>Ngành *</label>
-                  <select value={formData.majorCode} onChange={(e) => setFormData((p) => ({ ...p, majorCode: e.target.value }))}>
+                  <select value={formData.majorCode} onChange={(e) => setFormData((p) => ({ ...p, majorCode: e.target.value }))} required>
                     <option value="">-- Chọn ngành --</option>
-                    {mockMajors.map((m) => (
+                    {(majors || []).map((m) => (
                       <option key={m.code} value={m.code}>
                         {m.code} — {m.name}
                       </option>
@@ -434,9 +570,9 @@ export default function CourseSectionManagement() {
 
                 <div className="form-group">
                   <label>Môn *</label>
-                  <select value={formData.subjectCode} onChange={(e) => setFormData((p) => ({ ...p, subjectCode: e.target.value }))}>
+                  <select value={formData.subjectCode} onChange={(e) => setFormData((p) => ({ ...p, subjectCode: e.target.value }))} required>
                     <option value="">-- Chọn môn --</option>
-                    {mockSubjects.map((s) => (
+                    {(subjects || []).map((s) => (
                       <option key={s.code} value={s.code}>
                         {s.code} — {s.name}
                       </option>
@@ -448,9 +584,9 @@ export default function CourseSectionManagement() {
                   <label>Giảng viên</label>
                   <select value={formData.teacherId} onChange={(e) => setFormData((p) => ({ ...p, teacherId: e.target.value }))}>
                     <option value="">(Chưa gán)</option>
-                    {mockTeachers.map((t) => (
-                      <option key={t.id} value={String(t.id)}>
-                        #{t.id} — {t.name}
+                    {(teachers || []).map((u) => (
+                      <option key={u.id} value={String(u.id)}>
+                        #{u.id} — {u.fullName}
                       </option>
                     ))}
                   </select>
@@ -469,20 +605,12 @@ export default function CourseSectionManagement() {
 
                 <div className="form-group">
                   <label>Ngày bắt đầu</label>
-                  <input
-                    type="date"
-                    value={formData.startDate}
-                    onChange={(e) => setFormData((p) => ({ ...p, startDate: e.target.value }))}
-                  />
+                  <input type="date" value={formData.startDate} onChange={(e) => setFormData((p) => ({ ...p, startDate: e.target.value }))} />
                 </div>
 
                 <div className="form-group">
                   <label>Ngày kết thúc</label>
-                  <input
-                    type="date"
-                    value={formData.endDate}
-                    onChange={(e) => setFormData((p) => ({ ...p, endDate: e.target.value }))}
-                  />
+                  <input type="date" value={formData.endDate} onChange={(e) => setFormData((p) => ({ ...p, endDate: e.target.value }))} />
                 </div>
               </div>
 
@@ -501,27 +629,126 @@ export default function CourseSectionManagement() {
 
       {deleteTarget && (
         <div className="modal-overlay" onClick={() => setDeleteTarget(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content modal-confirm" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>Xác nhận xoá</h3>
+              <h3>⚠️ Xác nhận xoá</h3>
               <button className="btn-close" onClick={() => setDeleteTarget(null)}>
                 &times;
               </button>
             </div>
             <div className="modal-body">
-              <div>
-                Bạn chắc chắn muốn xoá lớp <code>{deleteTarget.code}</code>?
-              </div>
-              <div style={{ color: "#64748b", fontSize: "0.92rem" }}>
-                Thao tác này hiện chỉ xoá khỏi mock data trên UI.
-              </div>
+              <p className="confirm-text">
+                Bạn chắc chắn muốn xoá lớp <strong>{deleteTarget.code}</strong>?
+              </p>
             </div>
             <div className="modal-footer">
               <button className="btn-secondary" onClick={() => setDeleteTarget(null)}>
                 Huỷ
               </button>
-              <button className="btn-primary" onClick={handleDelete}>
+              <button className="btn-delete-confirm" onClick={handleDelete}>
                 Xoá
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {assignTarget && (
+        <div className="modal-overlay" onClick={closeAssignModal}>
+          <div className="modal-content modal-wide" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Gán sinh viên vào lớp {assignTarget.code}</h3>
+              <button className="btn-close" onClick={closeAssignModal}>
+                &times;
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <div className="form-group" style={{ gridColumn: "1 / -1" }}>
+                <label>Tìm sinh viên</label>
+                <input
+                  type="text"
+                  placeholder="Tìm theo tên / MSSV / email..."
+                  value={assignSearch}
+                  onChange={(e) => setAssignSearch(e.target.value)}
+                />
+              </div>
+
+              <div style={{ gridColumn: "1 / -1" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+                  <div className="result-count">
+                    Đã gán: {registeredStudents.length} • Tổng SV: {filteredStudentsForAssign.length}
+                  </div>
+                  {assignLoading ? <div className="result-count">Đang tải...</div> : null}
+                </div>
+
+                <div style={{ width: "100%", overflowX: "auto", marginTop: 12 }}>
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th style={{ width: 80 }}>ID</th>
+                        <th>Họ tên</th>
+                        <th>MSSV</th>
+                        <th>Email</th>
+                        <th style={{ width: 160 }}>Trạng thái</th>
+                        <th style={{ width: 160 }}>Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredStudentsForAssign.slice(0, 50).map((u) => {
+                        const isRegistered = registeredStudentIds.has(u.id);
+                        return (
+                          <tr key={u.id}>
+                            <td>
+                              <code>{u.id}</code>
+                            </td>
+                            <td style={{ fontWeight: 700, color: "#0f172a" }}>{u.fullName}</td>
+                            <td>
+                              <code>{u.userName || u.username || "-"}</code>
+                            </td>
+                            <td>{u.email || "-"}</td>
+                            <td>
+                              <span className={`badge ${isRegistered ? "badge-green" : "badge-yellow"}`}>
+                                {isRegistered ? "Đã gán" : "Chưa gán"}
+                              </span>
+                            </td>
+                            <td>
+                              {isRegistered ? (
+                                <button className="btn-delete" onClick={() => handleUnassign(u)}>
+                                  Bỏ
+                                </button>
+                              ) : (
+                                <button className="btn-edit" onClick={() => handleAssign(u)}>
+                                  Thêm
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                      {filteredStudentsForAssign.length > 50 ? (
+                        <tr>
+                          <td colSpan={6} style={{ padding: 14, color: "#64748b" }}>
+                            Đang hiển thị 50 sinh viên đầu tiên. Hãy dùng ô tìm kiếm để lọc.
+                          </td>
+                        </tr>
+                      ) : null}
+                      {filteredStudentsForAssign.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} style={{ padding: 14, color: "#64748b" }}>
+                            Không có sinh viên phù hợp.
+                          </td>
+                        </tr>
+                      ) : null}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <button type="button" className="btn-secondary" onClick={closeAssignModal}>
+                Đóng
               </button>
             </div>
           </div>
@@ -530,4 +757,3 @@ export default function CourseSectionManagement() {
     </div>
   );
 }
-

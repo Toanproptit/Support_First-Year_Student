@@ -420,7 +420,7 @@ export default function QaTab({ toast, fallbackUserName }) {
     }, 250);
   };
 
-  const CommentNode = ({ node, postId, depth = 0 }) => {
+  const renderCommentNode = (node, postId, depth = 0) => {
     if (!node?.id) return null;
     const isReply = depth > 0;
     const bubbleClass = isReply ? "fb-comment-bubble reply-bubble" : "fb-comment-bubble";
@@ -428,7 +428,7 @@ export default function QaTab({ toast, fallbackUserName }) {
     const repliesCount = Array.isArray(node.replies) ? node.replies.length : 0;
 
     return (
-      <div className="fb-comment-thread" style={depth ? { marginLeft: Math.min(depth * 18, 72) } : undefined}>
+      <div key={node.id} className="fb-comment-thread" style={depth ? { marginLeft: Math.min(depth * 18, 72) } : undefined}>
         <div className="fb-comment-row">
           <div className={`avatar-small ${isReply ? "alt3" : "alt2"}`}>{node.author?.charAt?.(0) || "?"}</div>
           <div className="fb-comment-body">
@@ -438,9 +438,11 @@ export default function QaTab({ toast, fallbackUserName }) {
               {node.likes > 0 && <div className="fb-comment-like-count">Like {node.likes}</div>}
             </div>
             <div className="fb-comment-actions">
-              <button onClick={() => toggleReplyBox(node.id)}>Phản hồi</button>
+              <button type="button" onClick={() => toggleReplyBox(node.id)}>
+                Phản hồi
+              </button>
               {repliesCount > 0 && (
-                <button onClick={() => toggleReplies(node.id)}>
+                <button type="button" onClick={() => toggleReplies(node.id)}>
                   {isCollapsed ? `Xem ${repliesCount} phản hồi` : "Thu gọn"}
                 </button>
               )}
@@ -448,9 +450,7 @@ export default function QaTab({ toast, fallbackUserName }) {
 
             {!isCollapsed && Array.isArray(node.replies) && node.replies.length > 0 && (
               <div className="fb-replies-list">
-                {node.replies.map((child) => (
-                  <CommentNode key={child.id} node={child} postId={postId} depth={depth + 1} />
-                ))}
+                {node.replies.map((child) => renderCommentNode(child, postId, depth + 1))}
               </div>
             )}
 
@@ -466,7 +466,7 @@ export default function QaTab({ toast, fallbackUserName }) {
                     handleAddReply(postId, node.id);
                   }}
                 />
-                <button className="send-icon-btn" onClick={() => handleAddReply(postId, node.id)}>
+                <button className="send-icon-btn" type="button" onClick={() => handleAddReply(postId, node.id)}>
                   Gửi
                 </button>
               </div>
@@ -734,10 +734,8 @@ export default function QaTab({ toast, fallbackUserName }) {
                 </button>
               </div>
 
-              <div className="fb-post-comments">
-                {displayedComments.map((cmt) => (
-                  <CommentNode key={cmt.id} node={cmt} postId={post.id} depth={0} />
-                ))}
+                <div className="fb-post-comments">
+                {displayedComments.map((cmt) => renderCommentNode(cmt, post.id, 0))}
 
                 {remainingComments > 0 ? (
                   <button className="fb-see-more-btn" onClick={() => handleLoadMoreComments(post.id)}>

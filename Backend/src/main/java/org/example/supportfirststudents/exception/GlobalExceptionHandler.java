@@ -15,7 +15,7 @@ public class GlobalExceptionHandler {
         ErrorCode errorCode = ex.getErrorCode();
 
         return ResponseEntity
-                .status(errorCode.getCode())
+                .status(errorCode.getStatusCode())
                 .body(Map.of(
                         "code", errorCode.getCode(),
                         "message", errorCode.getMessage()

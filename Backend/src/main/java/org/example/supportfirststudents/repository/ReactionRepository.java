@@ -2,10 +2,12 @@ package org.example.supportfirststudents.repository;
 
 import org.example.supportfirststudents.entity.Reaction;
 import org.example.supportfirststudents.enums.ReactionType;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -16,6 +18,12 @@ import java.util.Optional;
 public interface ReactionRepository extends JpaRepository<Reaction,Long> {
     Optional<Reaction> findByUserIdAndPostId(long userId, long postId);
     void deleteByUserIdAndPostId(long userId, long postId);
+
+    @Modifying(flushAutomatically = true)
+    @Transactional
+    @Query("delete from Reaction r where r.post.id = :postId")
+    int deleteByPostId(@Param("postId") Long postId);
+
     Long countByPostId(long postId);
     Long countByPostIdAndType(long postId, ReactionType type);
     List<Reaction> findAllByPostId(long postId , ReactionType reactionType);

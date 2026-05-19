@@ -100,10 +100,14 @@ cd back-end
 ### Cấu hình `.env`
 
 ```env
-DB_URL=
 DB_USERNAME=
 DB_PASSWORD=
-JWT_SECRET=
+SIGNER_KEY=
+
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+
 ```
 
 ### Chạy project

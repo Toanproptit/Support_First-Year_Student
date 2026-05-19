@@ -233,6 +233,8 @@ public class PostService {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
+        reactionRepository.deleteByPostId(id);
+
         User user = post.getUser();
         if (user != null) {
             user.removePost(post);

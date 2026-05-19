@@ -24,7 +24,6 @@ import AdminDashboard from "./components/admin/AdminDashboard";
 import UserManagement from "./components/admin/UserManagement";
 import PostManagement from "./components/admin/PostManagement";
 import CategoryManagement from "./components/admin/CategoryManagement";
-import HandbookManagement from "./components/admin/HandbookManagement";
 import FacultyManagement from "./components/admin/FacultyManagement";
 import MajorManagement from "./components/admin/MajorManagement";
 import ActivityManagement from "./components/admin/ActivityManagement";
@@ -34,6 +33,8 @@ import Club from "./components/Club";
 import Dormitory from "./components/Dormitory";
 import RequireAuth from "./components/RequireAuth";
 import AdminFeedBack from "./components/admin/AdminFeedBack";
+import ClubManagement from "./components/admin/ClubManagement";
+import SubjectManagement from "./components/admin/SubjectManagement";
 
 // Layout chung cho các trang public (có Header)
 function PublicLayout({ children }) {
@@ -91,9 +92,11 @@ export default function App() {
         <Route path="users" element={<UserManagement />} />
         <Route path="posts" element={<PostManagement />} />
         <Route path="categories" element={<CategoryManagement />} />
-        <Route path="handbook" element={<HandbookManagement />} />
+        <Route path="clubs" element={<ClubManagement />} />
+        <Route path="handbook" element={<Navigate to="/admin/clubs" replace />} />
         <Route path="faculties" element={<FacultyManagement />} />
         <Route path="majors" element={<MajorManagement />} />
+        <Route path="subjects" element={<SubjectManagement />} />
         <Route path="activities" element={<ActivityManagement />} />
         <Route path="terms" element={<TermManagement />} />
         <Route path="course-sections" element={<CourseSectionManagement />} />

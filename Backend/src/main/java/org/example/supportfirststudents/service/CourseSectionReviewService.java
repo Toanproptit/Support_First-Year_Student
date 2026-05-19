@@ -8,7 +8,6 @@ import org.example.supportfirststudents.dto.request.UpdateCourseSectionReview;
 import org.example.supportfirststudents.dto.response.CourseSectionReviewResponse;
 import org.example.supportfirststudents.entity.CourseSection;
 import org.example.supportfirststudents.entity.CourseSectionReview;
-import org.example.supportfirststudents.entity.StudentCourseSection;
 import org.example.supportfirststudents.entity.User;
 import org.example.supportfirststudents.enums.ErrorCode;
 import org.example.supportfirststudents.exception.AppException;
@@ -23,6 +22,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
@@ -47,11 +47,16 @@ public class CourseSectionReviewService {
             throw new AppException(ErrorCode.COURSE_SECTION_REVIEW_ALREADY_EXISTS);
         }
 
+        if (!isAdminCaller()) {
+            enforceCourseSectionInProgress(courseSection);
+            if (!studentCourseSectionRepository.existsByUser_IdAndCourseSection_Code(user.getId(), courseSection.getCode())) {
+                throw new AppException(ErrorCode.COURSE_SECTION_REVIEW_REQUIRES_ENROLLMENT);
+            }
+        }
+
         CourseSectionReview review = reviewMapper.toEntity(request);
         review.setUser(user);
         review.setCourseSection(courseSection);
-
-        autoJoinCourseSectionIfNeeded(user, courseSection);
 
         return reviewMapper.toResponse(reviewRepository.save(review));
     }
@@ -120,18 +125,17 @@ public class CourseSectionReviewService {
         return caller;
     }
 
-    private void autoJoinCourseSectionIfNeeded(User user, CourseSection courseSection) {
-        if (user == null || user.getId() == null || courseSection == null || courseSection.getCode() == null) {
-            return;
+    private void enforceCourseSectionInProgress(CourseSection courseSection) {
+        if (courseSection == null) throw new AppException(ErrorCode.COURSE_SECTION_NOT_FOUND);
+        LocalDate start = courseSection.getStartDate();
+        LocalDate end = courseSection.getEndDate();
+        if (start == null || end == null) {
+            throw new AppException(ErrorCode.COURSE_SECTION_REVIEW_NOT_IN_PROGRESS);
         }
-        String courseSectionCode = normalizeCode(courseSection.getCode());
-        if (studentCourseSectionRepository.existsByUser_IdAndCourseSection_Code(user.getId(), courseSectionCode)) {
-            return;
+        LocalDate today = LocalDate.now();
+        if (today.isBefore(start) || today.isAfter(end)) {
+            throw new AppException(ErrorCode.COURSE_SECTION_REVIEW_NOT_IN_PROGRESS);
         }
-        StudentCourseSection join = new StudentCourseSection();
-        join.setUser(user);
-        join.setCourseSection(courseSection);
-        studentCourseSectionRepository.save(join);
     }
 
     private boolean isCallerUserId(Long userId) {
@@ -165,4 +169,3 @@ public class CourseSectionReviewService {
         return value == null ? null : value.trim().toUpperCase(Locale.ROOT);
     }
 }
-

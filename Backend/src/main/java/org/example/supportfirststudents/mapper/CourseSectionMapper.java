@@ -14,6 +14,10 @@ public class CourseSectionMapper {
                 .majorCode(courseSection.getMajor() != null ? courseSection.getMajor().getCode() : null)
                 .subjectCode(courseSection.getSubject() != null ? courseSection.getSubject().getCode() : null)
                 .teacherId(courseSection.getTeacher() != null ? courseSection.getTeacher().getId() : null)
+                .teacherName(courseSection.getTeacher() != null ? courseSection.getTeacher().getFullName() : null)
+                .maxStudents(courseSection.getMaxStudents())
+                .startDate(courseSection.getStartDate())
+                .endDate(courseSection.getEndDate())
                 .build();
     }
 }

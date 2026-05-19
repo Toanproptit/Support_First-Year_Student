@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDate;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -19,4 +21,8 @@ public class CourseSectionResponse {
     String majorCode;
     String subjectCode;
     Long teacherId;
+    String teacherName;
+    Integer maxStudents;
+    LocalDate startDate;
+    LocalDate endDate;
 }

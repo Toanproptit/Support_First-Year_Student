@@ -38,7 +38,7 @@ public class CourseSectionController {
     }
 
     @GetMapping("/{code}")
-    @PreAuthorize("hasAnyRole('Admin','Student')")
+    @PreAuthorize("hasAnyRole('Admin','Student','Teacher')")
     public ApiResponse<CourseSectionResponse> getCourseSectionByCode(@PathVariable String code) {
         return ApiResponse.<CourseSectionResponse>builder()
                 .result(courseSectionService.getCourseSectionByCode(code))
@@ -46,7 +46,7 @@ public class CourseSectionController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('Admin','Student')")
+    @PreAuthorize("hasAnyRole('Admin','Student','Teacher')")
     public ApiResponse<List<CourseSectionResponse>> getAllCourseSections(
             @RequestParam(required = false) String termCode,
             @RequestParam(required = false) String majorCode,

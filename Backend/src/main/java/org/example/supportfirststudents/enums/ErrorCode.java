@@ -74,6 +74,8 @@ public enum ErrorCode {
     USER_ID_REQUIRED(1047, "User id is required", HttpStatus.BAD_REQUEST),
     COURSE_SECTION_REVIEW_NOT_FOUND(1048, "Course section review not found", HttpStatus.NOT_FOUND),
     COURSE_SECTION_REVIEW_ALREADY_EXISTS(1049, "Course section review already exists", HttpStatus.BAD_REQUEST),
+    COURSE_SECTION_REVIEW_REQUIRES_ENROLLMENT(1060, "You must join this course section to review", HttpStatus.FORBIDDEN),
+    COURSE_SECTION_REVIEW_NOT_IN_PROGRESS(1061, "Course section is not in progress", HttpStatus.BAD_REQUEST),
     TERM_NOT_FOUND(1050, "Term not found", HttpStatus.NOT_FOUND),
     TERM_CODE_EXISTED(1051, "Term code existed", HttpStatus.BAD_REQUEST),
     COURSE_SECTION_CODE_EXISTED(1052, "Course section code existed", HttpStatus.BAD_REQUEST),

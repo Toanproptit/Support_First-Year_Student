@@ -7,6 +7,7 @@ import lombok.experimental.FieldDefaults;
 import org.example.supportfirststudents.dto.request.RegisterCourseSection;
 import org.example.supportfirststudents.dto.response.ApiResponse;
 import org.example.supportfirststudents.dto.response.CourseSectionResponse;
+import org.example.supportfirststudents.dto.response.UserResponse;
 import org.example.supportfirststudents.service.StudentCourseSectionService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -51,6 +53,24 @@ public class StudentCourseSectionController {
     public ApiResponse<List<CourseSectionResponse>> myCourseSections() {
         return ApiResponse.<List<CourseSectionResponse>>builder()
                 .result(studentCourseSectionService.myCourseSections())
+                .build();
+    }
+
+    @PreAuthorize("hasAnyRole('Admin')")
+    @GetMapping
+    public ApiResponse<List<UserResponse>> getStudentsByCourseSection(@RequestParam String courseSectionCode) {
+        return ApiResponse.<List<UserResponse>>builder()
+                .result(studentCourseSectionService.getStudentsByCourseSection(courseSectionCode))
+                .build();
+    }
+
+    @PreAuthorize("hasAnyRole('Admin')")
+    @DeleteMapping("/{courseSectionCode}/users/{userId}")
+    public ApiResponse<Void> unregisterForAdmin(@PathVariable String courseSectionCode, @PathVariable Long userId) {
+        studentCourseSectionService.unregisterForAdmin(courseSectionCode, userId);
+        return ApiResponse.<Void>builder()
+                .code(200)
+                .message("Unregistered successfully")
                 .build();
     }
 }

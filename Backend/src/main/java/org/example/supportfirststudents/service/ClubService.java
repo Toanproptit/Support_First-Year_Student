@@ -61,10 +61,16 @@ public class ClubService {
         return clubMapper.toClubResponse(club);
     }
     public ClubResponse updateClub(Long id ,CreateClub request) {
-        Club oldClub = getClub(id);
-        oldClub = clubMapper.toClub(request);
-        clubRepository.save(oldClub);
-        return clubMapper.toClubResponse(oldClub);
+        Club club = getClub(id);
+        club.setName(request.getName());
+        club.setDescription(request.getDescription());
+        club.setLinkWeb(request.getLinkWeb());
+        club.setLinkYoutube(request.getLinkYoutube());
+        club.setLinkFacebook(request.getLinkFacebook());
+        club.setImage(request.getImage());
+        club.setHead(request.getHead());
+        clubRepository.save(club);
+        return clubMapper.toClubResponse(club);
     }
     public void deleteClub(Long id) {
         clubRepository.deleteById(id);

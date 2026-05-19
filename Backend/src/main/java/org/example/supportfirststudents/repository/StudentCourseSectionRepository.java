@@ -11,4 +11,6 @@ public interface StudentCourseSectionRepository extends JpaRepository<StudentCou
     void deleteByUser_IdAndCourseSection_Code(Long userId, String courseSectionCode);
 
     java.util.List<StudentCourseSection> findByUser_Id(Long userId);
+
+    java.util.List<StudentCourseSection> findByCourseSection_Code(String courseSectionCode);
 }
